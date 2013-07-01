@@ -1,0 +1,2 @@
+1.0.0 - 2013-08-08 - Lew Ayotte, Glenn Ansley, Justin Kopepasah, Brad Ulrich
+	Initial Release
