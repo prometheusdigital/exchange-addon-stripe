@@ -30,6 +30,7 @@ function it_exchange_register_stripe_addon() {
 		'author'            => 'iThemes',
 		'author_url'        => 'http://ithemes.com/exchange/stripe/',
 		'icon'              => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/images/stripe50px.png' ),
+		'wizard-icon'       => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/images/wizard-stripe.png' ),
 		'file'              => dirname( __FILE__ ) . '/init.php',
 		'category'          => 'transaction-methods',
 		'supports'          => array( 'transaction_status' => true ),
