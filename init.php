@@ -175,16 +175,20 @@ function it_exchange_stripe_addon_settings_callback() {
  * @param object $form Current IT Form object
  * @return void
 */
-function it_exchange_stripe_addon_print_wizard_settings( $form ) {
+function it_exchange_print_stripe_wizard_settings( $form ) {
 	$IT_Exchange_Stripe_Add_On = new IT_Exchange_Stripe_Add_On();
 	$settings = it_exchange_get_option( 'addon_stripe', true );
+	$hide_if_js =  it_exchange_is_addon_enabled( 'stripe' ) ? '' : 'hide-if-js';
 	?>
-	<div class="field stripe-wizard hide-if-js">
-		<?php $IT_Exchange_Stripe_Add_On->get_stripe_payment_form_table( $form, $settings ); ?>
+	<div class="field stripe-wizard <?php echo $hide_if_js; ?>">
+	<?php if ( empty( $hide_if_js ) ) { ?>
+        <input class="enable-stripe" type="hidden" name="it-exchange-transaction-methods[]" value="stripe" />
+    <?php } ?>
+	<?php $IT_Exchange_Stripe_Add_On->get_stripe_payment_form_table( $form, $settings ); ?>
 	</div>
 	<?php
 }
-add_action( 'it_exchange_print_wizard_settings', 'it_exchange_stripe_addon_print_wizard_settings' );
+add_action( 'it_exchange_print_stripe_wizard_settings', 'it_exchange_print_stripe_wizard_settings' );
 
 /**
  * Saves stripe settings when the Wizard is saved
@@ -193,14 +197,14 @@ add_action( 'it_exchange_print_wizard_settings', 'it_exchange_stripe_addon_print
  *
  * @return void
 */
-function it_exchange_stripe_addon_save_wizard_settings( $errors ) {
+function it_exchange_save_stripe_wizard_settings( $errors ) {
 	if ( ! empty( $errors ) )
 		return $errors;
 		
 	$IT_Exchange_Stripe_Add_On = new IT_Exchange_Stripe_Add_On();
 	return $IT_Exchange_Stripe_Add_On->stripe_save_wizard_settings();
 }
-add_action( 'it_exchange_save_transaction_method_wizard_settings', 'it_exchange_stripe_addon_save_wizard_settings' );
+add_action( 'it_exchange_save_stripe_wizard_settings', 'it_exchange_save_stripe_wizard_settings' );
 
 /**
  * Default settings for stripe
