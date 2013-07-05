@@ -630,21 +630,21 @@ class IT_Exchange_Stripe_Add_On {
 		?>
 		<div class="it-exchange-addon-settings it-exchange-stripe-addon-settings">
             <p>
-				<?php _e( 'To get Stripe setup for your ecommerce site, you will need to do a couple of things in Stripe first.<br /><br />
-				<a href="http://ithemes.com/tutorial/category/exchange" target="_blank">Video: Getting Stripe Setup with Exchange</a>', 'LION' ); ?>
+				<?php _e( 'To get Stripe set up for use with Exchange, you\'ll need to add the following information from your Stripe account.', 'LION' ); ?><br /><br />
+				<a href="http://ithemes.com/tutorial/category/exchange" target="_blank"><?php _e( 'Video: Getting Stripe Setup with Exchange', 'LION' ); ?></a>
 			</p>
-			<p><?php _e( 'Do not have a Stripe account yet? <a href="http://stripe.com" target="_blank">Go set one up here</a>.', 'LION' ); ?></p>
+			<p><?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.</p>
 			<?php
 				if ( ! in_array( $general_settings['default-currency'], array_keys( $this->get_supported_currency_options() ) ) )
 					echo '<h4>' . sprintf( __( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'LION' ), add_query_arg( 'page', 'it-exchange-settings' ) ) . '</h4>';
 			?>
             <h4><?php _e( 'Step 1. Fill out your Stripe API Credentials', 'LION' ); ?></h4>
 			<p>
-				<label for="stripe-live-secret-key"><?php _e( 'Live Secret Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Secret Key is available in your Stripe Dashboard.', 'LION' ); ?>">i</span></label>
+				<label for="stripe-live-secret-key"><?php _e( 'Live Secret Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Secret Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
 				<?php $form->add_text_box( 'stripe-live-secret-key' ); ?>
 			</p>
 			<p>
-				<label for="stripe-live-publishable-key"><?php _e( 'Live Publishable Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Publishable Key is available in your Stripe Dashboard.', 'LION' ); ?>">i</span></label>
+				<label for="stripe-live-publishable-key"><?php _e( 'Live Publishable Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Publishable Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
 				<?php $form->add_text_box( 'stripe-live-publishable-key' ); ?>
 			</p>
 			<p class="hide-if-wizard">
@@ -653,11 +653,11 @@ class IT_Exchange_Stripe_Add_On {
 			</p>
             <?php $hidden_class = ( $settings['stripe-test-mode'] ) ? '' : 'hide-if-live-mode'; ?>
 			<p class="test-mode-options hide-if-wizard <?php echo $hidden_class; ?>">
-				<label for="stripe-test-secret-key"><?php _e( 'Test Secret Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Secret Key is available in your Stripe Dashboard.', 'LION' ); ?>">i</span></label>
+				<label for="stripe-test-secret-key"><?php _e( 'Test Secret Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Secret Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
 				<?php $form->add_text_box( 'stripe-test-secret-key' ); ?>
 			</p>
 			<p class="test-mode-options hide-if-wizard <?php echo $hidden_class; ?>">
-				<label for="stripe-test-publishable-key"><?php _e( 'Test Publishable Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Publishable Key is available in your Stripe Dashboard.', 'LION' ); ?>">i</span></label>
+				<label for="stripe-test-publishable-key"><?php _e( 'Test Publishable Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Publishable Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
 				<?php $form->add_text_box( 'stripe-test-publishable-key' ); ?>
 			</p>
 			<p>
@@ -665,8 +665,8 @@ class IT_Exchange_Stripe_Add_On {
 				<?php $form->add_text_box( 'stripe-purchase-button-label' ); ?>
 			</p>
             <h4><?php _e( 'Step 2. Setup Stripe Webhooks', 'LION' ); ?></h4>
-			<p><?php _e( 'Webhooks can be configured in the <a href="https://manage.stripe.com/account/webhooks">webhook settings section</a> of the Stripe dashboard. Clicking Add URL will reveal a form to add a new URL for receiving webhooks.', 'LION' ); ?></p>
-			<p><?php _e( 'Please log into your account and add this URL to your Webhooks so iThemes Exchange is notified of things like refunds, payments, etc.', 'LION' ); ?></p>
+			<p><?php printf( __( 'Webhooks can be configured in the %sWebhook Settings%s section of the Stripe dashboard. Click "Add URL" to reveal a form to add a new URL for receiving webhooks.', 'LION' ), '<a href="https://manage.stripe.com/account/webhooks">', '</a>' ); ?></p>
+			<p><?php _e( 'Please log in to your account and add this URL to your Webhooks so iThemes Exchange is notified of things like refunds, payments, etc.', 'LION' ); ?></p>
 			<code><?php echo get_site_url(); ?>/?<?php esc_attr_e( it_exchange_get_webhook( 'stripe' ) ); ?>=1</code>
 		</div>
 		<?php
