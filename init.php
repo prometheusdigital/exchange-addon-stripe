@@ -628,13 +628,19 @@ class IT_Exchange_Stripe_Add_On {
 			foreach ( $settings as $key => $var )
 				$form->set_option( $key, $var );
 
-		?>
+        if ( ! empty( $_GET['page'] ) && 'it-exchange-setup' == $_GET['page'] ) : ?>
+            <h3><?php _e( 'Stripe', 'LION' ); ?></h3>
+        <?php endif; ?>
 		<div class="it-exchange-addon-settings it-exchange-stripe-addon-settings">
             <p>
-				<?php _e( 'To get Stripe set up for use with Exchange, you\'ll need to add the following information from your Stripe account.', 'LION' ); ?><br /><br />
-				<a href="http://ithemes.com/tutorial/category/exchange" target="_blank"><?php _e( 'Video: Getting Stripe Setup with Exchange', 'LION' ); ?></a>
+				<?php _e( 'To get Stripe set up for use with Exchange, you\'ll need to add the following information from your Stripe account.', 'LION' ); ?>
+				<br /><br />
+				<a href="http://ithemes.com/tutorials/setting-up-a-stripe-account/" target="_blank"><?php _e( 'Video: Getting Stripe Setup with Exchange', 'LION' ); ?></a>
 			</p>
-			<p><?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.</p>
+			<p>
+				<?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.
+				<span class="tip" title="<?php _e( 'Enabling Stripe limits your currency options to United States Dollars and Canadian Dollars.', 'LION' ); ?>">i</span>
+			</p>
 			<?php
 				if ( ! in_array( $general_settings['default-currency'], array_keys( $this->get_supported_currency_options() ) ) )
 					echo '<h4>' . sprintf( __( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'LION' ), add_query_arg( 'page', 'it-exchange-settings' ) ) . '</h4>';
