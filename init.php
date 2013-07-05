@@ -628,7 +628,9 @@ class IT_Exchange_Stripe_Add_On {
 			foreach ( $settings as $key => $var )
 				$form->set_option( $key, $var );
 
-		?>
+        if ( ! empty( $_GET['page'] ) && 'it-exchange-setup' == $_GET['page'] ) : ?>
+            <h3><?php _e( 'Stripe', 'LION' ); ?></h3>
+        <?php endif; ?>
 		<div class="it-exchange-addon-settings it-exchange-stripe-addon-settings">
             <p>
 				<?php _e( 'To get Stripe set up for use with Exchange, you\'ll need to add the following information from your Stripe account.', 'LION' ); ?>
