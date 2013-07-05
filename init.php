@@ -178,13 +178,14 @@ function it_exchange_stripe_addon_settings_callback() {
 function it_exchange_print_stripe_wizard_settings( $form ) {
 	$IT_Exchange_Stripe_Add_On = new IT_Exchange_Stripe_Add_On();
 	$settings = it_exchange_get_option( 'addon_stripe', true );
+	$form_values = ITUtility::merge_defaults( ITForm::get_post_data(), $settings );
 	$hide_if_js =  it_exchange_is_addon_enabled( 'stripe' ) ? '' : 'hide-if-js';
 	?>
 	<div class="field stripe-wizard <?php echo $hide_if_js; ?>">
 	<?php if ( empty( $hide_if_js ) ) { ?>
         <input class="enable-stripe" type="hidden" name="it-exchange-transaction-methods[]" value="stripe" />
     <?php } ?>
-	<?php $IT_Exchange_Stripe_Add_On->get_stripe_payment_form_table( $form, $settings ); ?>
+	<?php $IT_Exchange_Stripe_Add_On->get_stripe_payment_form_table( $form, $form_values ); ?>
 	</div>
 	<?php
 }
