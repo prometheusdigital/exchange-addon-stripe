@@ -654,15 +654,17 @@ class IT_Exchange_Stripe_Add_On {
 				<label for="stripe-live-publishable-key"><?php _e( 'Live Publishable Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Publishable Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
 				<?php $form->add_text_box( 'stripe-live-publishable-key' ); ?>
 			</p>
-			<p>
-				<label for="stripe-purchase-button-label"><?php _e( 'Purchase Button Label', 'LION' ); ?> <span class="tip" title="<?php _e( 'This is the text inside the button your customers will press to purchase with Stripe', 'LION' ); ?>">i</span></label>
-				<?php $form->add_text_box( 'stripe-purchase-button-label' ); ?>
-			</p>
 			
 			<h4><?php _e( 'Step 2. Setup Stripe Webhooks', 'LION' ); ?></h4>
 			<p><?php printf( __( 'Webhooks can be configured in the %sWebhook Settings%s section of the Stripe dashboard. Click "Add URL" to reveal a form to add a new URL for receiving webhooks.', 'LION' ), '<a href="https://manage.stripe.com/account/webhooks">', '</a>' ); ?></p>
 			<p><?php _e( 'Please log in to your account and add this URL to your Webhooks so iThemes Exchange is notified of things like refunds, payments, etc.', 'LION' ); ?></p>
 			<code><?php echo get_site_url(); ?>/?<?php esc_attr_e( it_exchange_get_webhook( 'stripe' ) ); ?>=1</code>
+			
+			<h4><?php _e( 'Optional: Edit Purchase Button Label', 'LION' ); ?></h4>
+			<p>
+				<label for="stripe-purchase-button-label"><?php _e( 'Purchase Button Label', 'LION' ); ?> <span class="tip" title="<?php _e( 'This is the text inside the button your customers will press to purchase with Stripe', 'LION' ); ?>">i</span></label>
+				<?php $form->add_text_box( 'stripe-purchase-button-label' ); ?>
+			</p>
 			
 			<h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Stripe Test Mode', 'LION' ); ?></h4>
 			<p class="hide-if-wizard">
