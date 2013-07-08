@@ -1,2 +1,4 @@
-1.0.0 - 2013-08-08 - Lew Ayotte, Glenn Ansley, Justin Kopepasah, Brad Ulrich
+1.0.1 - 2013-07-08 - Lew Ayotte
+  	Update Video Links
+1.0.0 - 2013-07-08 - Lew Ayotte, Glenn Ansley, Justin Kopepasah, Brad Ulrich
 	Initial Release
