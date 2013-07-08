@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: iThemes Exchange - Stripe Add-on
- * Version: 0.1.0
+ * Version: 1.0.0
  * Description: Adds the ability for users to checkout with Stripe.
  * Plugin URI: http://ithemes.com/exchange/stripe/
  * Author: iThemes
@@ -39,3 +39,17 @@ function it_exchange_register_stripe_addon() {
 	it_exchange_register_addon( 'stripe', $options );
 }
 add_action( 'it_exchange_register_addons', 'it_exchange_register_stripe_addon' );
+
+/**
+ * Registers Plugin with iThemes updater class
+ *
+ * @since 1.0.0
+ *
+ * @param object $updater ithemes updater object
+ * @return void
+*/
+function ithemes_exchange_addon_stripe_updater_register( $updater ) { 
+	    $updater->register( 'exchange-addon-stripe', __FILE__ );
+}
+add_action( 'ithemes_updater_register', 'ithemes_exchange_addon_stripe_updater_register' );
+require( dirname( __FILE__ ) . '/lib/updater/load.php' );
