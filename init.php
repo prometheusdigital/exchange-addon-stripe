@@ -635,7 +635,7 @@ class IT_Exchange_Stripe_Add_On {
             <p>
 				<?php _e( 'To get Stripe set up for use with Exchange, you\'ll need to add the following information from your Stripe account.', 'LION' ); ?>
 				<br /><br />
-				<?php _e( 'Video:', 'LION' ); ?>&nsbp;<a href="http://ithemes.com/tutorials/setting-up-stripe-in-exchange/" target="_blank"><?php _e( 'Setting Up Stripe in Exchange', 'LION' ); ?></a>
+				<?php _e( 'Video:', 'LION' ); ?>&nbsp;<a href="http://ithemes.com/tutorials/setting-up-stripe-in-exchange/" target="_blank"><?php _e( 'Setting Up Stripe in Exchange', 'LION' ); ?></a>
 			</p>
 			<p>
 				<?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.
