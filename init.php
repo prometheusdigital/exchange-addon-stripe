@@ -8,6 +8,26 @@
 // Initialized Stripe...
 if ( !class_exists( 'Stripe' ) )
 	require_once('stripe-api/lib/Stripe.php');
+	
+/**
+ * Adds actions to the plugins page for the iThemes Exchange Stripe plugin
+ *
+ * @since 1.0.0
+ *
+ * @param array $meta Existing meta
+ * @param string $plugin_file the wp plugin slug (path)
+ * @param array $plugin_data the data WP harvested from the plugin header
+ * @param string $context 
+ * @return array
+*/
+function it_exchange_stripe_plugin_row_actions( $actions, $plugin_file, $plugin_data, $context ) {
+	
+	$actions['setup_addon'] = '<a href="' . get_admin_url( NULL, 'admin.php?page=it-exchange-addons&add-on-settings=stripe' ) . '">' . __( 'Setup Add-on', 'LION' ) . '</a>';
+	
+	return $actions;
+	
+}
+add_filter( 'plugin_action_links_exchange-addon-stripe/exchange-addon-stripe.php', 'it_exchange_stripe_plugin_row_actions', 10, 4 );
 
 /**
  * Enqueues any scripts we need on the frontend during a stripe checkout
