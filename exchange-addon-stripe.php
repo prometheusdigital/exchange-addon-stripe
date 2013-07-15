@@ -41,6 +41,18 @@ function it_exchange_register_stripe_addon() {
 add_action( 'it_exchange_register_addons', 'it_exchange_register_stripe_addon' );
 
 /**
+ * Loads the translation data for WordPress
+ *
+ * @uses load_plugin_textdomain()
+ * @since 1.0.3
+ * @return void
+*/
+function it_exchange_stripe_set_textdomain() {
+	load_plugin_textdomain( 'LION', false, plugin_basename( __FILE__  ) . '/lang/' );
+}
+add_action( 'plugins_loaded', 'it_exchange_stripe_set_textdomain' );
+
+/**
  * Registers Plugin with iThemes updater class
  *
  * @since 1.0.0
