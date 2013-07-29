@@ -1,3 +1,6 @@
+1.0.3 - 2013-07-29 - Lew Ayotte, Justin Kopepasah, Brad Ulrich
+	Updated Logo
+	Added Localization
 1.0.2 - 2013-07-10 - Lew Ayotte
     Added Setup Add-on link on plugin page's row action
 1.0.1 - 2013-07-08 - Lew Ayotte
