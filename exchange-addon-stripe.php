@@ -26,7 +26,7 @@
 function it_exchange_register_stripe_addon() {
 	$options = array(
 		'name'              => __( 'Stripe', 'LION' ),
-		'description'       => __( 'Process transactions via Stripe.', 'LION' ),
+		'description'       => __( 'Process transactions via Stripe, a simple and elegant payment gateway.', 'LION' ),
 		'author'            => 'iThemes',
 		'author_url'        => 'http://ithemes.com/exchange/stripe/',
 		'icon'              => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/images/stripe50px.png' ),
