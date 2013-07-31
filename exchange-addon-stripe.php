@@ -19,6 +19,8 @@
 /**
  * This registers our plugin as a stripe addon
  *
+ * To learn how to create your own-addon, visit http://ithemes.com/codex/page/Exchange_Custom_Add-ons:_Overview
+ *
  * @since 0.1.0
  *
  * @return void
@@ -29,8 +31,8 @@ function it_exchange_register_stripe_addon() {
 		'description'       => __( 'Process transactions via Stripe, a simple and elegant payment gateway.', 'LION' ),
 		'author'            => 'iThemes',
 		'author_url'        => 'http://ithemes.com/exchange/stripe/',
-		'icon'              => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/images/stripe50px.png' ),
-		'wizard-icon'       => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/images/wizard-stripe.png' ),
+		'icon'              => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/lib/images/stripe50px.png' ),
+		'wizard-icon'       => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/lib/images/wizard-stripe.png' ),
 		'file'              => dirname( __FILE__ ) . '/init.php',
 		'basename'          => plugin_basename( __FILE__ ),
 		'category'          => 'transaction-methods',
