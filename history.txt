@@ -1,3 +1,6 @@
+1.0.4 - 2013-08-01 - Glenn Ansley
+	Reorganized plugin structure and added docblock comments to explain add-on API
+	Updated plugin description
 1.0.3 - 2013-07-29 - Lew Ayotte, Justin Kopepasah, Brad Ulrich
 	Updated Logo
 	Added Localization
