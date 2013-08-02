@@ -1,3 +1,5 @@
+1.0.5 - 2013-08-02 - Lew Ayotte
+	Updated currencies to support GBP and EUR for Stripe's new beta programs
 1.0.4 - 2013-08-01 - Glenn Ansley
 	Reorganized plugin structure and added docblock comments to explain add-on API
 	Updated plugin description
