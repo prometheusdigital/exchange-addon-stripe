@@ -361,7 +361,12 @@ class IT_Exchange_Stripe_Add_On {
      * @return void
     */
     function get_supported_currency_options() {
-        $options = array( 'USD' => __( 'US Dollar' ), 'CAD' => __( 'Canadian Dollar' ) );
+        $options = array( 
+			'USD' => __( 'United States dollar' ), 
+			'CAD' => __( 'Canadian dollar' ),
+			'GBP' => __( 'British pound' ),
+			'EUR' => __( 'European Euro' ),
+		);
         return $options;
     }
 
