@@ -34,7 +34,6 @@ function it_exchange_register_stripe_addon() {
 		'icon'              => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/lib/images/stripe50px.png' ),
 		'wizard-icon'       => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/lib/images/wizard-stripe.png' ),
 		'file'              => dirname( __FILE__ ) . '/init.php',
-		'basename'          => plugin_basename( __FILE__ ),
 		'category'          => 'transaction-methods',
 		'settings-callback' => 'it_exchange_stripe_addon_settings_callback',	
 	);
@@ -50,7 +49,7 @@ add_action( 'it_exchange_register_addons', 'it_exchange_register_stripe_addon' )
  * @return void
 */
 function it_exchange_stripe_set_textdomain() {
-	load_plugin_textdomain( 'LION', false, plugin_basename( __FILE__  ) . '/lang/' );
+	load_plugin_textdomain( 'LION', false, dirname( plugin_basename( __FILE__  ) ) . '/lang/' );
 }
 add_action( 'plugins_loaded', 'it_exchange_stripe_set_textdomain' );
 
