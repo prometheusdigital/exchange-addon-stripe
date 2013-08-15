@@ -34,7 +34,7 @@ add_filter( 'plugin_action_links_exchange-addon-stripe/exchange-addon-stripe.php
 */
 function it_exchange_stripe_addon_enqueue_script() {
     wp_enqueue_script( 'stripe', 'https://checkout.stripe.com/v2/checkout.js', array( 'jquery' ) );
-    wp_enqueue_script( 'stripe-addon-js', ITUtility::get_url_from_file( dirname( __FILE__ ) ) . '/lib/js/stripe-addon.js', array( 'jquery' ) );
+    wp_enqueue_script( 'stripe-addon-js', ITUtility::get_url_from_file( dirname( __FILE__ ) ) . '/js/stripe-addon.js', array( 'jquery' ) );
     wp_localize_script( 'stripe-addon-js', 'stripeAddonL10n', array(
             'processing_payment_text'  => __( 'Processing payment, please wait...', 'LION' ),
         )
