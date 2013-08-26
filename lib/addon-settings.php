@@ -362,10 +362,11 @@ class IT_Exchange_Stripe_Add_On {
     */
     function get_supported_currency_options() {
         $options = array( 
-			'USD' => __( 'United States dollar' ), 
-			'CAD' => __( 'Canadian dollar' ),
-			'GBP' => __( 'British pound' ),
-			'EUR' => __( 'European Euro' ),
+			'USD' => __( 'United States dollar', 'LION' ), 
+			'AUD' => __( 'Australian dollar', 'LION' ) ),
+			'CAD' => __( 'Canadian dollar', 'LION' ),
+			'GBP' => __( 'British pound', 'LION' ),
+			'EUR' => __( 'European Euro', 'LION' ),
 		);
         return $options;
     }
