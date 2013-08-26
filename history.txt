@@ -1,3 +1,5 @@
+1.0.8 - 2013-08-26 - Glenn Ansley
+	Added Australian Dollar to currencies
 1.0.7 - 2013-08-15 - Glenn Ansley
 	Fixing 404ing sytlesheet
 1.0.6 - 2013-08-06 - Lew Ayotte
