@@ -50,47 +50,65 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
 
     $body = @file_get_contents('php://input');
     $stripe_event = json_decode( $body );
+	
+	wp_mail( 'lew@ithemes.com', 'stripe webhook', print_r( $stripe_event, true ) );
 
     if ( isset( $stripe_event->id ) ) {
 
-        try {
+		$stripe_object = $stripe_event->data->object;
 
-            $stripe_object = $stripe_event->data->object;
+		//https://stripe.com/docs/api#event_types
+		switch( $stripe_event->type ) :
 
-            //https://stripe.com/docs/api#event_types
-            switch( $stripe_event->type ) :
+			case 'charge.succeeded' :
+				it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'succeeded' );
+				break;
+			case 'charge.failed' :
+				it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'failed' );
+				break;
+			case 'charge.refunded' :
+				if ( $stripe_object->refunded )
+					it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'refunded' );
+				else
+					it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'partial-refund' );
 
-                case 'charge.succeeded' :
-                    it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'succeeded' );
-                    break;
-                case 'charge.failed' :
-                    it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'failed' );
-                    break;
-                case 'charge.refunded' :
-                    if ( $stripe_object->refunded )
-                        it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'refunded' );
-                    else
-                        it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'partial-refund' );
+				it_exchange_stripe_addon_add_refund_to_transaction( $stripe_object->id, $stripe_object->amount_refunded );
 
-                    it_exchange_stripe_addon_add_refund_to_transaction( $stripe_object->id, $stripe_object->amount_refunded );
+				break;
+			case 'charge.dispute.created' :
+			case 'charge.dispute.updated' :
+			case 'charge.dispute.closed' :
+				it_exchange_stripe_addon_update_transaction_status( $stripe_object->charge, $stripe_object->status );
+				break;
+			case 'customer.deleted' :
+				it_exchange_stripe_addon_delete_stripe_id_from_customer( $stripe_object->id );
+				break;
+				
+			case 'invoice.payment_succeeded' :
+				$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_event );
+				$subscriber_id = it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $stripe_event );
+				if ( !it_exchange_stripe_addon_update_transaction_status( $stripe_object->charge, 'succeeded' ) ) {
+					//If the transaction isn't found, we've got a new payment
+					it_exchange_stripe_addon_add_child_transaction( $stripe_object->charge, 'succeeded', $subscriber_id, $stripe_object->total );
+				}
+				it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'active' );
+				break;
+				
+			case 'invoice.payment_failed' :
+				$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_event );
+				it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'deactivated' );
+				break;
+				
+			case 'customer.subscription.created' :
+				it_exchange_stripe_addon_update_subscriber_status( $stripe_object->id, 'active' );
+				break;
+				
+			case 'customer.subscription.deleted' :
+				it_exchange_stripe_addon_update_subscriber_status( $stripe_object->id, 'deleted' );
+				break;
+				
 
-                    break;
-                case 'charge.dispute.created' :
-                case 'charge.dispute.updated' :
-                case 'charge.dispute.closed' :
-                    it_exchange_stripe_addon_update_transaction_status( $stripe_object->charge, $stripe_object->status );
-                    break;
-                case 'customer.deleted' :
-                    it_exchange_stripe_addon_delete_stripe_id_from_customer( $stripe_object->id );
-                    break;
-
-            endswitch;
-
-        } catch ( Exception $e ) {
-
-            // What are we going to do here?
-
-        }
+		endswitch;
     }
 
 }

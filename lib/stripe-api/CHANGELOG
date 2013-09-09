@@ -1,3 +1,21 @@
+=== 1.8.3 2013-08-13
+
+* Add new Balance and BalanceTransaction
+
+=== 1.8.2 2013-08-12
+
+* Add support for unsetting attributes by updating to NULL.
+  Setting properties to a blank string is now an error.
+
+=== 1.8.1 2013-07-12
+
+* Add support for multiple cards API (Stripe API version 2013-07-12: https://stripe.com/docs/upgrades#2013-07-05)
+
+=== 1.8.0 2013-04-11
+
+* Allow Transfers to be creatable
+* Add new Recipient resource
+
 === 1.7.15 2013-02-21
 
 * Add 'id' to the list of permanent object attributes
