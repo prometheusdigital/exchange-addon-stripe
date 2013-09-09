@@ -100,14 +100,20 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 			}
 				
 			if ( $subscription_id ) {
-				$args = array( 
-					'plan'    => 'weekly', //$subscription_id, //@todo fix this line!
-					'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
-				);
-				$subscription = $stripe_customer->updateSubscription( $args );
-				$charge_id = $subscription->id;	//need a temporary ID
-				it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
+				// We don't want to update the stripe customer if they're trying to subscribe to the same plan!
+				if ( empty( $stripe_customer->subscription->plan->name ) || $subscription_id != $stripe_customer->subscription->plan->name ) {
+					
+					$args = array( 
+						'plan'    => 'weekly', //$subscription_id, //@todo fix this line!
+						'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
+					);
+					$subscription = $stripe_customer->updateSubscription( $args );
+					$charge_id = $subscription->id;	//need a temporary ID
+					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
 
+				} else {
+					throw new Exception( __( 'Error: You cannot subscribe to the same plan!', 'LION' ) );	
+				}
 			} else {
 				// Now that we have a valid Customer ID, charge them!
 				$charge = Stripe_Charge::create(array(
@@ -377,3 +383,27 @@ function it_exchange_stripe_unsubscribe_action( $output, $options ) {
 	return $output;
 }
 add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubscribe_action', 10, 2 );
+
+function it_exchange_stripe_unsubscribe_action_submit() {
+	if ( !empty( $_REQUEST['it-exchange-stripe-action'] ) ) {
+		
+		$settings = it_exchange_get_option( 'addon_stripe' );
+	
+		$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
+		Stripe::setApiKey( $secret_key );
+	
+		switch( $_REQUEST['it-exchange-stripe-action'] ) {
+		
+			case 'unsubscribe' :
+				$current_user_id = get_current_user_id();
+				$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
+				$cu = Stripe_Customer::retrieve( $stripe_customer_id );
+				$cu->cancelSubscription();
+				
+				break;
+			
+		}
+		
+	}
+}
+add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
