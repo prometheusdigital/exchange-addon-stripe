@@ -104,7 +104,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				if ( empty( $stripe_customer->subscription->plan->name ) || $subscription_id != $stripe_customer->subscription->plan->name ) {
 					
 					$args = array( 
-						'plan'    => 'weekly', //$subscription_id, //@todo fix this line!
+						'plan'    => $subscription_id,
 						'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
 					);
 					$subscription = $stripe_customer->updateSubscription( $args );
