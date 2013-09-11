@@ -51,8 +51,6 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
     $body = @file_get_contents('php://input');
     $stripe_event = json_decode( $body );
 	
-	wp_mail( 'lew@ithemes.com', 'stripe webhook', print_r( $stripe_event, true ) );
-
     if ( isset( $stripe_event->id ) ) {
 
 		$stripe_object = $stripe_event->data->object;
