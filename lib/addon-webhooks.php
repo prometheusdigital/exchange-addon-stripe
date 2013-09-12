@@ -102,7 +102,7 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
 				break;
 				
 			case 'customer.subscription.deleted' :
-				it_exchange_stripe_addon_update_subscriber_status( $stripe_object->id, 'deleted' );
+				it_exchange_stripe_addon_update_subscriber_status( $stripe_object->id, 'cancelled' );
 				break;
 				
 
