@@ -7,7 +7,7 @@
 
 /**
  * Converts a transaction ID from the temporary subscription ID to the permanent charge ID
- * @since 1.0.9
+ * @since 1.1.0
  *
  * @param object $stripe_object Stripe Event Object
  * @return string $subscriber_id
@@ -25,7 +25,7 @@ function it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object ) {
 
 /**
  * Converts a transaction ID from the temporary subscription ID to the permanent charge ID
- * @since 1.0.9
+ * @since 1.1.0
  *
  * @param string $stripe_subscription_id
  * @param string $stripe_charge_id
@@ -149,7 +149,7 @@ function it_exchange_stripe_addon_set_stripe_customer_id( $customer_id, $stripe_
 /**
  * Add the stripe customer's subscription ID as user meta on a WP user
  *
- * @since 1.0.9
+ * @since 1.1.0
  *
  * @param integer $customer_id the WP user ID
  * @param integer $subscription_id the stripe customer's subscription ID
@@ -182,7 +182,7 @@ function it_exchange_stripe_addon_get_transaction_id( $stripe_id ) {
 /**
  * Grab a transaction from the stripe subscriber ID
  *
- * @since 1.0.9
+ * @since 1.1.0
  *
  * @param integer $subscriber_id id of stripe transaction
  * @return transaction object
@@ -219,7 +219,7 @@ function it_exchange_stripe_addon_update_transaction_status( $stripe_id, $new_st
 /**
  * Updates a stripe customer's subscription status based on subscription ID
  *
- * @since 1.0.9
+ * @since 1.1.0
  *
  * @param integer $subscription_id id of stripe subscription
  * @param string $status new status
