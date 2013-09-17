@@ -1,3 +1,5 @@
+1.1.0 - 2013-09-17 - Lew Ayotte
+	Updating Stripe to work with the Recurring Payments add-on
 1.0.8 - 2013-08-26 - Glenn Ansley
 	Added Australian Dollar to currencies
 1.0.7 - 2013-08-15 - Glenn Ansley
