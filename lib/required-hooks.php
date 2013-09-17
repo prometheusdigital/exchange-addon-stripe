@@ -369,7 +369,7 @@ add_filter( 'it_exchange_stripe_transaction_is_cleared_for_delivery', 'it_exchan
 /**
  * Returns the Unsubscribe button for Stripe
  *
- * @since X.X.X
+ * @since 1.0.9
  *
  * @param string $output Stripe output (should be empty)
  * @param array $options Recurring Payments options
