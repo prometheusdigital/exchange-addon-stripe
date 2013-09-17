@@ -1,3 +1,5 @@
+1.1.1 - 2013-09-17 - Lew Ayotte
+	Removing debug code from Stripe, replaced with correct output
 1.1.0 - 2013-09-17 - Lew Ayotte
 	Updating Stripe to work with the Recurring Payments add-on
 1.0.8 - 2013-08-26 - Glenn Ansley

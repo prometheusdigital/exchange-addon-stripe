@@ -233,9 +233,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			try {
 				$stripe_plan = Stripe_Plan::create( $args );
 			} catch( Exception $e ) {
-				echo "1";
-				ITDebug::print_r( $e );	
-				die();			
+				return sprintf( __( 'Error: Unable to create Plan in Stripe - %s', 'LION' ), $e->getMessage() );
 			}
 			
 			update_post_meta( $product_id, '_it_exchange_stripe_plan_id', $stripe_plan->id );
@@ -252,9 +250,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			try {
 				$stripe_plan = Stripe_Plan::create( $args );
 			} catch( Exception $e ) {
-				echo "2";
-				ITDebug::print_r( $e );	
-				die();			
+				return sprintf( __( 'Error: Unable to create Plan in Stripe - %s', 'LION' ), $e->getMessage() );
 			}
 			
 			update_post_meta( $product_id, '_it_exchange_stripe_plan_id', $stripe_plan->id );
