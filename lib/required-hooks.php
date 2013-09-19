@@ -380,6 +380,13 @@ function it_exchange_stripe_unsubscribe_action( $output, $options ) {
 }
 add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubscribe_action', 10, 2 );
 
+/**
+ * Performs user requested unsubscribe
+ *
+ * @since 1.3.0
+ *
+ * @return void
+*/
 function it_exchange_stripe_unsubscribe_action_submit() {
 	if ( !empty( $_REQUEST['it-exchange-stripe-action'] ) ) {
 		
@@ -391,11 +398,30 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 		switch( $_REQUEST['it-exchange-stripe-action'] ) {
 		
 			case 'unsubscribe' :
-				$current_user_id = get_current_user_id();
-				$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
-				$cu = Stripe_Customer::retrieve( $stripe_customer_id );
-				$cu->cancelSubscription();
+				try {
+					$current_user_id = get_current_user_id();
+					$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
+					$cu = Stripe_Customer::retrieve( $stripe_customer_id );
+					$cu->cancelSubscription();
+				}
+				catch( Exception $e ) {
+					echo 'ERROR';
+				}
+				break;
 				
+			case 'unsubscribe-user' :
+				if ( is_admin() && current_user_can( 'administrator' ) ) {
+					if ( !empty( $_REQUEST['it-exchange-stripe-customer-id'] ) && $stripe_customer_id = $_REQUEST['it-exchange-stripe-customer-id'] ) {
+						echo "here";
+						try {
+							$cu = Stripe_Customer::retrieve( $stripe_customer_id );
+							$cu->cancelSubscription();
+						}
+						catch( Exception $e ) {
+							echo 'ERROR';
+						}
+					}
+				}
 				break;
 			
 		}
@@ -403,3 +429,48 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 	}
 }
 add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
+
+
+/**
+ * Output the Cancel URL for the Payments screen
+ *
+ * @since 1.3.1
+ *
+ * @param object $transaction iThemes Transaction object
+ * @return void
+*/
+function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {	
+	$cart_object = get_post_meta( $transaction->ID, '_it_exchange_cart_object', true );
+	foreach ( $cart_object->products as $product ) {	
+		$autorenews = $transaction->get_transaction_meta( 'subscription_autorenew_' . $product['product_id'], true );
+		if ( $autorenews ) {
+			$customer_id = it_exchange_get_transaction_customer_id( $transaction->ID );
+			$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $customer_id );
+			$status = $transaction->get_transaction_meta( 'subscriber_status', true );
+			switch( $status ) {
+			
+				case 'deactivated':
+					$output = __( 'Recurring payment has been deactivated', 'LION' );
+					break;
+					
+				case 'cancelled':
+					$output = __( 'Recurring payment has been cancelled', 'LION' );
+					break;
+				
+				case 'active':
+				default:
+					$output  = '<a href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
+					break;
+			}
+			?>
+			<div class="transaction-autorenews clearfix spacing-wrapper">
+				<div class="recurring-payment-cancel-options left">
+					<div class="recurring-payment-status-name"><?php echo $output; ?></div>
+				</div>
+			</div>
+			<?php
+			continue;
+		}
+	}
+}
+add_action( 'it_exchange_after_payment_details_cancel_url_for_stripe', 'it_exchange_stripe_after_payment_details_cancel_url' );
