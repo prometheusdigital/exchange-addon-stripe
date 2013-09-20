@@ -412,7 +412,6 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 			case 'unsubscribe-user' :
 				if ( is_admin() && current_user_can( 'administrator' ) ) {
 					if ( !empty( $_REQUEST['it-exchange-stripe-customer-id'] ) && $stripe_customer_id = $_REQUEST['it-exchange-stripe-customer-id'] ) {
-						echo "here";
 						try {
 							$cu = Stripe_Customer::retrieve( $stripe_customer_id );
 							$cu->cancelSubscription();
