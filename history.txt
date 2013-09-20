@@ -1,3 +1,5 @@
+1.1.2 - 2013-09-20 - Lew Ayotte
+	Adding cancel links to Payments Edit screen
 1.1.1 - 2013-09-17 - Lew Ayotte
 	Removing debug code from Stripe, replaced with correct output
 1.1.0 - 2013-09-17 - Lew Ayotte
