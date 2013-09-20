@@ -405,7 +405,7 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 					$cu->cancelSubscription();
 				}
 				catch( Exception $e ) {
-					echo 'ERROR';
+					it_exchange_add_message( 'error', sprintf( __( 'Error: Unable to unsubscribe user %s', 'LION' ), $e->getMessage() ) );
 				}
 				break;
 				
@@ -418,7 +418,7 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 							$cu->cancelSubscription();
 						}
 						catch( Exception $e ) {
-							echo 'ERROR';
+							it_exchange_add_message( 'error', sprintf( __( 'Error: Unable to unsubscribe user %s', 'LION' ), $e->getMessage() ) );
 						}
 					}
 				}
