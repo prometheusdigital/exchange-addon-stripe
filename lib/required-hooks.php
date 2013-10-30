@@ -119,7 +119,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				$charge = Stripe_Charge::create(array(
 					'customer'    => $stripe_customer->id,
 					'amount'      => number_format( $transaction_object->total, 2, '', '' ),
-					'currency'    => $general_settings['default-currency'],
+					'currency'    => strtolower( $general_settings['default-currency'] ),
 					'description' => $transaction_object->description,
 				));
 				$charge_id = $charge->id;
@@ -227,7 +227,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 				'interval'       => $interval,
 				'interval_count' => $duration,
 				'name'           => get_the_title( $product_id ) . ' ' . $time, 
-				'currency'       => esc_js( $general_settings['default-currency'] ), 
+				'currency'       => esc_js( strtolower( $general_settings['default-currency'] ) ), 
 				'id'             => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time
 			);
 			try {
@@ -243,7 +243,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 				'interval'       => $interval, 
 				'interval_count' => $duration,
 				'name'           => get_the_title( $product_id ) . ' ' . $time, 
-				'currency'       => esc_js( $general_settings['default-currency'] ), 
+				'currency'       => esc_js( strtolower( $general_settings['default-currency'] ) ), 
 				'id'             => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time
 			);
 			
@@ -289,7 +289,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '    StripeCheckout.open({' . "\n";
 		$payment_form .= '      key:         "' . esc_js( $publishable_key ) . '",' . "\n";
 		$payment_form .= '      amount:      "' . esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) ) . '",' . "\n";
-		$payment_form .= '      currency:    "' . esc_js( $general_settings['default-currency'] ) . '",' . "\n";
+		$payment_form .= '      currency:    "' . esc_js( strtolower( $general_settings['default-currency'] ) ) . '",' . "\n";
 		$payment_form .= '      name:        "' . empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
