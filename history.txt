@@ -40,3 +40,5 @@
 	Enhancement: Changed how the licensing page works on Multisite. Now it will appear at Settings > iThemes Licensing in the network admin Dashboard and at Settings > iThemes Licensing on sites when the current user is a network admin. This prevents exposing the licensing page to users that don't are not super users and thus should not be performing updates. As this update makes the functionality of the "Licensing Page Access" setting obsolete, the setting has been removed.
 	Enhancement: Using the ithemes-updater-force-minor-update query string variable will now force a data flush, allowing any available quick release updates to appear instantly.
 	Enhancement: Added "License" links to the Plugins and Themes pages for the Network Admin Dashboard of multisite installs.
+1.1.8 - 2013-10-30 - Lew Ayotte
+	Fixed currency bug
