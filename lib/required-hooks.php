@@ -197,6 +197,9 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		}
 	}
 	
+	
+	$it_exchange_customer = it_exchange_get_current_customer();
+	
 	$payment_form = '<form class="stripe_form" action="' . esc_attr( it_exchange_get_page_url( 'transaction' ) ) . '" method="post">';
 	$payment_form .= '<input type="hidden" name="it-exchange-transaction-method" value="stripe" />';
 	$payment_form .= wp_nonce_field( 'stripe-checkout', '_stripe_nonce', true, false );
@@ -267,8 +270,9 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      it_exchange_stripe_processing_payment_popup();' . "\n";
 		$payment_form .= '    };' . "\n";
 		$payment_form .= '    StripeCheckout.open({' . "\n";
-		$payment_form .= '      key:  "' . esc_js( $publishable_key ) . '",' . "\n";
-		$payment_form .= '      plan: "' . esc_js( $stripe_plan->id ) . '",' . "\n";
+		$payment_form .= '      key:         "' . esc_js( $publishable_key ) . '",' . "\n";
+		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
+		$payment_form .= '      plan:        "' . esc_js( $stripe_plan->id ) . '",' . "\n";
 		$payment_form .= '      name:        "' . empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		$payment_form .= '      token:       token' . "\n";
@@ -288,6 +292,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '    };' . "\n";
 		$payment_form .= '    StripeCheckout.open({' . "\n";
 		$payment_form .= '      key:         "' . esc_js( $publishable_key ) . '",' . "\n";
+		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
 		$payment_form .= '      amount:      "' . esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) ) . '",' . "\n";
 		$payment_form .= '      currency:    "' . esc_js( strtolower( $general_settings['default-currency'] ) ) . '",' . "\n";
 		$payment_form .= '      name:        "' . empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) . '",' . "\n";
