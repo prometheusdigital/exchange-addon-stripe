@@ -219,7 +219,7 @@ class IT_Exchange_Stripe_Add_On {
             </p>
             <p>
                 <?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.
-                <span class="tip" title="<?php _e( 'Enabling Stripe limits your currency options to United States Dollars and Canadian Dollars.', 'LION' ); ?>">i</span>
+                <span class="tip" title="<?php _e( 'Enabling Stripe limits your currency options to the currencies available to Stripe customers.', 'LION' ); ?>">i</span>
             </p>
             <?php
                 if ( ! in_array( $general_settings['default-currency'], array_keys( $this->get_supported_currency_options() ) ) )
