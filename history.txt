@@ -51,3 +51,5 @@
 	Changed Stripe tip for available currencies
 1.1.11 - 2013-12-18 - Packaging Bot (lib/updater)
 	Bug Fix: Removed unneeded check on package-info.ithemes.com which was causing performance issues on some sites.
+1.1.12 - 2013-12-19 - Packaging Bot (lib/updater)
+	Bug Fix: Licensing will now be universal across all sites of a multisite network. This means that you will only need to license on one site to have the license apply across the entire network.
