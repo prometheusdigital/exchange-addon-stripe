@@ -161,7 +161,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
     $general_settings = it_exchange_get_option( 'settings_general' );
     $stripe_settings = it_exchange_get_option( 'addon_stripe' );
 	$subscription = false;
-
+	
     $publishable_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-publishable-key'] : $stripe_settings['stripe-live-publishable-key'];
 
     $products = it_exchange_get_cart_data( 'products' );
@@ -273,7 +273,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      key:         "' . esc_js( $publishable_key ) . '",' . "\n";
 		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
 		$payment_form .= '      plan:        "' . esc_js( $stripe_plan->id ) . '",' . "\n";
-		$payment_form .= '      name:        "' . empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) . '",' . "\n";
+		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		$payment_form .= '      token:       token' . "\n";
 		$payment_form .= '    });' . "\n";
@@ -295,7 +295,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
 		$payment_form .= '      amount:      "' . esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) ) . '",' . "\n";
 		$payment_form .= '      currency:    "' . esc_js( strtolower( $general_settings['default-currency'] ) ) . '",' . "\n";
-		$payment_form .= '      name:        "' . empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) . '",' . "\n";
+		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		$payment_form .= '      token:       token' . "\n";
