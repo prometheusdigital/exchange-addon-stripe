@@ -285,7 +285,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	} else {
 		
 		$payment_form .= '<script>' . "\n";
-		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(){' . "\n";
+		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
 		$payment_form .= '    var token = function(res){' . "\n";
 		$payment_form .= '      var $stripeToken = jQuery("<input type=hidden name=stripeToken />").val(res.id);' . "\n";
