@@ -263,7 +263,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 
 			
 		$payment_form .= '<script>' . "\n";
-		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(){' . "\n";
+		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
+		$payment_form .= '    event.preventDefault();';
 		$payment_form .= '    var token = function(res){' . "\n";
 		$payment_form .= '      var $stripeToken = jQuery("<input type=hidden name=stripeToken />").val(res.id);' . "\n";
 		$payment_form .= '      jQuery("form.stripe_form").append($stripeToken).submit();' . "\n";
@@ -277,7 +278,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		$payment_form .= '      token:       token' . "\n";
 		$payment_form .= '    });' . "\n";
-		$payment_form .= '    return false;' . "\n";
+		// $payment_form .= '    return false;' . "\n";
 		$payment_form .= '  });' . "\n";
 		$payment_form .= '</script>' . "\n";
 		
@@ -285,6 +286,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(){' . "\n";
+		$payment_form .= '    event.preventDefault();';
 		$payment_form .= '    var token = function(res){' . "\n";
 		$payment_form .= '      var $stripeToken = jQuery("<input type=hidden name=stripeToken />").val(res.id);' . "\n";
 		$payment_form .= '      jQuery("form.stripe_form").append($stripeToken).submit();' . "\n";
@@ -300,7 +302,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		$payment_form .= '      token:       token' . "\n";
 		$payment_form .= '    });' . "\n";
-		$payment_form .= '    return false;' . "\n";
+		// $payment_form .= '    return false;' . "\n";
 		$payment_form .= '  });' . "\n";
 		$payment_form .= '</script>' . "\n";
 	
