@@ -55,3 +55,9 @@
 	Bug Fix: Licensing will now be universal across all sites of a multisite network. This means that you will only need to license on one site to have the license apply across the entire network.
 1.1.13 - 2014-01-02 - Lew Ayotte
 	Fixed bug not displaying the store name in the stripe popup.
+1.1.14 - Lew Ayotte, Justin Kopepasah
+	Add the event handler to the second script.
+	Change return false; to event.preventDefault(); so other scripts can latch into the event for that element.
+	Merge branch 'dev' of projectpress.net:exchange-addon-stripe into dev
+	Fixed bug not displaying the store name in the stripe popup
+	Fixed bug not displaying the store name in the stripe popup
