@@ -61,3 +61,5 @@
 	Merge branch 'dev' of projectpress.net:exchange-addon-stripe into dev
 	Fixed bug not displaying the store name in the stripe popup
 	Fixed bug not displaying the store name in the stripe popup
+1.1.15 - 2014-02-03 - Packaging Bot (lib/updater)
+	Bug Fix: Licensing on SSL-enabled sites now works properly.
