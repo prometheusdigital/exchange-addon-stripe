@@ -63,3 +63,5 @@
 	Fixed bug not displaying the store name in the stripe popup
 1.1.15 - 2014-02-03 - Packaging Bot (lib/updater)
 	Bug Fix: Licensing on SSL-enabled sites now works properly.
+1.1.16 - 2014-02-11 - Lew Ayotte
+	Modified supported currencies to pull from Stripe's API, now open to up to 139 currencies!
