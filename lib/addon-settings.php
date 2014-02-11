@@ -361,14 +361,15 @@ class IT_Exchange_Stripe_Add_On {
      * @return void
     */
     function get_supported_currency_options() {
-        $options = array( 
-			'USD' => __( 'United States dollar', 'LION' ), 
-			'AUD' => __( 'Australian dollar', 'LION' ),
-			'CAD' => __( 'Canadian dollar', 'LION' ),
-			'GBP' => __( 'British pound', 'LION' ),
-			'EUR' => __( 'European Euro', 'LION' ),
-		);
-        return $options;
+        $settings = it_exchange_get_option( 'addon_stripe', true );
+        $secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
+	    Stripe::setApiKey( $secret_key );
+	    
+	    $account = Stripe_Account::retrieve();
+	    
+	    $currencies = array_change_key_case( array_flip( $account->currencies_supported ), CASE_UPPER );
+	    	    
+        return $currencies;
     }
 
 }
