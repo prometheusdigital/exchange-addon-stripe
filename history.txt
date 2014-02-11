@@ -65,3 +65,5 @@
 	Bug Fix: Licensing on SSL-enabled sites now works properly.
 1.1.16 - 2014-02-11 - Lew Ayotte
 	Modified supported currencies to pull from Stripe's API, now open to up to 139 currencies!
+1.1.17 - 2014-02-11 - Lew Ayotte
+	Fixes Stripe API error on activation, when no stripe key has been added (yet)
