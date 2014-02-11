@@ -97,7 +97,10 @@ add_filter( 'it_storage_get_defaults_exchange_addon_stripe', 'it_exchange_stripe
 function it_exchange_stripe_addon_get_currency_options( $default_currencies ) {
     $IT_Exchange_Stripe_Add_On = new IT_Exchange_Stripe_Add_On();
     $stripe_currencies = $IT_Exchange_Stripe_Add_On->get_supported_currency_options();
-    return array_intersect_key( $default_currencies, $stripe_currencies );
+	if ( !empty( $stripe_currencies ) )
+		return array_intersect_key( $default_currencies, $stripe_currencies );
+	else
+		return $default_currencies;
 }
 add_filter( 'it_exchange_get_currency_options', 'it_exchange_stripe_addon_get_currency_options' );
 
@@ -361,14 +364,16 @@ class IT_Exchange_Stripe_Add_On {
      * @return void
     */
     function get_supported_currency_options() {
+		$currencies = array();
         $settings = it_exchange_get_option( 'addon_stripe', true );
-        $secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
-	    Stripe::setApiKey( $secret_key );
+		if ( !empty( $settings ) ) {
+			$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
+			Stripe::setApiKey( $secret_key );
 	    
-	    $account = Stripe_Account::retrieve();
+			$account = Stripe_Account::retrieve();
 	    
-	    $currencies = array_change_key_case( array_flip( $account->currencies_supported ), CASE_UPPER );
-	    	    
+			$currencies = array_change_key_case( array_flip( $account->currencies_supported ), CASE_UPPER );
+	    }
         return $currencies;
     }
 
