@@ -130,6 +130,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 			it_exchange_add_message( 'error', $e->getMessage() );
 			return false;
 		}
+			
 		return it_exchange_add_transaction( 'stripe', $charge_id, 'succeeded', $it_exchange_customer->id, $transaction_object );
 	} else {
 		it_exchange_add_message( 'error', __( 'Unknown error. Please try again later.', 'LION' ) );
@@ -138,6 +139,28 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 }
 add_action( 'it_exchange_do_transaction_stripe', 'it_exchange_stripe_addon_process_transaction', 10, 2 );
+
+function it_exchange_cancel_stripe_subscription( $subscription_details ) {
+
+	if ( empty( $subscription_details['old_subscriber_id'] ) )
+		return;
+		
+	$subscriber_id = $subscription_details['old_subscriber_id'];
+	$secret_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
+	Stripe::setApiKey( $secret_key );
+	
+	try {
+		$current_user_id = get_current_user_id();
+		$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
+		
+		$cu = Stripe_Customer::retrieve( $stripe_customer_id );
+		$cu->subscriptions->retrieve( $subscriber_id )->cancel();
+	}
+	catch( Exception $e ) {
+		it_exchange_add_message( 'error', sprintf( __( 'Error: Unable to unsubscribe user %s', 'LION' ), $e->getMessage() ) );
+	}
+}
+add_action( 'it_exchange_cancel_stripe_subscription', 'it_exchange_cancel_stripe_subscription' );
 
 /**
  * Returns the button for making the payment
@@ -197,7 +220,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		}
 	}
 	
-	
 	$it_exchange_customer = it_exchange_get_current_customer();
 	
 	$payment_form = '<form class="stripe_form" action="' . esc_attr( it_exchange_get_page_url( 'transaction' ) ) . '" method="post">';
@@ -205,7 +227,25 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	$payment_form .= wp_nonce_field( 'stripe-checkout', '_stripe_nonce', true, false );
 	$payment_form .= '<div class="hide-if-no-js">';
 	$payment_form .= '<input type="submit" class="it-exchange-stripe-payment-button" name="stripe_purchase" value="' . esc_attr( $stripe_settings['stripe-purchase-button-label'] ) .'" />';
+	$upgrade_downgrade = it_exchange_get_session_data( 'updowngrade_details' );
 
+	if ( $subscription && !empty( $product_id )
+		&& !empty( $upgrade_downgrade[$product_id]['old_transaction_id'] ) 
+		&& !empty( $upgrade_downgrade[$product_id]['old_transaction_method'] ) ) {
+		$subscription_details = array(
+			'product_id'             => $product_id,
+			'free_days'              => $upgrade_downgrade[$product_id]['free_days'],
+			'credit'                 => $upgrade_downgrade[$product_id]['credit'],
+			'old_transaction_id'     => $upgrade_downgrade[$product_id]['old_transaction_id'],
+			'old_transaction_method' => $upgrade_downgrade[$product_id]['old_transaction_method'],
+		);
+		if ( !empty( $upgrade_downgrade[$product_id]['old_subscriber_id'] ) )
+			$subscription_details['old_subscriber_id'] = $upgrade_downgrade[$product_id]['old_subscriber_id'];
+		it_exchange_update_session_data( 'cancel_subscription', $subscription_details );
+	} else {
+		it_exchange_clear_session_data( 'cancel_subscription' );
+	}
+		
 	if ( $subscription ) {
 
 		$secret_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
@@ -213,6 +253,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$stripe_plan = false;
 		$time = time();
 		$amount = esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) );
+		$trial_period_days = empty( $upgrade_downgrade[$product_id]['free_days'] ) ? null : $upgrade_downgrade[$product_id]['free_days']; //stripe returns null if it isn't set
 		
 		$existing_plan = get_post_meta( $product_id, '_it_exchange_stripe_plan_id', true );
 		if ( $existing_plan ) {
@@ -226,13 +267,15 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		
 		if ( !is_object( $stripe_plan ) ) {
 			$args = array( 
-				'amount'         => $amount, 
-				'interval'       => $interval,
-				'interval_count' => $duration,
-				'name'           => get_the_title( $product_id ) . ' ' . $time, 
-				'currency'       => esc_js( strtolower( $general_settings['default-currency'] ) ), 
-				'id'             => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time
+				'amount'            => $amount, 
+				'interval'          => $interval,
+				'interval_count'    => $duration,
+				'name'              => get_the_title( $product_id ) . ' ' . $time, 
+				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ), 
+				'id'                => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time,
+				'trial_period_days' => $trial_period_days,
 			);
+			
 			try {
 				$stripe_plan = Stripe_Plan::create( $args );
 			} catch( Exception $e ) {
@@ -240,14 +283,15 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			}
 			
 			update_post_meta( $product_id, '_it_exchange_stripe_plan_id', $stripe_plan->id );
-		} else if ( $amount != $stripe_plan->amount || $interval != $stripe_plan->interval || $duration != $stripe_plan->interval_count ) {
+		} else if ( $amount != $stripe_plan->amount || $interval != $stripe_plan->interval || $duration != $stripe_plan->interval_count || $trial_period_days != $stripe_plan->trial_period_days ) {
 			$args = array( 
-				'amount'         => $amount, 
-				'interval'       => $interval, 
-				'interval_count' => $duration,
-				'name'           => get_the_title( $product_id ) . ' ' . $time, 
-				'currency'       => esc_js( strtolower( $general_settings['default-currency'] ) ), 
-				'id'             => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time
+				'amount'            => $amount, 
+				'interval'          => $interval, 
+				'interval_count'    => $duration,
+				'name'              => get_the_title( $product_id ) . ' ' . $time, 
+				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ), 
+				'id'                => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time,
+				'trial_period_days' => $trial_period_days,
 			);
 			
 			try {
@@ -260,8 +304,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		}
 		
 		$payment_form .= '<input type="hidden" class="it-exchange-stripe-subscription-id" name="stripe_subscription_id" value="' . esc_attr( $stripe_plan->id ) .'" />';
-
-			
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
@@ -284,6 +326,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		
 	} else {
 		
+		$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-subscription-id" name="stripe_old_subscription_id" value="' . esc_attr( $old_subscription_id ) .'" />';
+		$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-transaction-method" name="stripe_old_transaction_method" value="' . esc_attr( $old_transaction_method ) .'" />';
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
