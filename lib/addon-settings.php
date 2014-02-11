@@ -79,7 +79,7 @@ function it_exchange_stripe_addon_default_settings( $values ) {
         'stripe-live-publishable-key'  => '',
         'stripe-test-secret-key'       => '',
         'stripe-test-publishable-key'  => '',
-        'stripe-purchase-button-label' => __( 'Purchase', 'LION' ),
+        'stripe-purchase-button-label' => __( 'Purchase', 'it-l10n-exchange-addon-stripe' ),
     );
     $values = ITUtility::merge_defaults( $values, $defaults );
     return $values;
@@ -182,7 +182,7 @@ class IT_Exchange_Stripe_Add_On {
         ?>
         <div class="wrap">
             <?php screen_icon( 'it-exchange' ); ?>
-            <h2><?php _e( 'Stripe Settings', 'LION' ); ?></h2>
+            <h2><?php _e( 'Stripe Settings', 'it-l10n-exchange-addon-stripe' ); ?></h2>
 
             <?php do_action( 'it_exchange_stripe_settings_page_top' ); ?>
             <?php do_action( 'it_exchange_addon_settings_page_top' ); ?>
@@ -191,7 +191,7 @@ class IT_Exchange_Stripe_Add_On {
                 <?php $this->get_stripe_payment_form_table( $form, $form_values ); ?>
                 <?php do_action( 'it_exchange_stripe_settings_form_bottom' ); ?>
                 <p class="submit">
-                    <?php $form->add_submit( 'submit', array( 'value' => __( 'Save Changes', 'LION' ), 'class' => 'button button-primary button-large' ) ); ?>
+                    <?php $form->add_submit( 'submit', array( 'value' => __( 'Save Changes', 'it-l10n-exchange-addon-stripe' ), 'class' => 'button button-primary button-large' ) ); ?>
                 </p>
             <?php $form->end_form(); ?>
             <?php do_action( 'it_exchange_stripe_settings_page_bottom' ); ?>
@@ -212,55 +212,55 @@ class IT_Exchange_Stripe_Add_On {
                 $form->set_option( $key, $var );
 
         if ( ! empty( $_GET['page'] ) && 'it-exchange-setup' == $_GET['page'] ) : ?>
-            <h3><?php _e( 'Stripe', 'LION' ); ?></h3>
+            <h3><?php _e( 'Stripe', 'it-l10n-exchange-addon-stripe' ); ?></h3>
         <?php endif; ?>
         <div class="it-exchange-addon-settings it-exchange-stripe-addon-settings">
             <p>
-                <?php _e( 'To get Stripe set up for use with Exchange, you\'ll need to add the following information from your Stripe account.', 'LION' ); ?>
+                <?php _e( 'To get Stripe set up for use with Exchange, you\'ll need to add the following information from your Stripe account.', 'it-l10n-exchange-addon-stripe' ); ?>
                 <br /><br />
-                <?php _e( 'Video:', 'LION' ); ?>&nbsp;<a href="http://ithemes.com/tutorials/setting-up-stripe-in-exchange/" target="_blank"><?php _e( 'Setting Up Stripe in Exchange', 'LION' ); ?></a>
+                <?php _e( 'Video:', 'it-l10n-exchange-addon-stripe' ); ?>&nbsp;<a href="http://ithemes.com/tutorials/setting-up-stripe-in-exchange/" target="_blank"><?php _e( 'Setting Up Stripe in Exchange', 'it-l10n-exchange-addon-stripe' ); ?></a>
             </p>
             <p>
-                <?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.
-                <span class="tip" title="<?php _e( 'Enabling Stripe limits your currency options to the currencies available to Stripe customers.', 'LION' ); ?>">i</span>
+                <?php _e( 'Don\'t have a Stripe account yet?', 'it-l10n-exchange-addon-stripe' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'it-l10n-exchange-addon-stripe' ); ?></a>.
+                <span class="tip" title="<?php _e( 'Enabling Stripe limits your currency options to the currencies available to Stripe customers.', 'it-l10n-exchange-addon-stripe' ); ?>">i</span>
             </p>
             <?php
                 if ( ! in_array( $general_settings['default-currency'], array_keys( $this->get_supported_currency_options() ) ) )
-                    echo '<h4>' . sprintf( __( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'LION' ), add_query_arg( 'page', 'it-exchange-settings' ) ) . '</h4>';
+                    echo '<h4>' . sprintf( __( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'it-l10n-exchange-addon-stripe' ), add_query_arg( 'page', 'it-exchange-settings' ) ) . '</h4>';
             ?>
-            <h4><?php _e( 'Step 1. Fill out your Stripe API Credentials', 'LION' ); ?></h4>
+            <h4><?php _e( 'Step 1. Fill out your Stripe API Credentials', 'it-l10n-exchange-addon-stripe' ); ?></h4>
             <p>
-                <label for="stripe-live-secret-key"><?php _e( 'Live Secret Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Secret Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
+                <label for="stripe-live-secret-key"><?php _e( 'Live Secret Key', 'it-l10n-exchange-addon-stripe' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Secret Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'it-l10n-exchange-addon-stripe' ); ?>">i</span></label>
                 <?php $form->add_text_box( 'stripe-live-secret-key' ); ?>
             </p>
             <p>
-                <label for="stripe-live-publishable-key"><?php _e( 'Live Publishable Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Publishable Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
+                <label for="stripe-live-publishable-key"><?php _e( 'Live Publishable Key', 'it-l10n-exchange-addon-stripe' ); ?> <span class="tip" title="<?php _e( 'The Stripe Live Publishable Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'it-l10n-exchange-addon-stripe' ); ?>">i</span></label>
                 <?php $form->add_text_box( 'stripe-live-publishable-key' ); ?>
             </p>
 
-            <h4><?php _e( 'Step 2. Setup Stripe Webhooks', 'LION' ); ?></h4>
-            <p><?php printf( __( 'Webhooks can be configured in the %sWebhook Settings%s section of the Stripe dashboard. Click "Add URL" to reveal a form to add a new URL for receiving webhooks.', 'LION' ), '<a href="https://manage.stripe.com/account/webhooks">', '</a>' ); ?></p>
-            <p><?php _e( 'Please log in to your account and add this URL to your Webhooks so iThemes Exchange is notified of things like refunds, payments, etc.', 'LION' ); ?></p>
+            <h4><?php _e( 'Step 2. Setup Stripe Webhooks', 'it-l10n-exchange-addon-stripe' ); ?></h4>
+            <p><?php printf( __( 'Webhooks can be configured in the %sWebhook Settings%s section of the Stripe dashboard. Click "Add URL" to reveal a form to add a new URL for receiving webhooks.', 'it-l10n-exchange-addon-stripe' ), '<a href="https://manage.stripe.com/account/webhooks">', '</a>' ); ?></p>
+            <p><?php _e( 'Please log in to your account and add this URL to your Webhooks so iThemes Exchange is notified of things like refunds, payments, etc.', 'it-l10n-exchange-addon-stripe' ); ?></p>
             <code><?php echo get_site_url(); ?>/?<?php esc_attr_e( it_exchange_get_webhook( 'stripe' ) ); ?>=1</code>
 
-            <h4><?php _e( 'Optional: Edit Purchase Button Label', 'LION' ); ?></h4>
+            <h4><?php _e( 'Optional: Edit Purchase Button Label', 'it-l10n-exchange-addon-stripe' ); ?></h4>
             <p>
-                <label for="stripe-purchase-button-label"><?php _e( 'Purchase Button Label', 'LION' ); ?> <span class="tip" title="<?php _e( 'This is the text inside the button your customers will press to purchase with Stripe', 'LION' ); ?>">i</span></label>
+                <label for="stripe-purchase-button-label"><?php _e( 'Purchase Button Label', 'it-l10n-exchange-addon-stripe' ); ?> <span class="tip" title="<?php _e( 'This is the text inside the button your customers will press to purchase with Stripe', 'it-l10n-exchange-addon-stripe' ); ?>">i</span></label>
                 <?php $form->add_text_box( 'stripe-purchase-button-label' ); ?>
             </p>
 
-            <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Stripe Test Mode', 'LION' ); ?></h4>
+            <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Stripe Test Mode', 'it-l10n-exchange-addon-stripe' ); ?></h4>
             <p class="hide-if-wizard">
                 <?php $form->add_check_box( 'stripe-test-mode', array( 'class' => 'show-test-mode-options' ) ); ?>
-                <label for="stripe-test-mode"><?php _e( 'Enable Stripe Test Mode?', 'LION' ); ?> <span class="tip" title="<?php _e( 'Use this mode for testing your store. This mode will need to be disabled when the store is ready to process customer payments.', 'LION' ); ?>">i</span></label>
+                <label for="stripe-test-mode"><?php _e( 'Enable Stripe Test Mode?', 'it-l10n-exchange-addon-stripe' ); ?> <span class="tip" title="<?php _e( 'Use this mode for testing your store. This mode will need to be disabled when the store is ready to process customer payments.', 'it-l10n-exchange-addon-stripe' ); ?>">i</span></label>
             </p>
             <?php $hidden_class = ( $settings['stripe-test-mode'] ) ? '' : 'hide-if-live-mode'; ?>
             <p class="test-mode-options hide-if-wizard <?php echo $hidden_class; ?>">
-                <label for="stripe-test-secret-key"><?php _e( 'Test Secret Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Secret Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
+                <label for="stripe-test-secret-key"><?php _e( 'Test Secret Key', 'it-l10n-exchange-addon-stripe' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Secret Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'it-l10n-exchange-addon-stripe' ); ?>">i</span></label>
                 <?php $form->add_text_box( 'stripe-test-secret-key' ); ?>
             </p>
             <p class="test-mode-options hide-if-wizard <?php echo $hidden_class; ?>">
-                <label for="stripe-test-publishable-key"><?php _e( 'Test Publishable Key', 'LION' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Publishable Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'LION' ); ?>">i</span></label>
+                <label for="stripe-test-publishable-key"><?php _e( 'Test Publishable Key', 'it-l10n-exchange-addon-stripe' ); ?> <span class="tip" title="<?php _e( 'The Stripe Test Publishable Key is available in your Stripe Dashboard (Your Account &rarr; Account Settings &rarr; API Keys).', 'it-l10n-exchange-addon-stripe' ); ?>">i</span></label>
                 <?php $form->add_text_box( 'stripe-test-publishable-key' ); ?>
             </p>
         </div>
@@ -279,18 +279,18 @@ class IT_Exchange_Stripe_Add_On {
 
         // Check nonce
         if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'it-exchange-stripe-settings' ) ) {
-            $this->error_message = __( 'Error. Please try again', 'LION' );
+            $this->error_message = __( 'Error. Please try again', 'it-l10n-exchange-addon-stripe' );
             return;
         }
 
         $errors = apply_filters( 'it_exchange_add_on_stripe_validate_settings', $this->get_form_errors( $new_values ), $new_values );
         if ( ! $errors && it_exchange_save_option( 'addon_stripe', $new_values ) ) {
-            ITUtility::show_status_message( __( 'Settings saved.', 'LION' ) );
+            ITUtility::show_status_message( __( 'Settings saved.', 'it-l10n-exchange-addon-stripe' ) );
         } else if ( $errors ) {
             $errors = implode( '<br />', $errors );
             $this->error_message = $errors;
         } else {
-            $this->status_message = __( 'Settings not saved.', 'LION' );
+            $this->status_message = __( 'Settings not saved.', 'it-l10n-exchange-addon-stripe' );
         }
     }
 
@@ -325,7 +325,7 @@ class IT_Exchange_Stripe_Add_On {
 
         } else {
             it_exchange_save_option( 'addon_stripe', $settings );
-            $this->status_message = __( 'Settings Saved.', 'LION' );
+            $this->status_message = __( 'Settings Saved.', 'it-l10n-exchange-addon-stripe' );
         }
 
         return;
@@ -343,15 +343,15 @@ class IT_Exchange_Stripe_Add_On {
 
         $errors = array();
         if ( empty( $values['stripe-live-secret-key'] ) )
-            $errors[] = __( 'Please include your Stripe Live Secret Key', 'LION' );
+            $errors[] = __( 'Please include your Stripe Live Secret Key', 'it-l10n-exchange-addon-stripe' );
         if ( empty( $values['stripe-live-publishable-key'] ) )
-            $errors[] = __( 'Please include your Stripe Live Publishable Key', 'LION' );
+            $errors[] = __( 'Please include your Stripe Live Publishable Key', 'it-l10n-exchange-addon-stripe' );
 
         if ( !empty( $values['stripe-test-mode' ] ) ) {
             if ( empty( $values['stripe-test-secret-key'] ) )
-                $errors[] = __( 'Please include your Stripe Test Secret Key', 'LION' );
+                $errors[] = __( 'Please include your Stripe Test Secret Key', 'it-l10n-exchange-addon-stripe' );
             if ( empty( $values['stripe-test-publishable-key'] ) )
-                $errors[] = __( 'Please include your Stripe Test Publishable Key', 'LION' );
+                $errors[] = __( 'Please include your Stripe Test Publishable Key', 'it-l10n-exchange-addon-stripe' );
         }
 
         return $errors;
@@ -366,7 +366,7 @@ class IT_Exchange_Stripe_Add_On {
     function get_supported_currency_options() {
 		$currencies = array();
         $settings = it_exchange_get_option( 'addon_stripe', true );
-		if ( !empty( $settings ) ) {
+		if ( !empty( $settings['stripe-test-secret-key'] ) || !empty( $settings['stripe-live-secret-key'] ) ) {
 			$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
 			Stripe::setApiKey( $secret_key );
 	    
