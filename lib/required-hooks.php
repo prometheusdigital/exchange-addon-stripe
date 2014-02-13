@@ -390,7 +390,7 @@ add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubsc
 /**
  * Performs user requested unsubscribe
  *
- * @since 1.3.0
+ * @since CHANGEME
  *
  * @return void
 */
