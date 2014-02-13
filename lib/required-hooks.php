@@ -436,7 +436,6 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 }
 add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
 
-
 /**
  * Output the Cancel URL for the Payments screen
  *
