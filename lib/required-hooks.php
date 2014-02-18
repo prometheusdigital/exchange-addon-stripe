@@ -107,7 +107,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 						'plan'    => $subscription_id,
 						'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
 					);
-					$subscription = $stripe_customer->updateSubscription( $args );
+					$subscription = $stripe_customer->subscriptions->create( $args );
 					$charge_id = $subscription->id;	//need a temporary ID
 					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
 
@@ -422,19 +422,21 @@ add_filter( 'it_exchange_stripe_transaction_is_cleared_for_delivery', 'it_exchan
  * @param array $options Recurring Payments options
  * @return string
 */
-function it_exchange_stripe_unsubscribe_action( $output, $options ) {
-	$output  = '<a class="button" href="' .  add_query_arg( 'it-exchange-stripe-action', 'unsubscribe' ) . '">';
+function it_exchange_stripe_unsubscribe_action( $output, $options, $transaction_object ) {	
+	$subscriber_id = $transaction_object->get_transaction_meta( 'subscriber_id' );
+	
+	$output  = '<a class="button" href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe', 'it-exchange-subscriber-id' => $subscriber_id ) ) . '">';
 	$output .= $options['label'];
 	$output .= '</a>';
 	
 	return $output;
 }
-add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubscribe_action', 10, 2 );
+add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubscribe_action', 10, 3 );
 
 /**
  * Performs user requested unsubscribe
  *
- * @since 1.3.0
+ * @since CHANGEME
  *
  * @return void
 */
@@ -453,7 +455,9 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 					$current_user_id = get_current_user_id();
 					$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
 					$cu = Stripe_Customer::retrieve( $stripe_customer_id );
-					$cu->cancelSubscription();
+		
+					if ( !empty( $_REQUEST['it-exchange-subscriber-id'] ) )
+						$cu->subscriptions->retrieve( $_REQUEST['it-exchange-subscriber-id'] )->cancel();
 				}
 				catch( Exception $e ) {
 					it_exchange_add_message( 'error', sprintf( __( 'Error: Unable to unsubscribe user %s', 'LION' ), $e->getMessage() ) );
@@ -465,7 +469,8 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 					if ( !empty( $_REQUEST['it-exchange-stripe-customer-id'] ) && $stripe_customer_id = $_REQUEST['it-exchange-stripe-customer-id'] ) {
 						try {
 							$cu = Stripe_Customer::retrieve( $stripe_customer_id );
-							$cu->cancelSubscription();
+							if ( !empty( $_REQUEST['it-exchange-stripe-subscriber-id'] ) )
+								$cu->subscriptions->retrieve( $_REQUEST['it-exchange-stripe-subscriber-id'] )->cancel();
 						}
 						catch( Exception $e ) {
 							it_exchange_add_message( 'error', sprintf( __( 'Error: Unable to unsubscribe user %s', 'LION' ), $e->getMessage() ) );
@@ -479,7 +484,6 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 	}
 }
 add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
-
 
 /**
  * Output the Cancel URL for the Payments screen
@@ -497,6 +501,7 @@ function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {
 			$customer_id = it_exchange_get_transaction_customer_id( $transaction->ID );
 			$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $customer_id );
 			$status = $transaction->get_transaction_meta( 'subscriber_status', true );
+			$subscriber_id = $transaction->get_transaction_meta( 'subscriber_id', true );
 			switch( $status ) {
 			
 				case 'deactivated':
@@ -509,7 +514,7 @@ function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {
 				
 				case 'active':
 				default:
-					$output  = '<a href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
+					$output  = '<a href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id, 'it-exchange-stripe-subscriber-id' => $subscriber_id ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
 					break;
 			}
 			?>

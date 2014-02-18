@@ -7,7 +7,7 @@
 
 // Include the Stripe API library
 if ( ! class_exists( 'Stripe' ) )
-	require_once('lib/stripe-api/lib/Stripe.php' );
+	require_once('lib/stripe-php/lib/Stripe.php' );
 
 /**
  * Exchange Transaction Add-ons require several hooks in order to work properly. 
