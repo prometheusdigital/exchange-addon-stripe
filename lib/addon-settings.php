@@ -346,12 +346,28 @@ class IT_Exchange_Stripe_Add_On {
             $errors[] = __( 'Please include your Stripe Live Secret Key', 'it-l10n-exchange-addon-stripe' );
         if ( empty( $values['stripe-live-publishable-key'] ) )
             $errors[] = __( 'Please include your Stripe Live Publishable Key', 'it-l10n-exchange-addon-stripe' );
+       
+        try {
+			Stripe::setApiKey( $values['stripe-live-secret-key'] );
+			$account = Stripe_Account::retrieve();
+        } 
+        catch( Exception $e ) {
+			$errors[] = $e->getMessage();
+        }
 
         if ( !empty( $values['stripe-test-mode' ] ) ) {
             if ( empty( $values['stripe-test-secret-key'] ) )
                 $errors[] = __( 'Please include your Stripe Test Secret Key', 'it-l10n-exchange-addon-stripe' );
             if ( empty( $values['stripe-test-publishable-key'] ) )
                 $errors[] = __( 'Please include your Stripe Test Publishable Key', 'it-l10n-exchange-addon-stripe' );
+	        
+	        try {
+				Stripe::setApiKey( $values['stripe-test-secret-key'] );
+				$account = Stripe_Account::retrieve();
+	        }
+	        catch( Exception $e ) {
+				$errors[] = $e->getMessage();
+	        }
         }
 
         return $errors;
@@ -366,13 +382,15 @@ class IT_Exchange_Stripe_Add_On {
     function get_supported_currency_options() {
 		$currencies = array();
         $settings = it_exchange_get_option( 'addon_stripe', true );
-		if ( !empty( $settings['stripe-test-secret-key'] ) || !empty( $settings['stripe-live-secret-key'] ) ) {
-			$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
-			Stripe::setApiKey( $secret_key );
-	    
-			$account = Stripe_Account::retrieve();
-	    
-			$currencies = array_change_key_case( array_flip( $account->currencies_supported ), CASE_UPPER );
+		if ( !empty( $settings['stripe-live-secret-key'] ) ) {
+			try {
+				Stripe::setApiKey( $settings['stripe-live-secret-key'] );
+		    
+				$account = Stripe_Account::retrieve();
+		    
+				$currencies = array_change_key_case( array_flip( $account->currencies_supported ), CASE_UPPER );
+			} 
+			catch( Exception $e ) {}
 	    }
         return $currencies;
     }
