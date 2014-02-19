@@ -145,8 +145,9 @@ function it_exchange_cancel_stripe_subscription( $subscription_details ) {
 	if ( empty( $subscription_details['old_subscriber_id'] ) )
 		return;
 		
-	$subscriber_id = $subscription_details['old_subscriber_id'];
-	$secret_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
+	$subscriber_id   = $subscription_details['old_subscriber_id'];
+	$stripe_settings = it_exchange_get_option( 'addon_stripe' );
+	$secret_key      = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
 	Stripe::setApiKey( $secret_key );
 	
 	try {
