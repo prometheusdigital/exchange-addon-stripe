@@ -69,3 +69,8 @@
 	Fixes Stripe API error on activation, when no stripe key has been added (yet)
 1.1.18 - 2014-02-11 - Lew Ayotte
 	Fixed empty stripe API key check	
+1.1.19 - 2014-02-19 - Lew Ayotte
+	Adding upcoming upgrade/downgrade functionality
+	Updating subscription functionality for new Stripe API
+	Test Stripe API keys on save
+	Fixing docblock and spacing
