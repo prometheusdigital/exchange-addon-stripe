@@ -74,3 +74,5 @@
 	Updating subscription functionality for new Stripe API
 	Test Stripe API keys on save
 	Fixing docblock and spacing
+1.1.20 - 2014-02-19 - Lew Ayotte
+	Removing Stripe-PHP git submodule, conflicting with Updater script
