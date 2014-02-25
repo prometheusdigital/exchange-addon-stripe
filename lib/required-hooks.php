@@ -305,10 +305,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		}
 		
 		$payment_form .= '<input type="hidden" class="it-exchange-stripe-subscription-id" name="stripe_subscription_id" value="' . esc_attr( $stripe_plan->id ) .'" />';
-		if ( !empty( $old_subscription_id ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-subscription-id" name="stripe_old_subscription_id" value="' . esc_attr( $old_subscription_id ) .'" />';
-		if ( !empty( $old_transaction_method ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-transaction-method" name="stripe_old_transaction_method" value="' . esc_attr( $old_transaction_method ) .'" />';
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
@@ -331,10 +327,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		
 	} else {
 		
-		if ( !empty( $old_subscription_id ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-subscription-id" name="stripe_old_subscription_id" value="' . esc_attr( $old_subscription_id ) .'" />';
-		if ( !empty( $old_transaction_method ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-transaction-method" name="stripe_old_transaction_method" value="' . esc_attr( $old_transaction_method ) .'" />';
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
