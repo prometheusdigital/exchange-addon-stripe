@@ -77,5 +77,8 @@
 1.1.20 - 2014-02-19 - Lew Ayotte
 	Removing Stripe-PHP git submodule, conflicting with Updater script
 1.1.21 - 2014-02-25 - Lew Ayotte
-	Added checks to verify old subscription information is set before adding
-	it to the Stripe form
+	Added checks to verify old subscription information is set before adding it to the Stripe form
+1.1.22 - 2014-02-27 - Lew Ayotte
+	Updating for upgrade/downgrade functionality
+	Removed unused code
+	Added better handling of membership cancellations
