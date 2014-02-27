@@ -189,9 +189,9 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
     $publishable_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-publishable-key'] : $stripe_settings['stripe-live-publishable-key'];
 
     $products = it_exchange_get_cart_data( 'products' );
+	$cart = it_exchange_get_cart_products();
 	
-	if ( 1 === it_exchange_get_cart_products_count() ) {
-		$cart = it_exchange_get_cart_products();
+	if ( 1 === absint( count( $cart ) ) ) {
 		foreach( $cart as $product ) {
 			if ( it_exchange_product_supports_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
 				if ( it_exchange_product_has_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
@@ -221,6 +221,30 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		}
 	}
 	
+	$upgrade_downgrade = it_exchange_get_session_data( 'updowngrade_details' );
+	if ( !empty( $upgrade_downgrade ) ) {
+		foreach( $cart as $product ) {
+			if ( !empty( $upgrade_downgrade[$product['product_id']] ) ) {
+				$product_id = $product['product_id'];
+				if (   !empty( $upgrade_downgrade[$product_id]['old_transaction_id'] ) 
+					&& !empty( $upgrade_downgrade[$product_id]['old_transaction_method'] ) ) {
+					$subscription_details['product_id'] = array(
+						'product_id'             => $product_id,
+						'free_days'              => $upgrade_downgrade[$product_id]['free_days'],
+						'credit'                 => $upgrade_downgrade[$product_id]['credit'],
+						'old_transaction_id'     => $upgrade_downgrade[$product_id]['old_transaction_id'],
+						'old_transaction_method' => $upgrade_downgrade[$product_id]['old_transaction_method'],
+					);
+					if ( !empty( $upgrade_downgrade[$product_id]['old_subscriber_id'] ) )
+						$subscription_details['old_subscriber_id'] = $upgrade_downgrade[$product_id]['old_subscriber_id'];
+					it_exchange_update_session_data( 'cancel_subscription', $subscription_details );
+				}
+			}
+		}
+	} else {
+		it_exchange_clear_session_data( 'cancel_subscription' );
+	}
+		
 	$it_exchange_customer = it_exchange_get_current_customer();
 	
 	$payment_form = '<form class="stripe_form" action="' . esc_attr( it_exchange_get_page_url( 'transaction' ) ) . '" method="post">';
@@ -228,24 +252,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	$payment_form .= wp_nonce_field( 'stripe-checkout', '_stripe_nonce', true, false );
 	$payment_form .= '<div class="hide-if-no-js">';
 	$payment_form .= '<input type="submit" class="it-exchange-stripe-payment-button" name="stripe_purchase" value="' . esc_attr( $stripe_settings['stripe-purchase-button-label'] ) .'" />';
-	$upgrade_downgrade = it_exchange_get_session_data( 'updowngrade_details' );
-
-	if ( $subscription && !empty( $product_id )
-		&& !empty( $upgrade_downgrade[$product_id]['old_transaction_id'] ) 
-		&& !empty( $upgrade_downgrade[$product_id]['old_transaction_method'] ) ) {
-		$subscription_details = array(
-			'product_id'             => $product_id,
-			'free_days'              => $upgrade_downgrade[$product_id]['free_days'],
-			'credit'                 => $upgrade_downgrade[$product_id]['credit'],
-			'old_transaction_id'     => $upgrade_downgrade[$product_id]['old_transaction_id'],
-			'old_transaction_method' => $upgrade_downgrade[$product_id]['old_transaction_method'],
-		);
-		if ( !empty( $upgrade_downgrade[$product_id]['old_subscriber_id'] ) )
-			$subscription_details['old_subscriber_id'] = $upgrade_downgrade[$product_id]['old_subscriber_id'];
-		it_exchange_update_session_data( 'cancel_subscription', $subscription_details );
-	} else {
-		it_exchange_clear_session_data( 'cancel_subscription' );
-	}
 		
 	if ( $subscription ) {
 
@@ -305,10 +311,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		}
 		
 		$payment_form .= '<input type="hidden" class="it-exchange-stripe-subscription-id" name="stripe_subscription_id" value="' . esc_attr( $stripe_plan->id ) .'" />';
-		if ( !empty( $old_subscription_id ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-subscription-id" name="stripe_old_subscription_id" value="' . esc_attr( $old_subscription_id ) .'" />';
-		if ( !empty( $old_transaction_method ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-transaction-method" name="stripe_old_transaction_method" value="' . esc_attr( $old_transaction_method ) .'" />';
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
@@ -331,10 +333,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		
 	} else {
 		
-		if ( !empty( $old_subscription_id ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-subscription-id" name="stripe_old_subscription_id" value="' . esc_attr( $old_subscription_id ) .'" />';
-		if ( !empty( $old_transaction_method ) )
-			$payment_form .= '<input type="hidden" class="it-exchange-stripe-old-transaction-method" name="stripe_old_transaction_method" value="' . esc_attr( $old_transaction_method ) .'" />';
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
@@ -392,6 +390,8 @@ function it_exchange_stripe_addon_transaction_status_label( $status ) {
             return __( 'Disputed: Under review', 'LION' );
         case 'won':
             return __( 'Disputed: Won, Paid', 'LION' );
+        case 'cancelled':
+            return __( 'Cancelled', 'LION' );
         default:
             return __( 'Unknown', 'LION' );
     }
