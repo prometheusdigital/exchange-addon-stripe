@@ -95,14 +95,14 @@ add_filter( 'it_storage_get_defaults_exchange_addon_stripe', 'it_exchange_stripe
  * @return array filtered list of currencies only supported by Stripe
  */
 function it_exchange_stripe_addon_get_currency_options( $default_currencies ) {
-    $IT_Exchange_Stripe_Add_On = new IT_Exchange_Stripe_Add_On();
-    $stripe_currencies = $IT_Exchange_Stripe_Add_On->get_supported_currency_options();
-	if ( !empty( $stripe_currencies ) )
-		return array_intersect_key( $default_currencies, $stripe_currencies );
-	else
-		return $default_currencies;
+	if ( is_admin() ) {
+	    $stripe_currencies = IT_Exchange_Stripe_Add_On::get_supported_currency_options();
+		if ( !empty( $stripe_currencies ) )
+			return array_intersect_key( $default_currencies, $stripe_currencies );
+	}
+	return $default_currencies;
 }
-add_filter( 'it_exchange_get_currency_options', 'it_exchange_stripe_addon_get_currency_options' );
+add_filter( 'it_exchange_get_currencies', 'it_exchange_stripe_addon_get_currency_options' );
 
 /**
  * Class for Stripe
@@ -379,7 +379,7 @@ class IT_Exchange_Stripe_Add_On {
      * @since 0.1.0
      * @return void
     */
-    function get_supported_currency_options() {
+    public function get_supported_currency_options() {
 		$currencies = array();
         $settings = it_exchange_get_option( 'addon_stripe', true );
 		if ( !empty( $settings['stripe-live-secret-key'] ) ) {
