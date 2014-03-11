@@ -82,3 +82,5 @@
 	Updating for upgrade/downgrade functionality
 	Removed unused code
 	Added better handling of membership cancellations
+1.1.23 - 2014-03-11 - Lew Ayotte
+	Make sure we only verify currencies in admin screen
