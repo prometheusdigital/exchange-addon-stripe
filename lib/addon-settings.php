@@ -263,7 +263,7 @@ class IT_Exchange_Stripe_Add_On {
             <p class="hide-if-wizard">
                 <?php
         		$attachment_image = wp_get_attachment_image_src( $settings['stripe-checkout-image'], 'it-exchange-stripe-addon-checkout-image' );
-				echo '<img src="' . $attachment_image[0] . '" width="' . $attachment_image[1] . '" height="' . $attachment_image[2] . '" />';
+				echo '<img class="stripe-circle-image" src="' . $attachment_image[0] . '" width="' . $attachment_image[1] . '" height="' . $attachment_image[2] . '" />';
                 ?>
                 <br />
                 <?php

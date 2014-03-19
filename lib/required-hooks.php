@@ -7,6 +7,53 @@
 */
 
 /**
+ * Adds actions to the plugins page for the iThemes Exchange Stripe plugin
+ *
+ * @since 1.0.0
+ *
+ * @param array $meta Existing meta
+ * @param string $plugin_file the wp plugin slug (path)
+ * @param array $plugin_data the data WP harvested from the plugin header
+ * @param string $context 
+ * @return array
+*/
+function it_exchange_stripe_plugin_row_actions( $actions, $plugin_file, $plugin_data, $context ) {
+    $actions['setup_addon'] = '<a href="' . get_admin_url( NULL, 'admin.php?page=it-exchange-addons&add-on-settings=stripe' ) . '">' . __( 'Setup Add-on', 'LION' ) . '</a>';    
+    return $actions;
+}
+add_filter( 'plugin_action_links_exchange-addon-stripe/exchange-addon-stripe.php', 'it_exchange_stripe_plugin_row_actions', 10, 4 );
+
+/**
+ * Enqueues admin scripts on Settings page
+ *
+ * @since CHANGEME
+ *
+ * @return void
+*/
+function it_exchange_stripe_addon_admin_enqueue_script( $hook ) {
+	if ( 'exchange_page_it-exchange-addons' === $hook )
+	    wp_enqueue_style( 'stripe-addon-settings-css', ITUtility::get_url_from_file( dirname( __FILE__ ) ) . '/css/settings.css' );
+}
+add_action( 'admin_enqueue_scripts', 'it_exchange_stripe_addon_admin_enqueue_script' );
+
+/**
+ * Enqueues any scripts we need on the frontend during a stripe checkout
+ *
+ * @since 0.1.0
+ *
+ * @return void
+*/
+function it_exchange_stripe_addon_enqueue_script() {
+    wp_enqueue_script( 'stripe', 'https://checkout.stripe.com/v2/checkout.js', array( 'jquery' ) );
+    wp_enqueue_script( 'stripe-addon-js', ITUtility::get_url_from_file( dirname( __FILE__ ) ) . '/js/stripe-addon.js', array( 'jquery' ) );
+    wp_localize_script( 'stripe-addon-js', 'stripeAddonL10n', array(
+            'processing_payment_text'  => __( 'Processing payment, please wait...', 'LION' ),
+        )
+    );
+}
+add_action( 'wp_enqueue_scripts', 'it_exchange_stripe_addon_enqueue_script' );
+
+/**
  * Stripe URL to perform refunds
  *
  * The it_exchange_refund_url_for_[addon-slug] filter is
