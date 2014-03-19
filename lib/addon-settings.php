@@ -96,7 +96,8 @@ add_filter( 'it_storage_get_defaults_exchange_addon_stripe', 'it_exchange_stripe
  * @return array filtered list of currencies only supported by Stripe
  */
 function it_exchange_stripe_addon_get_currency_options( $default_currencies ) {
-	if ( is_admin() ) {
+	$current_screen = get_current_screen();
+	if ( is_admin() && ! empty( $current_screen->base ) && 'exchange_page_it-exchange-settings' == $current_screen->base ) {
 	    $stripe_currencies = IT_Exchange_Stripe_Add_On::get_supported_currency_options();
 		if ( !empty( $stripe_currencies ) )
 			return array_intersect_key( $default_currencies, $stripe_currencies );
