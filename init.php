@@ -9,6 +9,10 @@
 if ( ! class_exists( 'Stripe' ) )
 	require_once('lib/stripe-php/lib/Stripe.php' );
 
+if ( function_exists( 'add_image_size' ) ) { 
+	add_image_size( 'it-exchange-stripe-addon-checkout-image', 128, 128, true );
+}
+
 /**
  * Exchange Transaction Add-ons require several hooks in order to work properly. 
  * Most of these hooks are called in api/transactions.php and are named dynamically

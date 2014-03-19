@@ -103,10 +103,10 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				// We don't want to update the stripe customer if they're trying to subscribe to the same plan!
 				if ( empty( $stripe_customer->subscription->plan->name ) || $subscription_id != $stripe_customer->subscription->plan->name ) {
 					
-					$args = array( 
+					$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', array( 
 						'plan'    => $subscription_id,
 						'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
-					);
+					) );
 					$subscription = $stripe_customer->subscriptions->create( $args );
 					$charge_id = $subscription->id;	//need a temporary ID
 					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
@@ -116,12 +116,13 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				}
 			} else {
 				// Now that we have a valid Customer ID, charge them!
-				$charge = Stripe_Charge::create(array(
+				$args = apply_filters( 'it_exchange_stripe_addon_charge_args', array(
 					'customer'    => $stripe_customer->id,
 					'amount'      => number_format( $transaction_object->total, 2, '', '' ),
 					'currency'    => strtolower( $general_settings['default-currency'] ),
 					'description' => $transaction_object->description,
-				));
+				) );
+				$charge = Stripe_Charge::create( $args );
 				$charge_id = $charge->id;
 			}
 
@@ -185,6 +186,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
     $general_settings = it_exchange_get_option( 'settings_general' );
     $stripe_settings = it_exchange_get_option( 'addon_stripe' );
 	$subscription = false;
+	$payment_image = false;
 	
     $publishable_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-publishable-key'] : $stripe_settings['stripe-live-publishable-key'];
 
@@ -252,6 +254,16 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	$payment_form .= wp_nonce_field( 'stripe-checkout', '_stripe_nonce', true, false );
 	$payment_form .= '<div class="hide-if-no-js">';
 	$payment_form .= '<input type="submit" class="it-exchange-stripe-payment-button" name="stripe_purchase" value="' . esc_attr( $stripe_settings['stripe-purchase-button-label'] ) .'" />';
+	
+	if ( !empty( $stripe_settings['stripe-checkout-image'] ) ) {
+		$attachment_image = wp_get_attachment_image_src( $stripe_settings['stripe-checkout-image'], 'it-exchange-stripe-addon-checkout-image' );
+		if ( !empty( $attachment_image ) ) {
+			$relative_url = str_replace( get_bloginfo( 'url' ), '', $attachment_image[0] );
+			if ( '/' !== substr( $relative_url, 0, 1 ) ) //if the bloginfo url ends in '/' it is stripped, but we need it
+				$relative_url = '/' . $relative_url;
+			$payment_image .= '  image:       "' . esc_js( $relative_url ) . '",' . "\n";
+		}
+	}
 		
 	if ( $subscription ) {
 
@@ -324,7 +336,11 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
 		$payment_form .= '      plan:        "' . esc_js( $stripe_plan->id ) . '",' . "\n";
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
-		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
+		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";		
+		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
+		if ( !empty( $payment_image ) )
+			$payment_form .= $payment_image;
+		$payment_form .= apply_filters( 'it_exchange_stripe_addon_payment_form_checkout_arg', '' );
 		$payment_form .= '      token:       token' . "\n";
 		$payment_form .= '    });' . "\n";
 		// $payment_form .= '    return false;' . "\n";
@@ -349,6 +365,9 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
+		if ( !empty( $payment_image ) )
+			$payment_form .= $payment_image;
+		$payment_form .= apply_filters( 'it_exchange_stripe_addon_payment_form_checkout_arg', '' );
 		$payment_form .= '      token:       token' . "\n";
 		$payment_form .= '    });' . "\n";
 		// $payment_form .= '    return false;' . "\n";
@@ -360,7 +379,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	$payment_form .= '</form>';
 	$payment_form .= '</div>';
 
-    return $payment_form;
+    return apply_filters( 'it_exchange_stripe_addon_payment_form', $payment_form );
+
 }
 add_filter( 'it_exchange_get_stripe_make_payment_button', 'it_exchange_stripe_addon_make_payment_button', 10, 2 );
 
