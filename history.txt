@@ -90,3 +90,5 @@
 	Only load stripe api on settings page and setup page
 	Added a few more filters for modifying the Stripe Checkout form, the Stripe Charge and Plan creation calls.
 	Added Stripe Image support.
+1.1.24.1 - 2014-03-20 - Lew Ayotte
+	Quick fix for get_current_screen() call on store frontend
