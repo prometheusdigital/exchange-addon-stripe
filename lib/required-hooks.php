@@ -26,7 +26,7 @@ add_filter( 'plugin_action_links_exchange-addon-stripe/exchange-addon-stripe.php
 /**
  * Enqueues admin scripts on Settings page
  *
- * @since CHANGEME
+ * @since 1.1.24 
  *
  * @return void
 */
@@ -510,7 +510,7 @@ add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubsc
 /**
  * Performs user requested unsubscribe
  *
- * @since CHANGEME
+ * @since 1.1.22 
  *
  * @return void
 */
