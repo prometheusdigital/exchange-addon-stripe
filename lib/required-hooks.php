@@ -277,7 +277,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 				$product_id = $product['product_id'];
 				if (   !empty( $upgrade_downgrade[$product_id]['old_transaction_id'] ) 
 					&& !empty( $upgrade_downgrade[$product_id]['old_transaction_method'] ) ) {
-					$subscription_details['product_id'] = array(
+					$subscription_details[$product_id] = array(
 						'product_id'             => $product_id,
 						'free_days'              => $upgrade_downgrade[$product_id]['free_days'],
 						'credit'                 => $upgrade_downgrade[$product_id]['credit'],
@@ -285,7 +285,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 						'old_transaction_method' => $upgrade_downgrade[$product_id]['old_transaction_method'],
 					);
 					if ( !empty( $upgrade_downgrade[$product_id]['old_subscriber_id'] ) )
-						$subscription_details['old_subscriber_id'] = $upgrade_downgrade[$product_id]['old_subscriber_id'];
+						$subscription_details[$product_id]['old_subscriber_id'] = $upgrade_downgrade[$product_id]['old_subscriber_id'];
 					it_exchange_update_session_data( 'cancel_subscription', $subscription_details );
 				}
 			}
