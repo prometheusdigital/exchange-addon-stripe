@@ -569,36 +569,38 @@ add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
 */
 function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {	
 	$cart_object = get_post_meta( $transaction->ID, '_it_exchange_cart_object', true );
-	foreach ( $cart_object->products as $product ) {	
-		$autorenews = $transaction->get_transaction_meta( 'subscription_autorenew_' . $product['product_id'], true );
-		if ( $autorenews ) {
-			$customer_id = it_exchange_get_transaction_customer_id( $transaction->ID );
-			$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $customer_id );
-			$status = $transaction->get_transaction_meta( 'subscriber_status', true );
-			$subscriber_id = $transaction->get_transaction_meta( 'subscriber_id', true );
-			switch( $status ) {
-			
-				case 'deactivated':
-					$output = __( 'Recurring payment has been deactivated', 'LION' );
-					break;
-					
-				case 'cancelled':
-					$output = __( 'Recurring payment has been cancelled', 'LION' );
-					break;
+	if ( !empty( $cart_object->products ) ) {
+		foreach ( $cart_object->products as $product ) {	
+			$autorenews = $transaction->get_transaction_meta( 'subscription_autorenew_' . $product['product_id'], true );
+			if ( $autorenews ) {
+				$customer_id = it_exchange_get_transaction_customer_id( $transaction->ID );
+				$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $customer_id );
+				$status = $transaction->get_transaction_meta( 'subscriber_status', true );
+				$subscriber_id = $transaction->get_transaction_meta( 'subscriber_id', true );
+				switch( $status ) {
 				
-				case 'active':
-				default:
-					$output  = '<a href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id, 'it-exchange-stripe-subscriber-id' => $subscriber_id ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
-					break;
-			}
-			?>
-			<div class="transaction-autorenews clearfix spacing-wrapper">
-				<div class="recurring-payment-cancel-options left">
-					<div class="recurring-payment-status-name"><?php echo $output; ?></div>
+					case 'deactivated':
+						$output = __( 'Recurring payment has been deactivated', 'LION' );
+						break;
+						
+					case 'cancelled':
+						$output = __( 'Recurring payment has been cancelled', 'LION' );
+						break;
+					
+					case 'active':
+					default:
+						$output  = '<a href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id, 'it-exchange-stripe-subscriber-id' => $subscriber_id ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
+						break;
+				}
+				?>
+				<div class="transaction-autorenews clearfix spacing-wrapper">
+					<div class="recurring-payment-cancel-options left">
+						<div class="recurring-payment-status-name"><?php echo $output; ?></div>
+					</div>
 				</div>
-			</div>
-			<?php
-			continue;
+				<?php
+				continue;
+			}
 		}
 	}
 }
