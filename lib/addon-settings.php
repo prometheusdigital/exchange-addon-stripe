@@ -302,8 +302,8 @@ class IT_Exchange_Stripe_Add_On {
     function save_settings() {
         $defaults = it_exchange_get_option( 'addon_stripe' );
         $new_values = wp_parse_args( ITForm::get_post_data(), $defaults );
-        
-        if ( !empty( $_FILES['stripe-checkout-image'] ) ) {
+                
+        if ( !empty( $_FILES['stripe-checkout-image']['name'] ) ) {
         	$id = media_handle_upload( 'stripe-checkout-image', 0 ); //post id of Client Files page
 			unset($_FILES);
 			if ( is_wp_error($id) ) {
