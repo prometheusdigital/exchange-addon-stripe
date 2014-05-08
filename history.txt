@@ -1,29 +1,29 @@
-1.1.2 - 2013-09-20 - Lew Ayotte
-	Adding cancel links to Payments Edit screen
-1.1.1 - 2013-09-17 - Lew Ayotte
-	Removing debug code from Stripe, replaced with correct output
-1.1.0 - 2013-09-17 - Lew Ayotte
-	Updating Stripe to work with the Recurring Payments add-on
-1.0.8 - 2013-08-26 - Glenn Ansley
-	Added Australian Dollar to currencies
-1.0.7 - 2013-08-15 - Glenn Ansley
-	Fixing 404ing sytlesheet
-1.0.6 - 2013-08-06 - Lew Ayotte
-    Fixed bug in i18n directory naming
-1.0.5 - 2013-08-02 - Lew Ayotte
-	Updated currencies to support GBP and EUR for Stripe's new beta programs
-1.0.4 - 2013-08-01 - Glenn Ansley
-	Reorganized plugin structure and added docblock comments to explain add-on API
-	Updated plugin description
+1.0.0 - 2013-07-08 - Lew Ayotte, Glenn Ansley, Justin Kopepasah, Brad Ulrich
+	Initial Release
+1.0.1 - 2013-07-08 - Lew Ayotte
+  	Update Video Links
+1.0.2 - 2013-07-10 - Lew Ayotte
+    Added Setup Add-on link on plugin page's row action
 1.0.3 - 2013-07-29 - Lew Ayotte, Justin Kopepasah, Brad Ulrich
 	Updated Logo
 	Added Localization
-1.0.2 - 2013-07-10 - Lew Ayotte
-    Added Setup Add-on link on plugin page's row action
-1.0.1 - 2013-07-08 - Lew Ayotte
-  	Update Video Links
-1.0.0 - 2013-07-08 - Lew Ayotte, Glenn Ansley, Justin Kopepasah, Brad Ulrich
-	Initial Release
+1.0.4 - 2013-08-01 - Glenn Ansley
+	Reorganized plugin structure and added docblock comments to explain add-on API
+	Updated plugin description
+1.0.5 - 2013-08-02 - Lew Ayotte
+	Updated currencies to support GBP and EUR for Stripe's new beta programs
+1.0.6 - 2013-08-06 - Lew Ayotte
+    Fixed bug in i18n directory naming
+1.0.7 - 2013-08-15 - Glenn Ansley
+	Fixing 404ing sytlesheet
+1.0.8 - 2013-08-26 - Glenn Ansley
+	Added Australian Dollar to currencies
+1.1.0 - 2013-09-17 - Lew Ayotte
+	Updating Stripe to work with the Recurring Payments add-on
+1.1.1 - 2013-09-17 - Lew Ayotte
+	Removing debug code from Stripe, replaced with correct output
+1.1.2 - 2013-09-20 - Lew Ayotte
+	Adding cancel links to Payments Edit screen
 1.1.3 - 2013-09-20 - Packaging Bot
 	Updated lib/updater to version 1.0.3
 1.1.4 - 2013-10-02 - Packaging Bot (lib/updater)
@@ -94,3 +94,5 @@
 	Quick fix for get_current_screen() call on store frontend
 1.1.25 - 2014-04-11 - Lew Ayotte, Elise Alley
 	Fixed bug in tracking old subscriber IDs through cancellation session
+1.1.26 - 2014-05-01 - Glenn Ansley
+	Wrapped it_exchange_get_cart_description in strip_tags() for Stripe Popup Dialog

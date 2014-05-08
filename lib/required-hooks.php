@@ -383,7 +383,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
 		$payment_form .= '      plan:        "' . esc_js( $stripe_plan->id ) . '",' . "\n";
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
-		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";		
+		$payment_form .= '      description: "' . esc_js( strip_tags( it_exchange_get_cart_description() ) ) . '",' . "\n";		
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		if ( !empty( $payment_image ) )
 			$payment_form .= $payment_image;
@@ -410,7 +410,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      amount:      "' . esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) ) . '",' . "\n";
 		$payment_form .= '      currency:    "' . esc_js( strtolower( $general_settings['default-currency'] ) ) . '",' . "\n";
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
-		$payment_form .= '      description: "' . esc_js( it_exchange_get_cart_description() ) . '",' . "\n";
+		$payment_form .= '      description: "' . esc_js( strip_tags( it_exchange_get_cart_description() ) ) . '",' . "\n";
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		if ( !empty( $payment_image ) )
 			$payment_form .= $payment_image;
