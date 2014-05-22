@@ -300,7 +300,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	$payment_form .= '<input type="hidden" name="it-exchange-transaction-method" value="stripe" />';
 	$payment_form .= wp_nonce_field( 'stripe-checkout', '_stripe_nonce', true, false );
 	$payment_form .= '<div class="hide-if-no-js">';
-	$payment_form .= '<input type="submit" class="it-exchange-stripe-payment-button" name="stripe_purchase" value="' . esc_attr( $stripe_settings['stripe-purchase-button-label'] ) .'" />';
+	$unique = it_exchange_create_unique_hash();
+	$payment_form .= '<input type="submit" id="it-exchange-stripe-payment-button-' . $unique . '" class="it-exchange-stripe-payment-button" name="stripe_purchase" value="' . esc_attr( $stripe_settings['stripe-purchase-button-label'] ) .'" />';
 	
 	if ( !empty( $stripe_settings['stripe-checkout-image'] ) ) {
 		$attachment_image = wp_get_attachment_image_src( $stripe_settings['stripe-checkout-image'], 'it-exchange-stripe-addon-checkout-image' );
@@ -371,7 +372,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		
 		$payment_form .= '<input type="hidden" class="it-exchange-stripe-subscription-id" name="stripe_subscription_id" value="' . esc_attr( $stripe_plan->id ) .'" />';
 		$payment_form .= '<script>' . "\n";
-		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
+		$payment_form .= '  jQuery("#it-exchange-stripe-payment-button-' . $unique . '").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
 		$payment_form .= '    var token = function(res){' . "\n";
 		$payment_form .= '      var $stripeToken = jQuery("<input type=hidden name=stripeToken />").val(res.id);' . "\n";
@@ -397,7 +398,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	} else {
 		
 		$payment_form .= '<script>' . "\n";
-		$payment_form .= '  jQuery(".it-exchange-stripe-payment-button").click(function(event){' . "\n";
+		$payment_form .= '  jQuery("#it-exchange-stripe-payment-button-' . $unique . '").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
 		$payment_form .= '    var token = function(res){' . "\n";
 		$payment_form .= '      var $stripeToken = jQuery("<input type=hidden name=stripeToken />").val(res.id);' . "\n";
