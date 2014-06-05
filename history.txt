@@ -99,3 +99,5 @@
 1.1.27 - 2014-06-05 - Lew Ayotte
 	Add HTML ID to payment button with unique ID, helps prevent cases where two stripe buttons appear on one page causing both to open when one is clicked
 	Fixing no image uploaded error
+1.1.28 - 2014-06-05 - Lew Ayotte
+	Incrementing tag
