@@ -436,7 +436,7 @@ class IT_Exchange_Stripe_Add_On {
      * @since 0.1.0
      * @return void
     */
-    public function get_supported_currency_options() {
+    public static function get_supported_currency_options() {
 		$currencies = array();
         $settings = it_exchange_get_option( 'addon_stripe', true );
 		if ( !empty( $settings['stripe-live-secret-key'] ) ) {
