@@ -306,7 +306,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	if ( !empty( $stripe_settings['stripe-checkout-image'] ) ) {
 		$attachment_image = wp_get_attachment_image_src( $stripe_settings['stripe-checkout-image'], 'it-exchange-stripe-addon-checkout-image' );
 		if ( !empty( $attachment_image ) ) {
-			$relative_url = str_replace( get_bloginfo( 'url' ), '', $attachment_image[0] );
+			$relative_url = parse_url( $attachment_image[0], PHP_URL_PATH );
 			if ( '/' !== substr( $relative_url, 0, 1 ) ) //if the bloginfo url ends in '/' it is stripped, but we need it
 				$relative_url = '/' . $relative_url;
 			$payment_image .= '  image:       "' . esc_js( $relative_url ) . '",' . "\n";
