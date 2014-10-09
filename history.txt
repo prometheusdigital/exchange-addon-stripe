@@ -105,3 +105,5 @@
 	Fix warning about calling non-static methods statically
 1.1.30 - 2014-08-26 - Lew Ayotte
 	Fixed Relative URL for Stripe icon, for sites with WordPress installed in a subdirectory
+1.1.31 - 2014-10-09 - Glenn Ansley
+	Added JS hooks to purchase button
