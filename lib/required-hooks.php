@@ -295,6 +295,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	}
 		
 	$it_exchange_customer = it_exchange_get_current_customer();
+	$customer_email       = empty( $it_exchange_customer->data->user_email ) ? '' : $it_exchange_customer->data->user_email;
 	
 	$payment_form = '<form class="stripe_form" action="' . esc_attr( it_exchange_get_page_url( 'transaction' ) ) . '" method="post">';
 	$payment_form .= '<input type="hidden" name="it-exchange-transaction-method" value="stripe" />';
@@ -374,6 +375,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery("#it-exchange-stripe-payment-button-' . $unique . '").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
+		$payment_form .= '    itExchange.stripeAddonCheckoutEmail = "' . esc_js( $customer_email ) . '";';
+		$payment_form .= '    itExchange.hooks.doAction( "itExchangeStripeAddon.makePayment" );';
 		$payment_form .= '    var token = function(res){' . "\n";
 		$payment_form .= '      var $stripeToken = jQuery("<input type=hidden name=stripeToken />").val(res.id);' . "\n";
 		$payment_form .= '      jQuery("form.stripe_form").append($stripeToken).submit();' . "\n";
@@ -381,7 +384,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '    };' . "\n";
 		$payment_form .= '    StripeCheckout.open({' . "\n";
 		$payment_form .= '      key:         "' . esc_js( $publishable_key ) . '",' . "\n";
-		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
+		$payment_form .= '      email:       itExchange.stripeAddonCheckoutEmail,' . "\n";
 		$payment_form .= '      plan:        "' . esc_js( $stripe_plan->id ) . '",' . "\n";
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( strip_tags( it_exchange_get_cart_description() ) ) . '",' . "\n";		
@@ -400,6 +403,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery("#it-exchange-stripe-payment-button-' . $unique . '").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
+		$payment_form .= '    itExchange.stripeAddonCheckoutEmail = "' . esc_js( $customer_email ) . '";';
+		$payment_form .= '    itExchange.hooks.doAction( "itExchangeStripeAddon.makePayment" );';
 		$payment_form .= '    var token = function(res){' . "\n";
 		$payment_form .= '      var $stripeToken = jQuery("<input type=hidden name=stripeToken />").val(res.id);' . "\n";
 		$payment_form .= '      jQuery("form.stripe_form").append($stripeToken).submit();' . "\n";
@@ -407,7 +412,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '    };' . "\n";
 		$payment_form .= '    StripeCheckout.open({' . "\n";
 		$payment_form .= '      key:         "' . esc_js( $publishable_key ) . '",' . "\n";
-		$payment_form .= '      email:       "' . esc_js( $it_exchange_customer->data->user_email ) . '",' . "\n";
+		$payment_form .= '      email:       itExchange.stripeAddonCheckoutEmail,' . "\n";
 		$payment_form .= '      amount:      "' . esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) ) . '",' . "\n";
 		$payment_form .= '      currency:    "' . esc_js( strtolower( $general_settings['default-currency'] ) ) . '",' . "\n";
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
