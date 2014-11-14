@@ -107,3 +107,6 @@
 	Fixed Relative URL for Stripe icon, for sites with WordPress installed in a subdirectory
 1.1.31 - 2014-10-09 - Glenn Ansley
 	Added JS hooks to purchase button
+1.1.32 - 2014-11-14 - Packaging Bot (lib/updater)
+	Enhancement: Reduced caching to allow updates to appear more quickly.
+	Enhancement: Authenticating users now uses the new authentication system.
