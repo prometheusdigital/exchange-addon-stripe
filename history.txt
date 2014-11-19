@@ -110,3 +110,5 @@
 1.1.32 - 2014-11-14 - Packaging Bot (lib/updater)
 	Enhancement: Reduced caching to allow updates to appear more quickly.
 	Enhancement: Authenticating users now uses the new authentication system.
+1.1.33 - 2014-11-19 - Glenn Ansley, Elise Alley
+	Disabled Purchase button on click so it can only be triggered once prior to stripe popup appearing.
