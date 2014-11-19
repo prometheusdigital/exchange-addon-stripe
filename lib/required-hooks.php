@@ -1,6 +1,6 @@
 <?php
 /**
- * Exchange Transaction Add-ons require several hooks in order to work properly. 
+ * Exchange Transaction Add-ons require several hooks in order to work properly.
  * Most of these hooks are called in api/transactions.php and are named dynamically
  * so that individual add-ons can target them. eg: it_exchange_refund_url_for_stripe
  * We've placed them all in one file to help add-on devs identify them more easily
@@ -14,11 +14,11 @@
  * @param array $meta Existing meta
  * @param string $plugin_file the wp plugin slug (path)
  * @param array $plugin_data the data WP harvested from the plugin header
- * @param string $context 
+ * @param string $context
  * @return array
 */
 function it_exchange_stripe_plugin_row_actions( $actions, $plugin_file, $plugin_data, $context ) {
-    $actions['setup_addon'] = '<a href="' . get_admin_url( NULL, 'admin.php?page=it-exchange-addons&add-on-settings=stripe' ) . '">' . __( 'Setup Add-on', 'LION' ) . '</a>';    
+    $actions['setup_addon'] = '<a href="' . get_admin_url( NULL, 'admin.php?page=it-exchange-addons&add-on-settings=stripe' ) . '">' . __( 'Setup Add-on', 'LION' ) . '</a>';
     return $actions;
 }
 add_filter( 'plugin_action_links_exchange-addon-stripe/exchange-addon-stripe.php', 'it_exchange_stripe_plugin_row_actions', 10, 4 );
@@ -26,7 +26,7 @@ add_filter( 'plugin_action_links_exchange-addon-stripe/exchange-addon-stripe.php
 /**
  * Enqueues admin scripts on Settings page
  *
- * @since 1.1.24 
+ * @since 1.1.24
  *
  * @return void
 */
@@ -65,7 +65,7 @@ add_action( 'wp_enqueue_scripts', 'it_exchange_stripe_addon_enqueue_script' );
  * @param string $url passed by WP filter.
  * @param string $url transaction URL
 */
-function it_exchange_refund_url_for_stripe( $url ) { 
+function it_exchange_refund_url_for_stripe( $url ) {
 	return 'https://manage.stripe.com/';
 }
 add_filter( 'it_exchange_refund_url_for_stripe', 'it_exchange_refund_url_for_stripe' );
@@ -73,12 +73,12 @@ add_filter( 'it_exchange_refund_url_for_stripe', 'it_exchange_refund_url_for_str
 /**
  * This proccesses a stripe transaction.
  *
- * The it_exchange_do_transaction_[addon-slug] action is called when 
+ * The it_exchange_do_transaction_[addon-slug] action is called when
  * the site visitor clicks a specific add-ons 'purchase' button. It is
  * passed the default status of false along with the transaction object
  * The transaction object is a package of data describing what was in the user's cart
  *
- * Exchange expects your add-on to either return false if the transaction failed or to 
+ * Exchange expects your add-on to either return false if the transaction failed or to
  * call it_exchange_add_transaction() and return the transaction ID
  *
  * @since 0.1.0
@@ -100,7 +100,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 	// Make sure we have the correct $_POST argument
 	if ( ! empty( $_POST['stripeToken'] ) ) {
-		
+
 		if ( !empty( $_POST['stripe_subscription_id'] ) )
 			$subscription_id = $_POST['stripe_subscription_id'];
 		else
@@ -130,7 +130,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 			// If this user isn't an existing Stripe User, create a new Stripe ID for them...
 			if ( ! empty( $stripe_customer ) ) {
-				
+
 				$stripe_customer->card = $token;
 				$stripe_customer->email = $it_exchange_customer->data->user_email;
 				$stripe_customer->save();
@@ -145,12 +145,12 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 				it_exchange_stripe_addon_set_stripe_customer_id( $it_exchange_customer->id, $stripe_customer->id );
 			}
-				
+
 			if ( $subscription_id ) {
 				// We don't want to update the stripe customer if they're trying to subscribe to the same plan!
 				if ( empty( $stripe_customer->subscription->plan->name ) || $subscription_id != $stripe_customer->subscription->plan->name ) {
-					
-					$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', array( 
+
+					$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', array(
 						'plan'    => $subscription_id,
 						'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
 					) );
@@ -159,7 +159,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
 
 				} else {
-					throw new Exception( __( 'Error: You cannot subscribe to the same plan!', 'LION' ) );	
+					throw new Exception( __( 'Error: You cannot subscribe to the same plan!', 'LION' ) );
 				}
 			} else {
 				// Now that we have a valid Customer ID, charge them!
@@ -178,7 +178,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 			it_exchange_add_message( 'error', $e->getMessage() );
 			return false;
 		}
-			
+
 		return it_exchange_add_transaction( 'stripe', $charge_id, 'succeeded', $it_exchange_customer->id, $transaction_object );
 	} else {
 		it_exchange_add_message( 'error', __( 'Unknown error. Please try again later.', 'LION' ) );
@@ -192,16 +192,16 @@ function it_exchange_cancel_stripe_subscription( $subscription_details ) {
 
 	if ( empty( $subscription_details['old_subscriber_id'] ) )
 		return;
-		
+
 	$subscriber_id   = $subscription_details['old_subscriber_id'];
 	$stripe_settings = it_exchange_get_option( 'addon_stripe' );
 	$secret_key      = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
 	Stripe::setApiKey( $secret_key );
-	
+
 	try {
 		$current_user_id = get_current_user_id();
 		$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
-		
+
 		$cu = Stripe_Customer::retrieve( $stripe_customer_id );
 		$cu->subscriptions->retrieve( $subscriber_id )->cancel();
 	}
@@ -234,32 +234,32 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
     $stripe_settings = it_exchange_get_option( 'addon_stripe' );
 	$subscription = false;
 	$payment_image = false;
-	
+
     $publishable_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-publishable-key'] : $stripe_settings['stripe-live-publishable-key'];
 
     $products = it_exchange_get_cart_data( 'products' );
 	$cart = it_exchange_get_cart_products();
-	
+
 	if ( 1 === absint( count( $cart ) ) ) {
 		foreach( $cart as $product ) {
 			if ( it_exchange_product_supports_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
 				if ( it_exchange_product_has_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
 					$time = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'time' ) );
 					switch( $time ) {
-					
+
 						case 'yearly':
 							$interval = 'year';
 							break;
-					
+
 						case 'weekly':
 							$interval = 'week';
 							break;
-							
+
 						case 'monthly':
 						default:
 							$interval = 'month';
 							break;
-						
+
 					}
 					$interval = apply_filters( 'it_exchange_stripe_subscription_unit', $interval, $time );
 					$duration = apply_filters( 'it_exchange_stripe_subscription_duration', 1, $time ); //interval_count
@@ -269,13 +269,13 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			}
 		}
 	}
-	
+
 	$upgrade_downgrade = it_exchange_get_session_data( 'updowngrade_details' );
 	if ( !empty( $upgrade_downgrade ) ) {
 		foreach( $cart as $product ) {
 			if ( !empty( $upgrade_downgrade[$product['product_id']] ) ) {
 				$product_id = $product['product_id'];
-				if (   !empty( $upgrade_downgrade[$product_id]['old_transaction_id'] ) 
+				if (   !empty( $upgrade_downgrade[$product_id]['old_transaction_id'] )
 					&& !empty( $upgrade_downgrade[$product_id]['old_transaction_method'] ) ) {
 					$subscription_details[$product_id] = array(
 						'product_id'             => $product_id,
@@ -293,17 +293,17 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	} else {
 		it_exchange_clear_session_data( 'cancel_subscription' );
 	}
-		
+
 	$it_exchange_customer = it_exchange_get_current_customer();
 	$customer_email       = empty( $it_exchange_customer->data->user_email ) ? '' : $it_exchange_customer->data->user_email;
-	
+
 	$payment_form = '<form class="stripe_form" action="' . esc_attr( it_exchange_get_page_url( 'transaction' ) ) . '" method="post">';
 	$payment_form .= '<input type="hidden" name="it-exchange-transaction-method" value="stripe" />';
 	$payment_form .= wp_nonce_field( 'stripe-checkout', '_stripe_nonce', true, false );
 	$payment_form .= '<div class="hide-if-no-js">';
 	$unique = it_exchange_create_unique_hash();
 	$payment_form .= '<input type="submit" id="it-exchange-stripe-payment-button-' . $unique . '" class="it-exchange-stripe-payment-button" name="stripe_purchase" value="' . esc_attr( $stripe_settings['stripe-purchase-button-label'] ) .'" />';
-	
+
 	if ( !empty( $stripe_settings['stripe-checkout-image'] ) ) {
 		$attachment_image = wp_get_attachment_image_src( $stripe_settings['stripe-checkout-image'], 'it-exchange-stripe-addon-checkout-image' );
 		if ( !empty( $attachment_image[0] ) ) {
@@ -311,7 +311,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			$payment_image .= '  image:       "' . esc_js( $relative_url ) . '",' . "\n";
 		}
 	}
-		
+
 	if ( $subscription ) {
 
 		$secret_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
@@ -320,59 +320,60 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$time = time();
 		$amount = esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) );
 		$trial_period_days = empty( $upgrade_downgrade[$product_id]['free_days'] ) ? null : $upgrade_downgrade[$product_id]['free_days']; //stripe returns null if it isn't set
-		
+
 		$existing_plan = get_post_meta( $product_id, '_it_exchange_stripe_plan_id', true );
 		if ( $existing_plan ) {
 			try {
 				$stripe_plan = Stripe_Plan::retrieve( $existing_plan );
-			} 
+			}
 			catch( Exception $e ) {
 				$stripe_plan = false;
 			}
 		}
-		
+
 		if ( !is_object( $stripe_plan ) ) {
-			$args = array( 
-				'amount'            => $amount, 
+			$args = array(
+				'amount'            => $amount,
 				'interval'          => $interval,
 				'interval_count'    => $duration,
-				'name'              => get_the_title( $product_id ) . ' ' . $time, 
-				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ), 
+				'name'              => get_the_title( $product_id ) . ' ' . $time,
+				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ),
 				'id'                => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time,
 				'trial_period_days' => $trial_period_days,
 			);
-			
+
 			try {
 				$stripe_plan = Stripe_Plan::create( $args );
 			} catch( Exception $e ) {
 				return sprintf( __( 'Error: Unable to create Plan in Stripe - %s', 'LION' ), $e->getMessage() );
 			}
-			
+
 			update_post_meta( $product_id, '_it_exchange_stripe_plan_id', $stripe_plan->id );
 		} else if ( $amount != $stripe_plan->amount || $interval != $stripe_plan->interval || $duration != $stripe_plan->interval_count || $trial_period_days != $stripe_plan->trial_period_days ) {
-			$args = array( 
-				'amount'            => $amount, 
-				'interval'          => $interval, 
+			$args = array(
+				'amount'            => $amount,
+				'interval'          => $interval,
 				'interval_count'    => $duration,
-				'name'              => get_the_title( $product_id ) . ' ' . $time, 
-				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ), 
+				'name'              => get_the_title( $product_id ) . ' ' . $time,
+				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ),
 				'id'                => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time,
 				'trial_period_days' => $trial_period_days,
 			);
-			
+
 			try {
 				$stripe_plan = Stripe_Plan::create( $args );
 			} catch( Exception $e ) {
 				return sprintf( __( 'Error: Unable to create Plan in Stripe - %s', 'LION' ), $e->getMessage() );
 			}
-			
+
 			update_post_meta( $product_id, '_it_exchange_stripe_plan_id', $stripe_plan->id );
 		}
-		
+
 		$payment_form .= '<input type="hidden" class="it-exchange-stripe-subscription-id" name="stripe_subscription_id" value="' . esc_attr( $stripe_plan->id ) .'" />';
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery("#it-exchange-stripe-payment-button-' . $unique . '").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
+		$payment_form .= '    jQuery(this).attr("disabled", "disabled");';
 		$payment_form .= '    itExchange.stripeAddonCheckoutEmail = "' . esc_js( $customer_email ) . '";';
 		$payment_form .= '    itExchange.hooks.doAction( "itExchangeStripeAddon.makePayment" );';
 		$payment_form .= '    var token = function(res){' . "\n";
@@ -385,7 +386,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      email:       itExchange.stripeAddonCheckoutEmail,' . "\n";
 		$payment_form .= '      plan:        "' . esc_js( $stripe_plan->id ) . '",' . "\n";
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
-		$payment_form .= '      description: "' . esc_js( strip_tags( it_exchange_get_cart_description() ) ) . '",' . "\n";		
+		$payment_form .= '      description: "' . esc_js( strip_tags( it_exchange_get_cart_description() ) ) . '",' . "\n";
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
 		if ( !empty( $payment_image ) )
 			$payment_form .= $payment_image;
@@ -394,13 +395,15 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '    });' . "\n";
 		// $payment_form .= '    return false;' . "\n";
 		$payment_form .= '  });' . "\n";
+		$payment_form .= '  jQuery(document).on("DOMNodeRemoved",".stripe_checkout_app", function() { jQuery(".it-exchange-stripe-payment-button").removeAttr("disabled");});' . "\n";
 		$payment_form .= '</script>' . "\n";
-		
+
 	} else {
-		
+
 		$payment_form .= '<script>' . "\n";
 		$payment_form .= '  jQuery("#it-exchange-stripe-payment-button-' . $unique . '").click(function(event){' . "\n";
 		$payment_form .= '    event.preventDefault();';
+		$payment_form .= '    jQuery(this).attr("disabled", "disabled");';
 		$payment_form .= '    itExchange.stripeAddonCheckoutEmail = "' . esc_js( $customer_email ) . '";';
 		$payment_form .= '    itExchange.hooks.doAction( "itExchangeStripeAddon.makePayment" );';
 		$payment_form .= '    var token = function(res){' . "\n";
@@ -423,8 +426,9 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '    });' . "\n";
 		// $payment_form .= '    return false;' . "\n";
 		$payment_form .= '  });' . "\n";
+		$payment_form .= '  jQuery(document).on("DOMNodeRemoved",".stripe_checkout_app", function() { jQuery(".it-exchange-stripe-payment-button").removeAttr("disabled");});' . "\n";
 		$payment_form .= '</script>' . "\n";
-	
+
 	}
 
 	$payment_form .= '</form>';
@@ -500,13 +504,13 @@ add_filter( 'it_exchange_stripe_transaction_is_cleared_for_delivery', 'it_exchan
  * @param array $options Recurring Payments options
  * @return string
 */
-function it_exchange_stripe_unsubscribe_action( $output, $options, $transaction_object ) {	
+function it_exchange_stripe_unsubscribe_action( $output, $options, $transaction_object ) {
 	$subscriber_id = $transaction_object->get_transaction_meta( 'subscriber_id' );
-	
+
 	$output  = '<a class="button" href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe', 'it-exchange-subscriber-id' => $subscriber_id ) ) . '">';
 	$output .= $options['label'];
 	$output .= '</a>';
-	
+
 	return $output;
 }
 add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubscribe_action', 10, 3 );
@@ -514,26 +518,26 @@ add_filter( 'it_exchange_stripe_unsubscribe_action', 'it_exchange_stripe_unsubsc
 /**
  * Performs user requested unsubscribe
  *
- * @since 1.1.22 
+ * @since 1.1.22
  *
  * @return void
 */
 function it_exchange_stripe_unsubscribe_action_submit() {
 	if ( !empty( $_REQUEST['it-exchange-stripe-action'] ) ) {
-		
+
 		$settings = it_exchange_get_option( 'addon_stripe' );
-	
+
 		$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
 		Stripe::setApiKey( $secret_key );
-	
+
 		switch( $_REQUEST['it-exchange-stripe-action'] ) {
-		
+
 			case 'unsubscribe' :
 				try {
 					$current_user_id = get_current_user_id();
 					$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
 					$cu = Stripe_Customer::retrieve( $stripe_customer_id );
-		
+
 					if ( !empty( $_REQUEST['it-exchange-subscriber-id'] ) )
 						$cu->subscriptions->retrieve( $_REQUEST['it-exchange-subscriber-id'] )->cancel();
 				}
@@ -541,7 +545,7 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 					it_exchange_add_message( 'error', sprintf( __( 'Error: Unable to unsubscribe user %s', 'LION' ), $e->getMessage() ) );
 				}
 				break;
-				
+
 			case 'unsubscribe-user' :
 				if ( is_admin() && current_user_can( 'administrator' ) ) {
 					if ( !empty( $_REQUEST['it-exchange-stripe-customer-id'] ) && $stripe_customer_id = $_REQUEST['it-exchange-stripe-customer-id'] ) {
@@ -556,9 +560,9 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 					}
 				}
 				break;
-			
+
 		}
-		
+
 	}
 }
 add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
@@ -571,10 +575,10 @@ add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
  * @param object $transaction iThemes Transaction object
  * @return void
 */
-function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {	
+function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {
 	$cart_object = get_post_meta( $transaction->ID, '_it_exchange_cart_object', true );
 	if ( !empty( $cart_object->products ) ) {
-		foreach ( $cart_object->products as $product ) {	
+		foreach ( $cart_object->products as $product ) {
 			$autorenews = $transaction->get_transaction_meta( 'subscription_autorenew_' . $product['product_id'], true );
 			if ( $autorenews ) {
 				$customer_id = it_exchange_get_transaction_customer_id( $transaction->ID );
@@ -582,15 +586,15 @@ function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {
 				$status = $transaction->get_transaction_meta( 'subscriber_status', true );
 				$subscriber_id = $transaction->get_transaction_meta( 'subscriber_id', true );
 				switch( $status ) {
-				
+
 					case 'deactivated':
 						$output = __( 'Recurring payment has been deactivated', 'LION' );
 						break;
-						
+
 					case 'cancelled':
 						$output = __( 'Recurring payment has been cancelled', 'LION' );
 						break;
-					
+
 					case 'active':
 					default:
 						$output  = '<a href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id, 'it-exchange-stripe-subscriber-id' => $subscriber_id ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
