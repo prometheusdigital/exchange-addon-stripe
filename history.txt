@@ -112,3 +112,5 @@
 	Enhancement: Authenticating users now uses the new authentication system.
 1.1.33 - 2014-11-19 - Glenn Ansley, Elise Alley
 	Disabled Purchase button on click so it can only be triggered once prior to stripe popup appearing.
+1.1.34 - 2014-12-16 - Lew Ayotte
+	Updated stripe-php API
