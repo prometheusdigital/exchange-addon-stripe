@@ -4,12 +4,16 @@ class Stripe_DiscountTest extends StripeTestCase
 {
   public function testDeletion()
   {
-    authorizeFromEnv();
+    self::authorizeFromEnv();
     $id = 'test-coupon-' . self::randomString();
-    $coupon = Stripe_Coupon::create(array('percent_off' => 25,
-                                          'duration' => 'repeating',
-                                          'duration_in_months' => 5,
-                                          'id' => $id));
+    $coupon = Stripe_Coupon::create(
+        array(
+            'percent_off' => 25,
+            'duration' => 'repeating',
+            'duration_in_months' => 5,
+            'id' => $id,
+        )
+    );
     $customer = self::createTestCustomer(array('coupon' => $id));
 
     $this->assertTrue(isset($customer->discount));

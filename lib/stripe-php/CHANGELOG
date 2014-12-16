@@ -1,3 +1,55 @@
+=== 1.17.4 2014-12-15
+
+* Saving objects fetched with a custom key now works (thanks @JustinHook & @jpasilan)
+* Added methods for reporting charges as safe or fraudulent and for specifying the reason for refunds
+
+=== 1.17.3 2014-11-06
+
+* Better handling of HHVM support for SSL certificate blacklist checking.
+
+=== 1.17.2 2014-09-23
+
+* Coupons now are backed by a `Stripe_Coupon` instead of `Stripe_Object`, and support updating metadata
+* Running operations (`create`, `retrieve`, `all`) on upcoming invoice items now works
+
+=== 1.17.1 2014-07-31
+
+* Requests now send Content-Type header
+
+=== 1.17.0 2014-07-29
+
+* Application Fee refunds now a list instead of array
+* HHVM now works
+* Small bug fixes (thanks @bencromwell & @fastest963)
+* __toString now returns the name of the object in addition to its JSON representation
+
+=== 1.16.0 2014-06-17
+
+* Add metadata for refunds and disputes
+
+=== 1.15.0 2014-05-28
+
+* Support canceling transfers
+
+=== 1.14.1 2014-05-21
+
+* Support cards for recipients.
+
+=== 1.13.1 2014-05-15
+
+* Fix bug in account resource where `id` wasn't in the result
+
+=== 1.13.0 2014-04-10
+
+* Add support for certificate blacklisting
+* Update ca bundle
+* Drop support for HHVM (Temporarily)
+
+=== 1.12.0 2014-04-01
+
+* Add Stripe_RateLimitError for catching rate limit errors.
+* Update to Zend coding style (thanks,  @jpiasetz)
+
 === 1.11.0 2014-01-29
 
 * Add support for multiple subscriptions per customer
@@ -90,7 +142,7 @@
 
 === 1.7.5 2012-08-23
 
-* Change internal function names so that Stripe_SingletonApiRequst is
+* Change internal function names so that Stripe_SingletonApiRequest is
   E_STRICT-clean (github issue #16)
 
 === 1.7.4 2012-08-21
@@ -111,7 +163,7 @@
 
 * Add missing argument to Stripe_InvalidRequestError constructor in
   Stripe_ApiResource::instanceUrl. Fixes a warning when
-  Stripe_ApiResource::instanceUrl is called on a resouce with no ID
+  Stripe_ApiResource::instanceUrl is called on a resource with no ID
   (github issue #12)
 
 === 1.7.0 2012-05-17

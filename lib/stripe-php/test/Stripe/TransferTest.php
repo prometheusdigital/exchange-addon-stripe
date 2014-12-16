@@ -6,13 +6,13 @@ class Stripe_TransferTest extends StripeTestCase
   {
     $recipient = self::createTestRecipient();
 
-    authorizeFromEnv();
+    self::authorizeFromEnv();
     $transfer = Stripe_Transfer::create(
-      array(
-        'amount' => 100,
-        'currency' => 'usd',
-        'recipient' => $recipient->id
-      )
+        array(
+          'amount' => 100,
+          'currency' => 'usd',
+          'recipient' => $recipient->id
+        )
     );
     $this->assertEqual('pending', $transfer->status);
   }
@@ -21,29 +21,48 @@ class Stripe_TransferTest extends StripeTestCase
   {
     $recipient = self::createTestRecipient();
 
-    authorizeFromEnv();
+    self::authorizeFromEnv();
     $transfer = Stripe_Transfer::create(
-      array(
-        'amount' => 100,
-        'currency' => 'usd',
-        'recipient' => $recipient->id
-      )
+        array(
+          'amount' => 100,
+          'currency' => 'usd',
+          'recipient' => $recipient->id
+        )
     );
     $reloaded = Stripe_Transfer::retrieve($transfer->id);
     $this->assertEqual($reloaded->id, $transfer->id);
+  }
+
+  public function testCancel()
+  {
+    $this->expectException(new IsAExpectation('Stripe_InvalidRequestError'));
+    $recipient = self::createTestRecipient();
+
+    self::authorizeFromEnv();
+    $transfer = Stripe_Transfer::create(
+        array(
+          'amount' => 100,
+          'currency' => 'usd',
+          'recipient' => $recipient->id
+        )
+    );
+    $reloaded = Stripe_Transfer::retrieve($transfer->id);
+    $this->assertEqual($reloaded->id, $transfer->id);
+
+    $reloaded->cancel();
   }
 
   public function testTransferUpdateMetadata()
   {
     $recipient = self::createTestRecipient();
 
-    authorizeFromEnv();
+    self::authorizeFromEnv();
     $transfer = Stripe_Transfer::create(
-      array(
-        'amount' => 100,
-        'currency' => 'usd',
-        'recipient' => $recipient->id
-      )
+        array(
+            'amount' => 100,
+            'currency' => 'usd',
+            'recipient' => $recipient->id
+        )
     );
 
     $transfer->metadata['test'] = 'foo bar';
@@ -57,13 +76,13 @@ class Stripe_TransferTest extends StripeTestCase
   {
     $recipient = self::createTestRecipient();
 
-    authorizeFromEnv();
+    self::authorizeFromEnv();
     $transfer = Stripe_Transfer::create(
-      array(
-        'amount' => 100,
-        'currency' => 'usd',
-        'recipient' => $recipient->id
-      )
+        array(
+          'amount' => 100,
+          'currency' => 'usd',
+          'recipient' => $recipient->id
+        )
     );
 
     $transfer->metadata = array('test' => 'foo bar');

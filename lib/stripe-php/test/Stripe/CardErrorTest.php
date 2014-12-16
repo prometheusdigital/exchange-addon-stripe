@@ -1,12 +1,25 @@
 <?php
 
-class Stripe_CardErrorTest extends UnitTestCase
+class Stripe_CardErrorTest extends StripeTestCase
 {
   public function testDecline()
   {
-    authorizeFromEnv();
+    self::authorizeFromEnv();
+
+    $card = array(
+      'number' => '4000000000000002',
+      'exp_month' => '3',
+      'exp_year' => '2020'
+    );
+
+    $charge = array(
+      'amount' => 100,
+      'currency' => 'usd',
+      'card' => $card
+    );
+
     try {
-      Stripe_Charge::create(array('amount' => 100, 'currency' => 'usd', 'card' => array('number' => '4000000000000002', 'exp_month' => '3', 'exp_year' => '2020')));
+      Stripe_Charge::create($charge);
     } catch (Stripe_CardError $e) {
       $this->assertEqual(402, $e->getHttpStatus());
       $body = $e->getJsonBody();
