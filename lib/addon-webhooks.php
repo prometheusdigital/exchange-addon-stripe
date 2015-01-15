@@ -47,6 +47,7 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
 
     $secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
     Stripe::setApiKey( $secret_key );
+    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
     $body = @file_get_contents('php://input');
     $stripe_event = json_decode( $body );

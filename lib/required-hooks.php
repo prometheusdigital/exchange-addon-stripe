@@ -113,6 +113,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 			$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
 			Stripe::setApiKey( $secret_key );
+		    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 			// Set stripe token
 			$token = $_POST['stripeToken'];
@@ -197,6 +198,7 @@ function it_exchange_cancel_stripe_subscription( $subscription_details ) {
 	$stripe_settings = it_exchange_get_option( 'addon_stripe' );
 	$secret_key      = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
 	Stripe::setApiKey( $secret_key );
+    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 	try {
 		$current_user_id = get_current_user_id();
@@ -240,29 +242,57 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
     $products = it_exchange_get_cart_data( 'products' );
 	$cart = it_exchange_get_cart_products();
 
-	if ( 1 === absint( count( $cart ) ) ) {
+	if ( 1 === count( $cart ) ) {
 		foreach( $cart as $product ) {
 			if ( it_exchange_product_supports_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
 				if ( it_exchange_product_has_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
-					$time = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'time' ) );
-					switch( $time ) {
-
-						case 'yearly':
-							$interval = 'year';
-							break;
-
-						case 'weekly':
-							$interval = 'week';
-							break;
-
-						case 'monthly':
-						default:
-							$interval = 'month';
-							break;
-
+					$trial_interval = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'trial-interval' ) );
+					$trial_interval_count = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'trial-interval-count' ) );
+					$auto_renew = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) );
+					$interval = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'interval' ) );
+					$interval_count = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'interval-count' ) );
+					
+					$allow_trial = true;
+					//Should we all trials?
+					if ( 'membership-product-type' === it_exchange_get_product_type( $product['product_id'] ) ) {
+						if ( is_user_logged_in() ) {
+							if ( function_exists( 'it_exchange_get_session_data' ) ) {
+								$member_access = it_exchange_get_session_data( 'member_access' );
+								$children = (array)it_exchange_membership_addon_get_all_the_children( $product['product_id'] );
+								$parents = (array)it_exchange_membership_addon_get_all_the_parents( $product['product_id'] );
+								foreach( $member_access as $prod_id => $txn_id ) {
+									if ( $prod_id === $product['product_id'] || in_array( $prod_id, $children ) || in_array( $prod_id, $parents ) ) {
+										$allow_trial = false;
+										break;
+									}								
+								}
+							}
+						}
 					}
-					$interval = apply_filters( 'it_exchange_stripe_subscription_unit', $interval, $time );
-					$duration = apply_filters( 'it_exchange_stripe_subscription_duration', 1, $time ); //interval_count
+			
+					$allow_trial = apply_filters( 'it_exchange_stripe_addon_make_payment_button_allow_trial', $allow_trial, $product['product_id'] );
+					
+					if ( $allow_trial && 0 < $trial_interval_count ) {
+						switch ( $trial_interval ) {
+							case 'year':
+								$days = 365;
+								break;
+							case 'month':
+								$days = 31;
+								break;
+							case 'week':
+								$days = 7;
+								break;
+							case 'day':
+							default:
+								$days = 1;
+								break;
+						}
+						$trial_period_days = $trial_interval_count * $days;
+					} else {
+						$trial_period_days = null;					
+					}
+					
 					$subscription = true;
 					$product_id = $product['product_id'];
 				}
@@ -316,10 +346,11 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 
 		$secret_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
 		Stripe::setApiKey( $secret_key );
+	    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 		$stripe_plan = false;
 		$time = time();
 		$amount = esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) );
-		$trial_period_days = empty( $upgrade_downgrade[$product_id]['free_days'] ) ? null : $upgrade_downgrade[$product_id]['free_days']; //stripe returns null if it isn't set
+		$trial_period_days = empty( $upgrade_downgrade[$product_id]['free_days'] ) ? $trial_period_days : $upgrade_downgrade[$product_id]['free_days']; //stripe returns null if it isn't set
 
 		$existing_plan = get_post_meta( $product_id, '_it_exchange_stripe_plan_id', true );
 		if ( $existing_plan ) {
@@ -335,7 +366,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			$args = array(
 				'amount'            => $amount,
 				'interval'          => $interval,
-				'interval_count'    => $duration,
+				'interval_count'    => $interval_count,
 				'name'              => get_the_title( $product_id ) . ' ' . $time,
 				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ),
 				'id'                => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time,
@@ -349,11 +380,11 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			}
 
 			update_post_meta( $product_id, '_it_exchange_stripe_plan_id', $stripe_plan->id );
-		} else if ( $amount != $stripe_plan->amount || $interval != $stripe_plan->interval || $duration != $stripe_plan->interval_count || $trial_period_days != $stripe_plan->trial_period_days ) {
+		} else if ( $amount != $stripe_plan->amount || $interval != $stripe_plan->interval || $interval_count != $stripe_plan->interval_count || $trial_period_days != $stripe_plan->trial_period_days ) {
 			$args = array(
 				'amount'            => $amount,
 				'interval'          => $interval,
-				'interval_count'    => $duration,
+				'interval_count'    => $interval_count,
 				'name'              => get_the_title( $product_id ) . ' ' . $time,
 				'currency'          => esc_js( strtolower( $general_settings['default-currency'] ) ),
 				'id'                => sanitize_title_with_dashes( get_the_title( $product_id ) ) . '-' . $time,
@@ -529,6 +560,7 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 
 		$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
 		Stripe::setApiKey( $secret_key );
+	    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 		switch( $_REQUEST['it-exchange-stripe-action'] ) {
 

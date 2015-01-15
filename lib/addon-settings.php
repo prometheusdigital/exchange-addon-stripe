@@ -406,6 +406,7 @@ class IT_Exchange_Stripe_Add_On {
        
         try {
 			Stripe::setApiKey( $values['stripe-live-secret-key'] );
+		    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 			$account = Stripe_Account::retrieve();
         } 
         catch( Exception $e ) {
@@ -420,6 +421,7 @@ class IT_Exchange_Stripe_Add_On {
 	        
 	        try {
 				Stripe::setApiKey( $values['stripe-test-secret-key'] );
+				Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 				$account = Stripe_Account::retrieve();
 	        }
 	        catch( Exception $e ) {

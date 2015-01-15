@@ -6,8 +6,12 @@
 */
 
 // Include the Stripe API library
-if ( ! class_exists( 'Stripe' ) )
+if ( ! class_exists( 'Stripe' ) ) {
 	require_once('lib/stripe-php/lib/Stripe.php' );
+	if ( !defined( 'ITE_STRIPE_API_VERSION' ) ) {
+		define( 'ITE_STRIPE_API_VERSION', '2015-01-11' );
+	}
+}
 
 if ( function_exists( 'add_image_size' ) ) { 
 	add_image_size( 'it-exchange-stripe-addon-checkout-image', 128, 128, true );
