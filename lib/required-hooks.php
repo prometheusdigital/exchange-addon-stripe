@@ -246,51 +246,53 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		foreach( $cart as $product ) {
 			if ( it_exchange_product_supports_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
 				if ( it_exchange_product_has_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) ) ) {
+					$trial_enabled = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'trial-enabled' ) );
 					$trial_interval = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'trial-interval' ) );
 					$trial_interval_count = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'trial-interval-count' ) );
 					$auto_renew = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) );
 					$interval = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'interval' ) );
 					$interval_count = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'interval-count' ) );
 					
-					$allow_trial = true;
-					//Should we all trials?
-					if ( 'membership-product-type' === it_exchange_get_product_type( $product['product_id'] ) ) {
-						if ( is_user_logged_in() ) {
-							if ( function_exists( 'it_exchange_get_session_data' ) ) {
-								$member_access = it_exchange_get_session_data( 'member_access' );
-								$children = (array)it_exchange_membership_addon_get_all_the_children( $product['product_id'] );
-								$parents = (array)it_exchange_membership_addon_get_all_the_parents( $product['product_id'] );
-								foreach( $member_access as $prod_id => $txn_id ) {
-									if ( $prod_id === $product['product_id'] || in_array( $prod_id, $children ) || in_array( $prod_id, $parents ) ) {
-										$allow_trial = false;
-										break;
-									}								
+					$trial_period_days = NULL;	
+					if ( $trial_enabled ) {
+						$allow_trial = true;
+						//Should we all trials?
+						if ( 'membership-product-type' === it_exchange_get_product_type( $product['product_id'] ) ) {
+							if ( is_user_logged_in() ) {
+								if ( function_exists( 'it_exchange_get_session_data' ) ) {
+									$member_access = it_exchange_get_session_data( 'member_access' );
+									$children = (array)it_exchange_membership_addon_get_all_the_children( $product['product_id'] );
+									$parents = (array)it_exchange_membership_addon_get_all_the_parents( $product['product_id'] );
+									foreach( $member_access as $prod_id => $txn_id ) {
+										if ( $prod_id === $product['product_id'] || in_array( $prod_id, $children ) || in_array( $prod_id, $parents ) ) {
+											$allow_trial = false;
+											break;
+										}								
+									}
 								}
 							}
 						}
-					}
-			
-					$allow_trial = apply_filters( 'it_exchange_stripe_addon_make_payment_button_allow_trial', $allow_trial, $product['product_id'] );
-					
-					if ( $allow_trial && 0 < $trial_interval_count ) {
-						switch ( $trial_interval ) {
-							case 'year':
-								$days = 365;
-								break;
-							case 'month':
-								$days = 31;
-								break;
-							case 'week':
-								$days = 7;
-								break;
-							case 'day':
-							default:
-								$days = 1;
-								break;
+				
+						$allow_trial = apply_filters( 'it_exchange_stripe_addon_make_payment_button_allow_trial', $allow_trial, $product['product_id'] );
+						
+						if ( $allow_trial && 0 < $trial_interval_count ) {
+							switch ( $trial_interval ) {
+								case 'year':
+									$days = 365;
+									break;
+								case 'month':
+									$days = 31;
+									break;
+								case 'week':
+									$days = 7;
+									break;
+								case 'day':
+								default:
+									$days = 1;
+									break;
+							}
+							$trial_period_days = $trial_interval_count * $days;
 						}
-						$trial_period_days = $trial_interval_count * $days;
-					} else {
-						$trial_period_days = null;					
 					}
 					
 					$subscription = true;
