@@ -654,3 +654,31 @@ function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {
 	}
 }
 add_action( 'it_exchange_after_payment_details_cancel_url_for_stripe', 'it_exchange_stripe_after_payment_details_cancel_url' );
+
+/**
+ * Mark this transaction method as okay to manually change transactions
+ *
+ * @since 1.1.36 
+*/
+add_filter( 'it_exchange_stripe_transaction_status_can_be_manually_changed', '__return_true' );
+
+/**
+ * Returns status options
+ *
+ * @since 1.1.36 
+ * @return array
+*/
+function it_exchange_stripe_get_default_status_options() {
+	$options = array(
+		'succeeded'       => _x( 'Paid', 'Transaction Status', 'it-l10n-ithemes-exchange' ),
+		'refunded'        => _x( 'Refunded', 'Transaction Status', 'it-l10n-ithemes-exchange' ),
+		'partial-refund'  => _x( 'Partially Refunded', 'Transaction Status', 'it-l10n-ithemes-exchange' ),
+		'cancelled'       => _x( 'Cancelled', 'Transaction Status', 'it-l10n-ithemes-exchange' ),
+		'needs_response'  => _x( 'Disputed: Stripe needs a response', 'Transaction Status', 'it-l10n-ithemes-exchange' ),
+		'under_review'    => _x( 'Disputed: Under review', 'Transaction Status', 'it-l10n-ithemes-exchange' ),
+		'won'             => _x( 'Disputed: Won, Paid', 'Transaction Status', 'it-l10n-ithemes-exchange' ),
+	);
+	return $options;
+}
+add_filter( 'it_exchange_get_status_options_for_stripe_transaction', 'it_exchange_stripe_get_default_status_options' );
+

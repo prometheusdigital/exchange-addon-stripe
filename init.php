@@ -8,9 +8,11 @@
 // Include the Stripe API library
 if ( ! class_exists( 'Stripe' ) ) {
 	require_once('lib/stripe-php/lib/Stripe.php' );
-	if ( !defined( 'ITE_STRIPE_API_VERSION' ) ) {
-		define( 'ITE_STRIPE_API_VERSION', '2015-01-11' );
-	}
+}
+
+// Set Stripe API version
+if ( !defined( 'ITE_STRIPE_API_VERSION' ) ) {
+	define( 'ITE_STRIPE_API_VERSION', '2015-01-11' );
 }
 
 if ( function_exists( 'add_image_size' ) ) { 
