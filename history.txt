@@ -116,3 +116,6 @@
 	Updated stripe-php API
 1.1.35 - 2015-02-02 - Lew Ayotte
 	Updates for Recurring Payments updates
+1.1.36 - 2015-02-25 - Lew Ayotte
+	Moving API VERSION definition outside of Stripe include block
+	Update for Recurring Payments payments edit screen
