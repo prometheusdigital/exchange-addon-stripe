@@ -119,3 +119,5 @@
 1.1.36 - 2015-02-25 - Lew Ayotte
 	Moving API VERSION definition outside of Stripe include block
 	Update for Recurring Payments payments edit screen
+1.1.37 - 2015-03-30 - Lew Ayotte
+	Better security for Stripe Webhook handling
