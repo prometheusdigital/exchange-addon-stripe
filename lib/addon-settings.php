@@ -233,7 +233,7 @@ class IT_Exchange_Stripe_Add_On {
             </p>
             <?php
                 if ( ! in_array( $general_settings['default-currency'], array_keys( $this->get_supported_currency_options() ) ) )
-                    echo '<h4>' . sprintf( __( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'LION' ), add_query_arg( 'page', 'it-exchange-settings' ) ) . '</h4>';
+                    echo '<h4>' . sprintf( __( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'LION' ), esc_url( add_query_arg( 'page', 'it-exchange-settings' ) ) ) . '</h4>';
             ?>
             <h4><?php _e( 'Step 1. Fill out your Stripe API Credentials', 'LION' ); ?></h4>
             <p>
@@ -270,7 +270,7 @@ class IT_Exchange_Stripe_Add_On {
                 <br />
                 <?php
                 $remove_image_url = add_query_arg( 'remove-checkout-image', $settings['stripe-checkout-image'] );
-                echo '<a href="' . $remove_image_url . '">' . __( 'Remove Checkout Image', 'LION' ) . '</a>';
+                echo '<a href="' . esc_url( $remove_image_url ) . '">' . __( 'Remove Checkout Image', 'LION' ) . '</a>';
                 ?>
             </p>
             <?php } ?>

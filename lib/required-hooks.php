@@ -547,7 +547,7 @@ add_filter( 'it_exchange_stripe_transaction_is_cleared_for_delivery', 'it_exchan
 function it_exchange_stripe_unsubscribe_action( $output, $options, $transaction_object ) {
 	$subscriber_id = $transaction_object->get_transaction_meta( 'subscriber_id' );
 
-	$output  = '<a class="button" href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe', 'it-exchange-subscriber-id' => $subscriber_id ) ) . '">';
+	$output  = '<a class="button" href="' . esc_url( add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe', 'it-exchange-subscriber-id' => $subscriber_id ) ) ) . '">';
 	$output .= $options['label'];
 	$output .= '</a>';
 
@@ -638,7 +638,7 @@ function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {
 
 					case 'active':
 					default:
-						$output  = '<a href="' .  add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id, 'it-exchange-stripe-subscriber-id' => $subscriber_id ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
+						$output  = '<a href="' . esc_url( add_query_arg( array( 'it-exchange-stripe-action' => 'unsubscribe-user', 'it-exchange-stripe-customer-id' => $stripe_customer_id, 'it-exchange-stripe-subscriber-id' => $subscriber_id ) ) ) . '">' . __( 'Cancel Recurring Payment', 'LION' ) . '</a>';
 						break;
 				}
 				?>
