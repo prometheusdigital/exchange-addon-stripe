@@ -121,3 +121,5 @@
 	Update for Recurring Payments payments edit screen
 1.1.37 - 2015-03-30 - Lew Ayotte
 	Better security for Stripe Webhook handling
+1.2.0 - 2015-04-20 - Lew Ayotte
+	Multiple updates involving add_query_arg and remove_query_arg to esc_url()
