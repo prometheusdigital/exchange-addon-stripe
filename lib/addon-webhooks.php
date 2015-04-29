@@ -83,10 +83,13 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
 					break;
 					
 				case 'invoice.payment_succeeded' :
+					wp_mail( 'lew@ithemes.com', 'stripe $stripe_object', print_r( $stripe_object, true ) );
 					$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object );
 					it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $subscriber_id, $stripe_object->charge );
 					if ( !it_exchange_stripe_addon_update_transaction_status( $stripe_object->charge, 'succeeded' ) ) {
 						//If the transaction isn't found, we've got a new payment
+						global $ite_child_transaction;
+						$ite_child_transaction = true;
 						it_exchange_stripe_addon_add_child_transaction( $stripe_object->charge, 'succeeded', $subscriber_id, $stripe_object->total );
 					}
 					it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'active' );
