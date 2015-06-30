@@ -439,7 +439,7 @@ class IT_Exchange_Stripe_Add_On {
      * @return void
     */
     public static function get_supported_currency_options() {
-		$currencies = array();
+		$currencies = array( 'USD', 'CAN', 'EUR' ); //Start off with some defaults
         $settings = it_exchange_get_option( 'addon_stripe', true );
 		if ( !empty( $settings['stripe-live-secret-key'] ) ) {
 			try {
