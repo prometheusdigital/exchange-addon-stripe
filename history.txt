@@ -129,3 +129,5 @@
 	Fixes for Recurring Payments bug
 1.3.1 - 2015-05-13 - Lew Ayotte
 	Updating updater origin url
+1.4.0 - 2015-06-30 - Lew Ayotte
+	Adding warning when deactivating payment gateway
