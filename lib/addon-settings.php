@@ -318,6 +318,15 @@ class IT_Exchange_Stripe_Add_On {
             $this->error_message = __( 'Error. Please try again', 'LION' );
             return;
         }
+        
+        if ( !empty( $new_values['stripe-live-secret-key'] ) )
+            $new_values['stripe-live-secret-key'] = trim( $new_values['stripe-live-secret-key'] );
+        if ( !empty( $new_values['stripe-live-publishable-key'] ) )
+            $new_values['stripe-live-publishable-key'] = trim( $new_values['stripe-live-publishable-key'] );
+        if ( !empty( $new_values['stripe-test-secret-key'] ) )
+            $new_values['stripe-test-secret-key'] = trim( $new_values['stripe-test-secret-key'] );
+        if ( !empty( $new_values['stripe-test-publishable-key'] ) )
+            $new_values['stripe-test-publishable-key'] = trim( $new_values['stripe-test-publishable-key'] );
 
         $errors = apply_filters( 'it_exchange_add_on_stripe_validate_settings', $this->get_form_errors( $new_values ), $new_values );
         if ( ! $errors && it_exchange_save_option( 'addon_stripe', $new_values ) ) {
@@ -373,6 +382,15 @@ class IT_Exchange_Stripe_Add_On {
                 $stripe_settings[$var] = $_REQUEST['it_exchange_settings-' . $var];
             }
         }
+
+        if ( !empty( $stripe_settings['stripe-live-secret-key'] ) )
+            $stripe_settings['stripe-live-secret-key'] = trim( $stripe_settings['stripe-live-secret-key'] );
+        if ( !empty( $stripe_settings['stripe-live-publishable-key'] ) )
+            $stripe_settings['stripe-live-publishable-key'] = trim( $stripe_settings['stripe-live-publishable-key'] );
+        if ( !empty( $stripe_settings['stripe-test-secret-key'] ) )
+            $stripe_settings['stripe-test-secret-key'] = trim( $stripe_settings['stripe-test-secret-key'] );
+        if ( !empty( $stripe_settings['stripe-test-publishable-key'] ) )
+            $stripe_settings['stripe-test-publishable-key'] = trim( $stripe_settings['stripe-test-publishable-key'] );
 
         $settings = wp_parse_args( $stripe_settings, it_exchange_get_option( 'addon_stripe' ) );
 
