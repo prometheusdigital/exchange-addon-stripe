@@ -134,6 +134,19 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 				$stripe_customer->card = $token;
 				$stripe_customer->email = $it_exchange_customer->data->user_email;
+				
+				/*	
+				if ( !empty( $transaction_object->billing_address ) ) {
+					$stripe_customer->source['name']            = $transaction_object->billing_address['first-name'] . ' ' . $transaction_object->billing_address['last-name'];
+					$stripe_customer->source['address_line1']   = $transaction_object->billing_address['address1'];
+					$stripe_customer->source['address_line2']   = $transaction_object->billing_address['address2'];
+					$stripe_customer->source['address_city']    = $transaction_object->billing_address['city'];
+					$stripe_customer->source['address_state']   = $transaction_object->billing_address['state'];
+					$stripe_customer->source['address_zip']     = $transaction_object->billing_address['zip'];
+					$stripe_customer->source['address_country'] = $transaction_object->billing_address['country'];
+				}
+				*/
+				
 				$stripe_customer->save();
 			} else {
 				$customer_array = array(
@@ -146,7 +159,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 				it_exchange_stripe_addon_set_stripe_customer_id( $it_exchange_customer->id, $stripe_customer->id );
 			}
-
+						
 			if ( $subscription_id ) {
 				// We don't want to update the stripe customer if they're trying to subscribe to the same plan!
 				if ( empty( $stripe_customer->subscription->plan->name ) || $subscription_id != $stripe_customer->subscription->plan->name ) {
@@ -158,10 +171,12 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 						$transaction_object->subtotal = '0.00'; //should be 0.00 ... since this is a free trial!
 					}
 					
-					$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', array(
+					$args = array(
 						'plan'    => $subscription_id,
 						'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
-					) );
+					);
+					
+					$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args );
 					$subscription = $stripe_customer->subscriptions->create( $args );
 					$charge_id = $subscription->id;	//need a temporary ID
 					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
@@ -171,12 +186,14 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				}
 			} else {
 				// Now that we have a valid Customer ID, charge them!
-				$args = apply_filters( 'it_exchange_stripe_addon_charge_args', array(
+				$args = array(
 					'customer'    => $stripe_customer->id,
 					'amount'      => number_format( $transaction_object->total, 2, '', '' ),
 					'currency'    => strtolower( $general_settings['default-currency'] ),
 					'description' => $transaction_object->description,
-				) );
+				);
+
+				$args = apply_filters( 'it_exchange_stripe_addon_charge_args', $args );
 				$charge = Stripe_Charge::create( $args );
 				$charge_id = $charge->id;
 			}
@@ -431,7 +448,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		if ( !empty( $payment_image ) )
 			$payment_form .= $payment_image;
 		$payment_form .= apply_filters( 'it_exchange_stripe_addon_payment_form_checkout_arg', '' );
-		$payment_form .= '      token:       token' . "\n";
+		$payment_form .= '      token:       token,' . "\n";
+		$payment_form .= '      zipCode:     true' . "\n";
 		$payment_form .= '    });' . "\n";
 		// $payment_form .= '    return false;' . "\n";
 		$payment_form .= '  });' . "\n";
@@ -462,7 +480,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		if ( !empty( $payment_image ) )
 			$payment_form .= $payment_image;
 		$payment_form .= apply_filters( 'it_exchange_stripe_addon_payment_form_checkout_arg', '' );
-		$payment_form .= '      token:       token' . "\n";
+		$payment_form .= '      token:       token,' . "\n";
+		$payment_form .= '      zipCode:     true' . "\n";
 		$payment_form .= '    });' . "\n";
 		// $payment_form .= '    return false;' . "\n";
 		$payment_form .= '  });' . "\n";
