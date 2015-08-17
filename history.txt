@@ -135,3 +135,8 @@
 	Enhancement: Updated link to iThemes support.
 1.5.0 - 2015-07-17 - Lew Ayotte, Elise Alley
 	Feature: trim API keys on save
+1.6.0 - 2015-08-17 - Lew Ayotte, Elise Alley
+	Don't limit Exchange currencies until after Stripe is setup
+	Including ZIP in Stripe checkout
+	Change how deactivation warning works
+
