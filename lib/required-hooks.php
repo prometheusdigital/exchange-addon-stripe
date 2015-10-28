@@ -260,6 +260,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
     $stripe_settings = it_exchange_get_option( 'addon_stripe' );
 	$subscription = false;
 	$payment_image = false;
+	$bitcoin_enabled = false;
 
     $publishable_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-publishable-key'] : $stripe_settings['stripe-live-publishable-key'];
 
@@ -364,8 +365,12 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$attachment_image = wp_get_attachment_image_src( $stripe_settings['stripe-checkout-image'], 'it-exchange-stripe-addon-checkout-image' );
 		if ( !empty( $attachment_image[0] ) ) {
 			$relative_url = parse_url( $attachment_image[0], PHP_URL_PATH );
-			$payment_image .= '  image:       "' . esc_js( $relative_url ) . '",' . "\n";
+			$payment_image = '  image:       "' . esc_js( $relative_url ) . '",' . "\n";
 		}
+	}
+	
+	if ( !empty( $stripe_settings['enable-bitcoin'] ) ) {
+		$bitcoin_enabled = '  bitcoin:       "true",' . "\n";
 	}
 
 	if ( $subscription ) {
@@ -445,8 +450,12 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( strip_tags( it_exchange_get_cart_description() ) ) . '",' . "\n";
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
-		if ( !empty( $payment_image ) )
+		if ( !empty( $payment_image ) ){
 			$payment_form .= $payment_image;
+		}
+		if ( !empty( $bitcoin_enabled ) ) {
+			$payment_form .= $bitcoin_enabled;
+		}
 		$payment_form .= apply_filters( 'it_exchange_stripe_addon_payment_form_checkout_arg', '' );
 		$payment_form .= '      token:       token,' . "\n";
 		$payment_form .= '      zipCode:     true' . "\n";
@@ -477,8 +486,12 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$payment_form .= '      name:        "' . ( empty( $general_settings['company-name'] ) ? '' : esc_js( $general_settings['company-name'] ) ) . '",' . "\n";
 		$payment_form .= '      description: "' . esc_js( strip_tags( it_exchange_get_cart_description() ) ) . '",' . "\n";
 		$payment_form .= '      panelLabel:  "Checkout",' . "\n";
-		if ( !empty( $payment_image ) )
+		if ( !empty( $payment_image ) ){
 			$payment_form .= $payment_image;
+		}
+		if ( !empty( $bitcoin_enabled ) ) {
+			$payment_form .= $bitcoin_enabled;
+		}
 		$payment_form .= apply_filters( 'it_exchange_stripe_addon_payment_form_checkout_arg', '' );
 		$payment_form .= '      token:       token,' . "\n";
 		$payment_form .= '      zipCode:     true' . "\n";

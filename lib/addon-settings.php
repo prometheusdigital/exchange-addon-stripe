@@ -81,6 +81,7 @@ function it_exchange_stripe_addon_default_settings( $values ) {
         'stripe-test-publishable-key'  => '',
         'stripe-purchase-button-label' => __( 'Purchase', 'LION' ),
         'stripe-checkout-image'        => '',
+        'enable-bitcoin'               => false,
     );
     $values = ITUtility::merge_defaults( $values, $defaults );
     return $values;
@@ -274,6 +275,12 @@ class IT_Exchange_Stripe_Add_On {
                 ?>
             </p>
             <?php } ?>
+
+            <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Bitcoin', 'LION' ); ?></h4>
+            <p class="hide-if-wizard">
+                <?php $form->add_check_box( 'enable-bitcoin' ); ?>
+                <label for="enable-bitcoin"><?php _e( 'Enable Bitcoin?', 'LION' ); ?> <span class="tip" title="<?php _e( 'When you accept Bitcoin with Stripe your currency settings must be set to USD. You currently need a US bank account to accept Bitcoin payments.', 'LION' ); ?>">i</span></label>
+            </p>
 
             <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Stripe Test Mode', 'LION' ); ?></h4>
             <p class="hide-if-wizard">
