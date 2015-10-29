@@ -139,4 +139,5 @@
 	Don't limit Exchange currencies until after Stripe is setup
 	Including ZIP in Stripe checkout
 	Change how deactivation warning works
-
+1.7.0 - 2015-10-29 - Lew Ayotte, Elise Alley
+	Adding Bitcoin Support (requires USD currency setting and US bank account)
