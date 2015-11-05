@@ -152,7 +152,7 @@ class IT_Exchange_Stripe_Add_On {
      * @since 0.1.0
      * @return void
     */
-    function IT_Exchange_Stripe_Add_On() {
+    function __construct() {
         $this->_is_admin       = is_admin();
         $this->_current_page   = empty( $_GET['page'] ) ? false : $_GET['page'];
         $this->_current_add_on = empty( $_GET['add-on-settings'] ) ? false : $_GET['add-on-settings'];
@@ -164,6 +164,17 @@ class IT_Exchange_Stripe_Add_On {
             add_action( 'it_exchange_remove_checkout_image_add_on_settings_stripe', array( $this, 'remove_checkout_image' ) );
             do_action( 'it_exchange_remove_checkout_image_add_on_settings_stripe' );
         }
+    }
+
+    /**
+     * Class deprecated constructor
+     *
+     * Sets up the class.
+     * @since 0.1.0
+     * @return void
+    */
+    function IT_Exchange_Stripe_Add_On() {
+		self::__construct();
     }
 
     /**
