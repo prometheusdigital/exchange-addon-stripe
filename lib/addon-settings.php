@@ -290,7 +290,7 @@ class IT_Exchange_Stripe_Add_On {
             <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Bitcoin', 'LION' ); ?></h4>
             <p class="hide-if-wizard">
                 <?php $form->add_check_box( 'enable-bitcoin' ); ?>
-                <label for="enable-bitcoin"><?php _e( 'Enable Bitcoin?', 'LION' ); ?> <span class="tip" title="<?php _e( 'When you accept Bitcoin with Stripe, your currency settings must be set to USD. You currently need a US bank account to accept Bitcoin payments.', 'LION' ); ?>">i</span></label>
+                <label for="enable-bitcoin"><?php _e( 'Enable Bitcoin?', 'LION' ); ?> <span class="tip" title="<?php _e( 'When you accept Bitcoin with Stripe, your currency settings must be set to USD. You currently need a US bank account to accept Bitcoin payments. NOTE: Bitcoin cannot be used with Stripe subscriptions/plans; we will remove the bitcoin option for those cases.', 'LION' ); ?>">i</span></label>
             </p>
 
             <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Stripe Test Mode', 'LION' ); ?></h4>
