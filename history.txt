@@ -147,3 +147,5 @@
 	Fixing tagged version
 1.9.0 - 2015-11-11 - Lew Ayotte, Elise Alley
 	Don't allow bitcoin for subscriptions/plans
+1.9.1 - 2015-11-11 - Lew Ayotte, Elise Alley
+	Adding some helper text to bitcoin option
