@@ -532,9 +532,9 @@ function it_exchange_stripe_addon_transaction_status_label( $status ) {
         case 'partial-refund':
             return __( 'Partially Refunded', 'LION' );
         case 'needs_response':
-            return __( 'Disputed: Stripe needs a response', 'LION' );
+            return __( 'Disputed: Response Needed', 'LION' );
         case 'under_review':
-            return __( 'Disputed: Under review', 'LION' );
+            return __( 'Disputed: Under Review', 'LION' );
         case 'won':
             return __( 'Disputed: Won, Paid', 'LION' );
         case 'cancelled':
