@@ -453,9 +453,6 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		if ( !empty( $payment_image ) ){
 			$payment_form .= $payment_image;
 		}
-		if ( !empty( $bitcoin_enabled ) ) {
-			$payment_form .= $bitcoin_enabled;
-		}
 		$payment_form .= apply_filters( 'it_exchange_stripe_addon_payment_form_checkout_arg', '' );
 		$payment_form .= '      token:       token,' . "\n";
 		$payment_form .= '      zipCode:     true' . "\n";
