@@ -169,26 +169,16 @@ function it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscrib
  *
  * @param integer $stripe_id id of stripe transaction
  * @param string $new_status new status
- * @return bool
+ * @return void
 */
 function it_exchange_stripe_addon_update_transaction_status( $stripe_id, $new_status ) {
     $transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
     foreach( $transactions as $transaction ) { //really only one
         $current_status = it_exchange_get_transaction_status( $transaction );
-        if ( $new_status !== $current_status ) {
-
-	        if ( class_exists( 'IT_Exchange_Txn_Activity_Gateway_Actor' ) ) {
-		        $context = new IT_Exchange_Txn_Activity_Gateway_Actor( it_exchange_get_addon( 'stripe' ) );
-	        } else {
-		        $context = null;
-	        }
-
-	        it_exchange_update_transaction_status( $transaction, $new_status, $context );
-        }
-
+        if ( $new_status !== $current_status )
+            it_exchange_update_transaction_status( $transaction, $new_status );
 		return true;
     }
-
 	return false;
 }
 
