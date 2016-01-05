@@ -71,7 +71,7 @@ function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_st
 			$customer_id = false;
 		}
 		
-		if ( $parent_tx_id && $customer_id ) {
+		if ( ! empty( $parent_tx_id ) && ! empty( $customer_id ) ) {
 			$transaction_object = new stdClass;
 			$transaction_object->total = $amount / 100;
 			it_exchange_add_child_transaction( 'stripe', $stripe_id, $payment_status, $customer_id, $parent_tx_id, $transaction_object );
