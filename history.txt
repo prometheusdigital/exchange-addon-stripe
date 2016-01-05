@@ -141,3 +141,11 @@
 	Change how deactivation warning works
 1.7.0 - 2015-10-29 - Lew Ayotte, Elise Alley
 	Adding Bitcoin Support (requires USD currency setting and US bank account)
+1.8.0 - 2015-11-05 - Lew Ayotte
+	PHP7 Updates
+1.8.1 - 2015-11-05 - Lew Ayotte, Elise Alley
+	Fixing tagged version
+1.9.0 - 2015-11-11 - Lew Ayotte, Elise Alley
+	Don't allow bitcoin for subscriptions/plans
+1.9.1 - 2015-11-11 - Lew Ayotte, Elise Alley
+	Adding some helper text to bitcoin option

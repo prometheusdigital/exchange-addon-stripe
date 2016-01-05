@@ -152,7 +152,7 @@ class IT_Exchange_Stripe_Add_On {
      * @since 0.1.0
      * @return void
     */
-    function IT_Exchange_Stripe_Add_On() {
+    function __construct() {
         $this->_is_admin       = is_admin();
         $this->_current_page   = empty( $_GET['page'] ) ? false : $_GET['page'];
         $this->_current_add_on = empty( $_GET['add-on-settings'] ) ? false : $_GET['add-on-settings'];
@@ -164,6 +164,17 @@ class IT_Exchange_Stripe_Add_On {
             add_action( 'it_exchange_remove_checkout_image_add_on_settings_stripe', array( $this, 'remove_checkout_image' ) );
             do_action( 'it_exchange_remove_checkout_image_add_on_settings_stripe' );
         }
+    }
+
+    /**
+     * Class deprecated constructor
+     *
+     * Sets up the class.
+     * @since 0.1.0
+     * @return void
+    */
+    function IT_Exchange_Stripe_Add_On() {
+		self::__construct();
     }
 
     /**
@@ -279,7 +290,7 @@ class IT_Exchange_Stripe_Add_On {
             <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Bitcoin', 'LION' ); ?></h4>
             <p class="hide-if-wizard">
                 <?php $form->add_check_box( 'enable-bitcoin' ); ?>
-                <label for="enable-bitcoin"><?php _e( 'Enable Bitcoin?', 'LION' ); ?> <span class="tip" title="<?php _e( 'When you accept Bitcoin with Stripe, your currency settings must be set to USD. You currently need a US bank account to accept Bitcoin payments.', 'LION' ); ?>">i</span></label>
+                <label for="enable-bitcoin"><?php _e( 'Enable Bitcoin?', 'LION' ); ?> <span class="tip" title="<?php _e( 'When you accept Bitcoin with Stripe, your currency settings must be set to USD. You currently need a US bank account to accept Bitcoin payments. NOTE: Bitcoin cannot be used with Stripe subscriptions/plans; we will remove the bitcoin option for those cases.', 'LION' ); ?>">i</span></label>
             </p>
 
             <h4 class="hide-if-wizard"><?php _e( 'Optional: Enable Stripe Test Mode', 'LION' ); ?></h4>
