@@ -441,9 +441,9 @@ class IT_Exchange_Stripe_Add_On {
             $errors[] = __( 'Please include your Stripe Live Publishable Key', 'LION' );
        
         try {
-			Stripe::setApiKey( $values['stripe-live-secret-key'] );
-		    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
-			$account = Stripe_Account::retrieve();
+			\Stripe\Stripe::setApiKey( $values['stripe-live-secret-key'] );
+			\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+			$account = \Stripe\Account::retrieve();
         } 
         catch( Exception $e ) {
 			$errors[] = $e->getMessage();
@@ -456,9 +456,9 @@ class IT_Exchange_Stripe_Add_On {
                 $errors[] = __( 'Please include your Stripe Test Publishable Key', 'LION' );
 	        
 	        try {
-				Stripe::setApiKey( $values['stripe-test-secret-key'] );
-				Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
-				$account = Stripe_Account::retrieve();
+				\Stripe\Stripe::setApiKey( $values['stripe-test-secret-key'] );
+				\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+				$account = \Stripe\Account::retrieve();
 	        }
 	        catch( Exception $e ) {
 				$errors[] = $e->getMessage();
@@ -477,13 +477,14 @@ class IT_Exchange_Stripe_Add_On {
     public static function get_supported_currency_options() {
 		$currencies = array();
         $settings = it_exchange_get_option( 'addon_stripe', true );
+		$general_settings = it_exchange_get_option( 'settings_general' );
 		if ( !empty( $settings['stripe-live-secret-key'] ) ) {
 			try {
-				Stripe::setApiKey( $settings['stripe-live-secret-key'] );
+				\Stripe\Stripe::setApiKey( $settings['stripe-live-secret-key'] );
+
+				$country = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
 		    
-				$account = Stripe_Account::retrieve();
-		    
-				$currencies = array_change_key_case( array_flip( $account->currencies_supported ), CASE_UPPER );
+				$currencies = array_change_key_case( array_flip( $country->supported_payment_currencies ), CASE_UPPER );
 			} 
 			catch( Exception $e ) {}
 	    }

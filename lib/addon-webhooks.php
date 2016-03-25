@@ -51,9 +51,9 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
 		    $settings = it_exchange_get_option( 'addon_stripe' );
 		
 		    $secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
-		    Stripe::setApiKey( $secret_key );
-		    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
-			$stripe_event = Stripe_Event::retrieve( $stripe_payload->id );
+		    \Stripe\Stripe::setApiKey( $secret_key );
+		    \Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+			$stripe_event = \Stripe\Event::retrieve( $stripe_payload->id );
 			$stripe_object = $stripe_event->data->object;
 	
 			//https://stripe.com/docs/api#event_types

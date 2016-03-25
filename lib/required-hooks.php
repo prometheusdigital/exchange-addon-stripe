@@ -112,8 +112,8 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 			$settings         = it_exchange_get_option( 'addon_stripe' );
 
 			$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
-			Stripe::setApiKey( $secret_key );
-		    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+			\Stripe\Stripe::setApiKey( $secret_key );
+		    \Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 			// Set stripe token
 			$token = $_POST['stripeToken'];
@@ -121,7 +121,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 			// Set stripe customer from WP customer ID
 			$it_exchange_customer = it_exchange_get_current_customer();
 			if ( $stripe_id = it_exchange_stripe_addon_get_stripe_customer_id( $it_exchange_customer->id ) )
-				$stripe_customer = Stripe_Customer::retrieve( $stripe_id );
+				$stripe_customer = \Stripe\Customer::retrieve( $stripe_id );
 
 			// If the user has been deleted from Stripe, we need to create a new Stripe ID.
 			if ( ! empty( $stripe_customer ) ) {
@@ -155,7 +155,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				);
 
 				// Creates a new Stripe ID for this customer
-				$stripe_customer = Stripe_Customer::create( $customer_array );
+				$stripe_customer = \Stripe\Customer::create( $customer_array );
 
 				it_exchange_stripe_addon_set_stripe_customer_id( $it_exchange_customer->id, $stripe_customer->id );
 			}
@@ -164,7 +164,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				// We don't want to update the stripe customer if they're trying to subscribe to the same plan!
 				if ( empty( $stripe_customer->subscription->plan->name ) || $subscription_id != $stripe_customer->subscription->plan->name ) {
 					
-					$plan = Stripe_Plan::retrieve( $subscription_id );
+					$plan = \Stripe\Plan::retrieve( $subscription_id );
 					if ( !empty( $plan->trial_period_days ) ) {
 						//This has a trial period, so we need to set the cart object totals to 0.00
 						$transaction_object->total = '0.00'; //should be 0.00 ... since this is a free trial!
@@ -194,7 +194,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 				);
 
 				$args = apply_filters( 'it_exchange_stripe_addon_charge_args', $args );
-				$charge = Stripe_Charge::create( $args );
+				$charge = \Stripe\Charge::create( $args );
 				$charge_id = $charge->id;
 			}
 
@@ -221,14 +221,14 @@ function it_exchange_cancel_stripe_subscription( $subscription_details ) {
 	$subscriber_id   = $subscription_details['old_subscriber_id'];
 	$stripe_settings = it_exchange_get_option( 'addon_stripe' );
 	$secret_key      = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
-	Stripe::setApiKey( $secret_key );
-    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+	\Stripe\Stripe::setApiKey( $secret_key );
+    \Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 	try {
 		$current_user_id = get_current_user_id();
 		$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
 
-		$cu = Stripe_Customer::retrieve( $stripe_customer_id );
+		$cu = \Stripe\Customer::retrieve( $stripe_customer_id );
 		$cu->subscriptions->retrieve( $subscriber_id )->cancel();
 	}
 	catch( Exception $e ) {
@@ -376,8 +376,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 	if ( $subscription ) {
 
 		$secret_key = ( $stripe_settings['stripe-test-mode'] ) ? $stripe_settings['stripe-test-secret-key'] : $stripe_settings['stripe-live-secret-key'];
-		Stripe::setApiKey( $secret_key );
-	    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+		\Stripe\Stripe::setApiKey( $secret_key );
+	    \Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 		$stripe_plan = false;
 		$time = time();
 		$amount = esc_js( number_format( it_exchange_get_cart_total( false ), 2, '', '' ) );
@@ -386,7 +386,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 		$existing_plan = get_post_meta( $product_id, '_it_exchange_stripe_plan_id', true );
 		if ( $existing_plan ) {
 			try {
-				$stripe_plan = Stripe_Plan::retrieve( $existing_plan );
+				$stripe_plan = \Stripe\Plan::retrieve( $existing_plan );
 			}
 			catch( Exception $e ) {
 				$stripe_plan = false;
@@ -405,7 +405,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			);
 
 			try {
-				$stripe_plan = Stripe_Plan::create( $args );
+				$stripe_plan = \Stripe\Plan::create( $args );
 			} catch( Exception $e ) {
 				return sprintf( __( 'Error: Unable to create Plan in Stripe - %s', 'LION' ), $e->getMessage() );
 			}
@@ -423,7 +423,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			);
 
 			try {
-				$stripe_plan = Stripe_Plan::create( $args );
+				$stripe_plan = \Stripe\Plan::create( $args );
 			} catch( Exception $e ) {
 				return sprintf( __( 'Error: Unable to create Plan in Stripe - %s', 'LION' ), $e->getMessage() );
 			}
@@ -597,8 +597,8 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 		$settings = it_exchange_get_option( 'addon_stripe' );
 
 		$secret_key = ( $settings['stripe-test-mode'] ) ? $settings['stripe-test-secret-key'] : $settings['stripe-live-secret-key'];
-		Stripe::setApiKey( $secret_key );
-	    Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+		\Stripe\Stripe::setApiKey( $secret_key );
+	    \Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 		switch( $_REQUEST['it-exchange-stripe-action'] ) {
 
@@ -606,7 +606,7 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 				try {
 					$current_user_id = get_current_user_id();
 					$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
-					$cu = Stripe_Customer::retrieve( $stripe_customer_id );
+					$cu = \Stripe\Customer::retrieve( $stripe_customer_id );
 
 					if ( !empty( $_REQUEST['it-exchange-subscriber-id'] ) )
 						$cu->subscriptions->retrieve( $_REQUEST['it-exchange-subscriber-id'] )->cancel();
@@ -620,7 +620,7 @@ function it_exchange_stripe_unsubscribe_action_submit() {
 				if ( is_admin() && current_user_can( 'administrator' ) ) {
 					if ( !empty( $_REQUEST['it-exchange-stripe-customer-id'] ) && $stripe_customer_id = $_REQUEST['it-exchange-stripe-customer-id'] ) {
 						try {
-							$cu = Stripe_Customer::retrieve( $stripe_customer_id );
+							$cu = \Stripe\Customer::retrieve( $stripe_customer_id );
 							if ( !empty( $_REQUEST['it-exchange-stripe-subscriber-id'] ) )
 								$cu->subscriptions->retrieve( $_REQUEST['it-exchange-stripe-subscriber-id'] )->cancel();
 						}

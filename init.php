@@ -7,7 +7,7 @@
 
 // Include the Stripe API library
 if ( ! class_exists( 'Stripe' ) ) {
-	require_once('lib/stripe-php/lib/Stripe.php' );
+	require_once('lib/stripe-php/init.php' );
 }
 
 // Set Stripe API version
