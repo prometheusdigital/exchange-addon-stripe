@@ -169,7 +169,7 @@ function it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscrib
  *
  * @param integer $stripe_id id of stripe transaction
  * @param string $new_status new status
- * @return void
+ * @return bool
 */
 function it_exchange_stripe_addon_update_transaction_status( $stripe_id, $new_status ) {
     $transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
