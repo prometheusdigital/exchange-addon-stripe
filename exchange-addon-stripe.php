@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: iThemes Exchange - Stripe Add-on
- * Version: 1.9.1
+ * Version: 1.10.0
  * Description: Adds the ability for users to checkout with Stripe.
  * Plugin URI: http://ithemes.com/exchange/stripe/
  * Author: iThemes
