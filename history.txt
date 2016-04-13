@@ -149,10 +149,11 @@
 	Don't allow bitcoin for subscriptions/plans
 1.9.1 - 2015-11-11 - Lew Ayotte, Elise Alley
 	Adding some helper text to bitcoin option
-1.10.0 - 2017-03-28 - Lew Ayotte, Elise Alley, Timothy B. Jacobs
+1.10.0 - 2016-03-28 - Lew Ayotte, Elise Alley, Timothy B. Jacobs
 	Updating to latest Stripe SDK (uses Namespace)
 	Fixing Currency Call
 	Minor code cleanup
 	Prevent not defined errors
-	Add support for $context parameter
 	Shorten status labels
+1.10.1 - 2016-04-13 - Lew Ayotte, Elise Alley, Timothy B. Jacobs
+	Fix: Directory for SSL certificate chain
