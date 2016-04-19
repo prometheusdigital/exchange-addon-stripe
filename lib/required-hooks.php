@@ -225,8 +225,9 @@ function it_exchange_cancel_stripe_subscription( $subscription_details ) {
     \Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 	try {
-		$current_user_id = get_current_user_id();
-		$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
+		$user_id = empty( $subscription_details['customer'] ) ? get_current_user_id() : $subscription_details['customer']->id;
+
+		$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $user_id );
 
 		$cu = \Stripe\Customer::retrieve( $stripe_customer_id );
 		$cu->subscriptions->retrieve( $subscriber_id )->cancel();
