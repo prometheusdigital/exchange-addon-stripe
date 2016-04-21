@@ -84,17 +84,25 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
 					
 				case 'invoice.payment_succeeded' :
 					$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object );
-					it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $subscriber_id, $stripe_object->charge );
-					if ( !it_exchange_stripe_addon_update_transaction_status( $stripe_object->charge, 'succeeded' ) ) {
+
+					if ( $stripe_object->charge ) {
+						it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $subscriber_id, $stripe_object->charge );
+						$find_by = $stripe_object->charge;
+					} else {
+						$find_by = $subscriber_id;
+					}
+
+					if ( ! it_exchange_stripe_addon_update_transaction_status( $find_by, 'succeeded' ) ) {
 						//If the transaction isn't found, we've got a new payment
 						$GLOBALS['it_exchange']['child_transaction'] = true;
-						it_exchange_stripe_addon_add_child_transaction( $stripe_object->charge, 'succeeded', $subscriber_id, $stripe_object->total );
+						it_exchange_stripe_addon_add_child_transaction( $find_by, 'succeeded', $subscriber_id, $stripe_object->total );
 					}
+
 					it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'active' );
 					break;
 					
 				case 'invoice.payment_failed' :
-					$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_event );
+					$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object );
 					it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'deactivated' );
 					break;
 					

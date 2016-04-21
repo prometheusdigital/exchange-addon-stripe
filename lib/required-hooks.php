@@ -150,22 +150,36 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 			if ( $subscription_id ) {
 					
 				$plan = \Stripe\Plan::retrieve( $subscription_id );
-				if ( !empty( $plan->trial_period_days ) ) {
+
+				if ( ! empty( $plan->trial_period_days ) ) {
 					//This has a trial period, so we need to set the cart object totals to 0.00
-					$transaction_object->total = '0.00'; //should be 0.00 ... since this is a free trial!
+					$transaction_object->total    = '0.00'; //should be 0.00 ... since this is a free trial!
 					$transaction_object->subtotal = '0.00'; //should be 0.00 ... since this is a free trial!
 				}
 
 				$args = array(
 					'plan'    => $subscription_id,
-					'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
+					'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ),
 				);
 
 				$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args );
-				$subscription = $stripe_customer->subscriptions->create( $args );
-				$charge_id = $subscription->id;	//need a temporary ID
-				it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
+				$stripe_subscription = $stripe_customer->subscriptions->create( $args );
+				$charge_id = $stripe_subscription->id;	//need a temporary ID
 
+				it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $stripe_subscription->id );
+
+				$txn_id = it_exchange_add_transaction( 'stripe', $charge_id, 'succeeded', $it_exchange_customer->id, $transaction_object );
+
+				if ( function_exists( 'it_exchange_get_transaction_subscriptions' ) ) {
+					$subscriptions = it_exchange_get_transaction_subscriptions( it_exchange_get_transaction( $txn_id ) );
+
+					// should be only one
+					foreach ( $subscriptions as $subscription ) {
+						$subscription->set_subscriber_id( $stripe_subscription->id );
+					}
+				}
+
+				return $txn_id;
 			} else {
 				// Now that we have a valid Customer ID, charge them!
 				$args = array(
