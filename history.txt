@@ -159,3 +159,8 @@
 	Fix: Directory for SSL certificate chain
 1.10.2 - 2016-04-13 - Lew Ayotte, Elise Alley, Timothy B, Jacobs
 	Fix: Properly load old and new Stripe SDKs
+1.10.3 - 2016-04-28 - Timothy B. Jacobs, Elise Alley
+	Add: Allow for specifying customer ID during cancellation request
+	Fix: Set subscriber ID immediately.
+	Fix: Only convert tepmorary method ID to a charge ID if a valid charge is given.
+	Fix: Remove dead code.
