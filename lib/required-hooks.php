@@ -134,19 +134,6 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 				$stripe_customer->card = $token;
 				$stripe_customer->email = $it_exchange_customer->data->user_email;
-				
-				/*	
-				if ( !empty( $transaction_object->billing_address ) ) {
-					$stripe_customer->source['name']            = $transaction_object->billing_address['first-name'] . ' ' . $transaction_object->billing_address['last-name'];
-					$stripe_customer->source['address_line1']   = $transaction_object->billing_address['address1'];
-					$stripe_customer->source['address_line2']   = $transaction_object->billing_address['address2'];
-					$stripe_customer->source['address_city']    = $transaction_object->billing_address['city'];
-					$stripe_customer->source['address_state']   = $transaction_object->billing_address['state'];
-					$stripe_customer->source['address_zip']     = $transaction_object->billing_address['zip'];
-					$stripe_customer->source['address_country'] = $transaction_object->billing_address['country'];
-				}
-				*/
-				
 				$stripe_customer->save();
 			} else {
 				$customer_array = array(
@@ -161,29 +148,38 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 			}
 						
 			if ( $subscription_id ) {
-				// We don't want to update the stripe customer if they're trying to subscribe to the same plan!
-				if ( empty( $stripe_customer->subscription->plan->name ) || $subscription_id != $stripe_customer->subscription->plan->name ) {
 					
-					$plan = \Stripe\Plan::retrieve( $subscription_id );
-					if ( !empty( $plan->trial_period_days ) ) {
-						//This has a trial period, so we need to set the cart object totals to 0.00
-						$transaction_object->total = '0.00'; //should be 0.00 ... since this is a free trial!
-						$transaction_object->subtotal = '0.00'; //should be 0.00 ... since this is a free trial!
-					}
-					
-					$args = array(
-						'plan'    => $subscription_id,
-						'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ) ,
-					);
-					
-					$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args );
-					$subscription = $stripe_customer->subscriptions->create( $args );
-					$charge_id = $subscription->id;	//need a temporary ID
-					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $subscription->id );
+				$plan = \Stripe\Plan::retrieve( $subscription_id );
 
-				} else {
-					throw new Exception( __( 'Error: You are already subscribed to this plan.', 'LION' ) );
+				if ( ! empty( $plan->trial_period_days ) ) {
+					//This has a trial period, so we need to set the cart object totals to 0.00
+					$transaction_object->total    = '0.00'; //should be 0.00 ... since this is a free trial!
+					$transaction_object->subtotal = '0.00'; //should be 0.00 ... since this is a free trial!
 				}
+
+				$args = array(
+					'plan'    => $subscription_id,
+					'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ),
+				);
+
+				$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args );
+				$stripe_subscription = $stripe_customer->subscriptions->create( $args );
+				$charge_id = $stripe_subscription->id;	//need a temporary ID
+
+				it_exchange_stripe_addon_set_stripe_customer_subscription_id( $it_exchange_customer->id, $stripe_subscription->id );
+
+				$txn_id = it_exchange_add_transaction( 'stripe', $charge_id, 'succeeded', $it_exchange_customer->id, $transaction_object );
+
+				if ( function_exists( 'it_exchange_get_transaction_subscriptions' ) ) {
+					$subscriptions = it_exchange_get_transaction_subscriptions( it_exchange_get_transaction( $txn_id ) );
+
+					// should be only one
+					foreach ( $subscriptions as $subscription ) {
+						$subscription->set_subscriber_id( $stripe_subscription->id );
+					}
+				}
+
+				return $txn_id;
 			} else {
 				// Now that we have a valid Customer ID, charge them!
 				$args = array(
@@ -225,8 +221,9 @@ function it_exchange_cancel_stripe_subscription( $subscription_details ) {
     \Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 
 	try {
-		$current_user_id = get_current_user_id();
-		$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $current_user_id );
+		$user_id = empty( $subscription_details['customer'] ) ? get_current_user_id() : $subscription_details['customer']->id;
+
+		$stripe_customer_id = it_exchange_stripe_addon_get_stripe_customer_id( $user_id );
 
 		$cu = \Stripe\Customer::retrieve( $stripe_customer_id );
 		$cu->subscriptions->retrieve( $subscriber_id )->cancel();

@@ -7,10 +7,12 @@
 
 /**
  * Converts a transaction ID from the temporary subscription ID to the permanent charge ID
+ * 
  * @since 1.1.0
  *
- * @param object $stripe_object Stripe Event Object
- * @return string $subscriber_id
+ * @param \Stripe\StripeObject $stripe_object Stripe Event Object
+ *
+ * @return string
 */
 function it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object ) {
 	$subscriber_id = false;
@@ -25,11 +27,11 @@ function it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object ) {
 
 /**
  * Converts a transaction ID from the temporary subscription ID to the permanent charge ID
+ * 
  * @since 1.1.0
  *
  * @param string $stripe_subscription_id
  * @param string $stripe_charge_id
- * @return void
 */
 function it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $stripe_subscription_id, $stripe_charge_id ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_subscription_id );
@@ -46,12 +48,14 @@ function it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $stripe_
  *
  * @since 1.3.0
  *
- * @param integer $stripe_id id of paypal transaction
- * @param string $payment_status new status
- * @param string $subscriber_id from PayPal (optional)
+ * @param integer     $stripe_id id of paypal transaction
+ * @param string      $payment_status new status
+ * @param string|bool $subscriber_id Optionally, specify the subscriber ID.
+ * @param int         $amount Amount of the child transaction in cents.
+ *
  * @return bool
 */
-function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_status, $subscriber_id=false, $amount ) {
+function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_status, $subscriber_id = false, $amount ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
 	if ( !empty( $transactions ) ) {
 		//this transaction DOES exist, don't try to create a new one, just update the status
@@ -87,6 +91,7 @@ function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_st
  * @since 0.1.0
  *
  * @param integer $customer_id the WP customer ID
+ *
  * @return integer
 */
 function it_exchange_stripe_addon_get_stripe_customer_id( $customer_id ) {
@@ -119,6 +124,7 @@ function it_exchange_stripe_addon_set_stripe_customer_id( $customer_id, $stripe_
  *
  * @param integer $customer_id the WP user ID
  * @param integer $subscription_id the stripe customer's subscription ID
+ *
  * @return boolean
 */
 function it_exchange_stripe_addon_set_stripe_customer_subscription_id( $customer_id, $subscription_id ) {
@@ -133,8 +139,9 @@ function it_exchange_stripe_addon_set_stripe_customer_subscription_id( $customer
  *
  * @since 0.1.0
  *
- * @param integer $stripe_id id of stripe transaction
- * @return transaction object
+ * @param string $stripe_id id of stripe transaction
+ *
+ * @return IT_Exchange_Transaction[]
 */
 function it_exchange_stripe_addon_get_transaction_id( $stripe_id ) {
     $args = array(
@@ -150,10 +157,11 @@ function it_exchange_stripe_addon_get_transaction_id( $stripe_id ) {
  *
  * @since 1.1.0
  *
- * @param integer $subscriber_id id of stripe transaction
- * @return transaction object
+ * @param string $subscriber_id id of stripe transaction
+ *
+ * @return IT_Exchange_Transaction[]
 */
-function it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id) {
+function it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id ) {
     $args = array(
         'meta_key'    => '_it_exchange_transaction_subscriber_id',
         'meta_value'  => $subscriber_id,
@@ -169,6 +177,7 @@ function it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscrib
  *
  * @param integer $stripe_id id of stripe transaction
  * @param string $new_status new status
+ *                           
  * @return bool
 */
 function it_exchange_stripe_addon_update_transaction_status( $stripe_id, $new_status ) {
@@ -187,9 +196,8 @@ function it_exchange_stripe_addon_update_transaction_status( $stripe_id, $new_st
  *
  * @since 1.1.0
  *
- * @param integer $subscription_id id of stripe subscription
+ * @param string $subscriber_id id of stripe subscription
  * @param string $status new status
- * @return void
 */
 function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $status ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
@@ -202,6 +210,9 @@ function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $sta
  * Adds a refund to post_meta for a stripe transaction
  *
  * @since 0.1.0
+ *
+ * @param string $stripe_id
+ * @param int    $refund
 */
 function it_exchange_stripe_addon_add_refund_to_transaction( $stripe_id, $refund ) {
 
