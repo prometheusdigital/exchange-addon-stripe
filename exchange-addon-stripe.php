@@ -26,7 +26,7 @@
  * @return void
 */
 function it_exchange_register_stripe_addon() {
-	if ( extension_loaded( 'mbstring' ) ) {
+	if ( extension_loaded( 'mbstring' ) && version_compare( phpversion(), '5.3', '>=' ) ) {
 		$options = array(
 			'name'              => __( 'Stripe', 'LION' ),
 			'description'       => __( 'Process transactions via Stripe, a simple and elegant payment gateway.', 'LION' ),
@@ -53,6 +53,24 @@ function it_exchange_stripe_addon_show_mbstring_nag() {
 	}
 }
 add_action( 'admin_notices', 'it_exchange_stripe_addon_show_mbstring_nag' );
+
+/**
+ * Show a nag if PHP 5.3 is not available.
+ *
+ * @since 1.10.4
+ */
+function it_exchange_stripe_addon_show_php_version_nag() {
+
+	if ( version_compare( phpversion(), '5.3', '<' ) ) {
+		?>
+		<div id="it-exchange-add-on-mbstring-nag" class="it-exchange-nag">
+			<?php _e( 'You must have PHP version 5.3 or greater to use the Stripe Add-on for iThemes Exchange. Please contact your web host provider to upgrade your PHP version.', 'LION' ); ?>
+		</div>
+		<?php
+	}
+}
+
+add_action( 'admin_notices', 'it_exchange_stripe_addon_show_php_version_nag' );
 
 /**
  * Loads the translation data for WordPress
