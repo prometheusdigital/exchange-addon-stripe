@@ -164,3 +164,5 @@
 	Fix: Set subscriber ID immediately.
 	Fix: Only convert tepmorary method ID to a charge ID if a valid charge is given.
 	Fix: Remove dead code.
+1.10.4 - 2016-05-20 - Timothy B. Jacobs, Elise Alley
+	Tweak: Add notice if PHP version requirement is not met.
