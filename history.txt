@@ -166,3 +166,5 @@
 	Fix: Remove dead code.
 1.10.4 - 2016-05-20 - Timothy B. Jacobs, Elise Alley
 	Tweak: Add notice if PHP version requirement is not met.
+1.10.5 - 2016-08-08 - Timothy B. Jacobs, Elise Alley
+	Fix: Update Stripe SDK to v3.19.0 to fix issues with TLS 1.2 on some server setups.
