@@ -15,6 +15,11 @@
  * @return string
 */
 function it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object ) {
+
+	if ( isset( $stripe_object->id ) && strpos( $stripe_object->id, 'sub' ) === 0 ) {
+		return $stripe_object->id;
+	}
+
 	$subscriber_id = false;
 	foreach( $stripe_object->lines->data as $invoice_line ) {
 		if ( 'subscription' === $invoice_line->type ) {
