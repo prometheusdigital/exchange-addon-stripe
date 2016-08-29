@@ -85,8 +85,26 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
 				case 'invoice.payment_succeeded' :
 					$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object );
 
+					$convert = true;
+
 					if ( $stripe_object->charge ) {
-						it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $subscriber_id, $stripe_object->charge );
+
+						$transactions = it_exchange_stripe_addon_get_transaction_id( $subscriber_id );
+
+						if ( is_array( $transactions ) && count( $transactions ) ) {
+							/** @var IT_Exchange_Transaction $transaction */
+							$transaction = reset( $transactions );
+
+							// this was a free trial
+							if ( (float) $transaction->get_total( false ) === 0.00 ) {
+								$convert = false;
+							}
+						}
+
+						if ( $convert ) {
+							it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $subscriber_id, $stripe_object->charge );
+						}
+
 						$find_by = $stripe_object->charge;
 					} else {
 						$find_by = $subscriber_id;
