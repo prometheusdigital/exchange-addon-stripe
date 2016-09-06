@@ -168,3 +168,5 @@
 	Tweak: Add notice if PHP version requirement is not met.
 1.10.5 - 2016-08-08 - Timothy B. Jacobs, Elise Alley
 	Fix: Update Stripe SDK to v3.19.0 to fix issues with TLS 1.2 on some server setups.
+1.10.6 - 2016-09-06 - Timothy B. Jacobs, Elise Alley
+	Fix: Issue with Stripe trials not converting to full subscriptions
