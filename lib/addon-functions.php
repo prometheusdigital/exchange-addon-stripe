@@ -265,3 +265,22 @@ function it_exchange_stripe_addon_delete_stripe_id_from_customer( $stripe_id ) {
         }
     }
 }
+
+/**
+ * Setup a Stripe object.
+ *
+ * @since 1.36.0
+ */
+function it_exchange_setup_stripe_request() {
+
+	$gateway = ITE_Gateways::get( 'stripe' );
+
+	if ( $gateway->is_sandbox_mode() ) {
+		$secret_key = $gateway->settings()->get( 'stripe-test-secret-key' );
+	} else {
+		$secret_key = $gateway->settings()->get( 'stripe-live-secret-key' );
+	}
+
+	\Stripe\Stripe::setApiKey( $secret_key );
+	\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
+}

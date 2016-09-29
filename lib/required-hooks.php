@@ -6,6 +6,11 @@
  * We've placed them all in one file to help add-on devs identify them more easily
 */
 
+add_action( 'it_exchange_register_gateways', function( ITE_Gateways $gateways ) {
+	require_once dirname( __FILE__ ) . '/handlers/class.tokenize.php';
+	$gateways::register( new IT_Exchange_Stripe_Gateway() );
+} );
+
 /**
  * Adds actions to the plugins page for the iThemes Exchange Stripe plugin
  *

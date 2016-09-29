@@ -36,7 +36,7 @@ function it_exchange_register_stripe_addon() {
 			'wizard-icon'       => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/lib/images/wizard-stripe.png' ),
 			'file'              => dirname( __FILE__ ) . '/init.php',
 			'category'          => 'transaction-methods',
-			'settings-callback' => 'it_exchange_stripe_addon_settings_callback',	
+			//'settings-callback' => 'it_exchange_stripe_addon_settings_callback',
 		);
 		it_exchange_register_addon( 'stripe', $options );
 	}
