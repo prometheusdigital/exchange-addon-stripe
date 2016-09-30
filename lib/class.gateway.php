@@ -21,6 +21,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 
 		$factory          = new ITE_Gateway_Request_Factory();
 		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this );
+		$this->handlers[] = new IT_Exchange_Stripe_Purchase_Request_Handler( $this, $factory );
 
 		add_action( "it_exchange_{$this->get_settings_name()}_top", array(
 			$this,

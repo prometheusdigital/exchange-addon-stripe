@@ -42,7 +42,15 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 		$to_tokenize = $request->get_source_to_tokenize();
 
 		$stripe_customer = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
-		$stripe_customer = \Stripe\Customer::retrieve( $stripe_customer );
+		$stripe_customer = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
+
+		if ( ! $stripe_customer || ! empty( $stripe_customer->deleted ) ) {
+			$stripe_customer = \Stripe\Customer::create( array(
+				'email'    => $request->get_customer()->get_email(),
+				'metadata' => array( 'wp_user_id' => $request->get_customer()->ID )
+			) );
+			it_exchange_stripe_addon_set_stripe_customer_id( $request->get_customer()->ID, $stripe_customer->id );
+		}
 
 		// This is a token returned from Checkout or Stripe.js
 		if ( is_string( $to_tokenize ) ) {
@@ -88,6 +96,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 				$token->update_meta( 'expiration_month', $source->exp_month );
 				$token->update_meta( 'expiration_year', $source->exp_year );
 				$token->update_meta( 'funding', $source->funding );
+				$token->update_meta( 'stripe_fingerprint', $source->fingerprint );
 			}
 		} elseif ( $source instanceof \Stripe\BankAccount ) {
 			$token = ITE_Payment_Token::create( array(

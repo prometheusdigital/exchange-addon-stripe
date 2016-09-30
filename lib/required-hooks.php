@@ -7,6 +7,7 @@
 */
 
 add_action( 'it_exchange_register_gateways', function( ITE_Gateways $gateways ) {
+	require_once dirname( __FILE__ ) . '/handlers/class.purchase.php';
 	require_once dirname( __FILE__ ) . '/handlers/class.tokenize.php';
 	$gateways::register( new IT_Exchange_Stripe_Gateway() );
 } );
@@ -212,7 +213,7 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 	return false;
 
 }
-add_action( 'it_exchange_do_transaction_stripe', 'it_exchange_stripe_addon_process_transaction', 10, 2 );
+//add_action( 'it_exchange_do_transaction_stripe', 'it_exchange_stripe_addon_process_transaction', 10, 2 );
 
 function it_exchange_cancel_stripe_subscription( $subscription_details ) {
 
@@ -508,7 +509,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
     return apply_filters( 'it_exchange_stripe_addon_payment_form', $payment_form );
 
 }
-add_filter( 'it_exchange_get_stripe_make_payment_button', 'it_exchange_stripe_addon_make_payment_button', 10, 2 );
+//add_filter( 'it_exchange_get_stripe_make_payment_button', 'it_exchange_stripe_addon_make_payment_button', 10, 2 );
 
 /**
  * Gets the interpretted transaction status from valid stripe transaction statuses
