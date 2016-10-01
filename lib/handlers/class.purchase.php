@@ -191,7 +191,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 
 			it_exchange_setup_stripe_request();
 
-			$stripe_customer = $this->get_stripe_customer_for_request( $request );
+			$stripe_customer = $this->get_stripe_customer_for_request( $request, $previous_default_source );
 			$http_request    = $request->get_http_request();
 
 			if ( ! empty( $http_request['stripe_subscription_id'] ) ) {
@@ -202,7 +202,10 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 				);
 				$args         = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
 				$subscription = $stripe_customer->subscriptions->create( $args );
-				$txn_id       = it_exchange_add_transaction( 'stripe', $subscription->id, 'succeeded', $cart );
+
+				$txn_id = it_exchange_add_transaction( 'stripe', $subscription->id, 'succeeded', $cart, null, array(
+					'payment_token' => $request->get_token() ? $request->get_token()->ID : 0
+				) );
 
 				if ( ! $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
 					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $request->get_customer()->ID, $subscription->id );
@@ -231,7 +234,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 
 				$args   = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
 				$charge = \Stripe\Charge::create( $args );
-				$txn_id = it_exchange_add_transaction( 'stripe', $charge->id, 'succeeded', $cart );
+				$txn_id = it_exchange_add_transaction( 'stripe', $charge->id, 'succeeded', $cart, null, array(
+					'payment_token' => $request->get_token() ? $request->get_token()->ID : 0
+				) );
 			}
 
 			$transaction = it_exchange_get_transaction( $txn_id );
@@ -240,8 +245,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 				$transaction->update_meta( 'stripe_guest_customer_id', $stripe_customer->id );
 			}
 
-			if ( $request->get_token() ) {
-				$transaction->add_meta( 'payment_tokens', $request->get_token()->ID );
+			if ( $previous_default_source && $request->get_token() && $stripe_customer->default_source !== $request->get_token()->token ) {
+				$stripe_customer->default_source = $previous_default_source;
+				$stripe_customer->save();
 			}
 
 			return $transaction;
@@ -259,10 +265,11 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	 * @since 1.36.0
 	 *
 	 * @param \ITE_Gateway_Purchase_Request $request
+	 * @param string|null                   $previous_default_source
 	 *
 	 * @return \Stripe\Customer
 	 */
-	protected function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request ) {
+	protected function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request, &$previous_default_source ) {
 
 		$stripe_customer = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
 		$stripe_customer = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
@@ -288,6 +295,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 				it_exchange_stripe_addon_set_stripe_customer_id( $request->get_customer()->ID, $stripe_customer->id );
 			}
 		} else {
+			$previous_default_source         = $stripe_customer->default_source;
 			$stripe_customer->default_source = $request->get_token()->token;
 			$stripe_customer->save();
 		}
