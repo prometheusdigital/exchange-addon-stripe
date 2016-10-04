@@ -21,8 +21,15 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 
 		$factory          = new ITE_Gateway_Request_Factory();
 		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this );
-		$this->handlers[] = new IT_Exchange_Stripe_Purchase_Request_Handler( $this, $factory );
 		$this->handlers[] = new IT_Exchange_Stripe_Webhook_Request_Handler( $this );
+
+		$helper = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper();
+
+		if ( $this->settings()->get( 'use-checkout' ) ) {
+			$this->handlers[] = new IT_Exchange_Stripe_Purchase_Request_Handler( $this, $factory, $helper );
+		} else {
+			$this->handlers[] = new IT_Exchange_Stripe_Purchase_Dialog_Request_Handler( $this, $factory, $helper );
+		}
 
 		add_action( "it_exchange_{$this->get_settings_name()}_top", array(
 			$this,
@@ -145,10 +152,19 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 				'default' => __( 'Purchase', 'LION' ),
 			),
 			array(
+				'type'    => 'check_box',
+				'slug'    => 'use-checkout',
+				'label'   => __( 'Use Stripe Checkout Modal', 'LION' ),
+				'desc'    => __( 'Use the Checkout modal provided by Stripe, instead of hosting the payment form on your site.', 'LION' ) . ' ' .
+				             sprintf( __( 'Learn more at %s.', 'LION' ), '<a href="https://stripe.com/checkout">Stripe</a>' ),
+				'default' => true,
+			),
+			array(
 				'type'    => 'file_upload',
 				'slug'    => 'stripe-checkout-image',
 				'label'   => __( 'Optional: Checkout Image', 'LION' ),
-				'tooltip' => __( 'This should be a square image (128x128 pixels) and will appear in the Stripe checkout', 'LION' )
+				'tooltip' => __( 'This should be a square image (128x128 pixels) and will appear in the Stripe checkout', 'LION' ),
+				'show_if' => array( 'field' => 'use-checkout', 'value' => true, 'compare' => '=' ),
 			),
 			'preview' => array(
 				'type' => 'html',
@@ -161,6 +177,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 				'slug'    => 'enable-bitcoin',
 				'label'   => __( 'Enable Bitcoin?', 'it-l10n-ithemes-exchange' ),
 				'tooltip' => __( 'When you accept Bitcoin with Stripe, your currency settings must be set to USD. You currently need a US bank account to accept Bitcoin payments. NOTE: Bitcoin cannot be used with Stripe subscriptions/plans; we will remove the bitcoin option for those cases.', 'LION' ),
+				'show_if' => array( 'field' => 'use-checkout', 'value' => true, 'compare' => '=' ),
 			),
 			array(
 				'type'    => 'check_box',
@@ -184,7 +201,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			),
 		);
 
-		if ( ! $this->settings()->get( 'stripe-checkout-image' ) ) {
+		if ( ! $this->settings()->get( 'stripe-checkout-image' ) || ! $this->settings()->get( 'use-checkout' ) ) {
 			unset( $fields['preview'] );
 		}
 

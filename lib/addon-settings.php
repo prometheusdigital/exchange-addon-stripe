@@ -80,13 +80,14 @@ function it_exchange_stripe_addon_default_settings( $values ) {
         'stripe-test-secret-key'       => '',
         'stripe-test-publishable-key'  => '',
         'stripe-purchase-button-label' => __( 'Purchase', 'LION' ),
+        'use-checkout'                 => true,
         'stripe-checkout-image'        => '',
         'enable-bitcoin'               => false,
     );
     $values = ITUtility::merge_defaults( $values, $defaults );
     return $values;
 }
-add_filter( 'it_storage_get_defaults_exchange_addon_stripe', 'it_exchange_stripe_addon_default_settings' );
+//add_filter( 'it_storage_get_defaults_exchange_addon_stripe', 'it_exchange_stripe_addon_default_settings' );
 
 /**
  * Filters default currencies to only display those supported by Stripe
