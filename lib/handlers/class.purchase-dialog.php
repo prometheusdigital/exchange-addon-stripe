@@ -122,12 +122,17 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 
 				var $ = jQuery, $form = jQuery( 'form.it-exchange-purchase-dialog-stripe' );
 
+				var name = $( "#it-exchnage-purchase-dialog-cc-first-name-for-stripe" ).val()
+					+ ' ' +
+					$( "#it-exchnage-purchase-dialog-cc-last-name-for-stripe" ).val();
+
 				Stripe.setPublishableKey( '<?php echo esc_js( $publishable ); ?>' );
 				Stripe.card.createToken( {
 					number   : $( '#it-exchnage-purchase-dialog-cc-number-for-stripe' ).val().replace( /\s+/g, '' ),
 					cvc      : $( '#it-exchnage-purchase-dialog-cc-code-for-stripe' ).val(),
 					exp_month: $( '#it-exchnage-purchase-dialog-cc-expiration-month-for-stripe' ).val(),
 					exp_year : $( '#it-exchnage-purchase-dialog-cc-expiration-year-for-stripe' ).val(),
+					name     : name
 				}, function ( status, response ) {
 					if ( response.error ) {
 						$( '.it-exchange-visual-cc-wrap', $form ).prepend(

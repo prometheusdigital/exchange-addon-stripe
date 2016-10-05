@@ -205,25 +205,38 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	 * @param string|null                   $previous_default_source
 	 *
 	 * @return \Stripe\Customer
+	 *
+	 * @throws \InvalidArgumentException
 	 */
 	public function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request, &$previous_default_source ) {
 
 		$stripe_customer = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
 		$stripe_customer = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
 
+		if ( $request->get_token() ) {
+			$source = $request->get_token()->token;
+		} elseif ( $request->get_tokenize() ) {
+			$token = ITE_Gateways::get( 'stripe' )->get_handler_for( $request->get_tokenize() )->handle( $request->get_tokenize() );
+
+			if ( $token ) {
+				$source = $token->token;
+			}
+		}
+
+		if ( empty( $source ) ) {
+			throw new InvalidArgumentException( __( 'Unable to create Payment Token.', 'LION' ) );
+		}
+
 		if ( ! $stripe_customer || ! empty( $stripe_customer->deleted ) ) {
 
 			$args = array(
 				'email'    => $request->get_customer()->get_email(),
 				'metadata' => array( 'wp_user_id' => $request->get_customer()->ID ),
+				'source'   => $source,
 			);
 
 			if ( $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
 				$args['metadata']['is_guest'] = true;
-			}
-
-			if ( $request->get_tokenize() ) {
-				$args['source'] = $request->get_tokenize()->get_source_to_tokenize();
 			}
 
 			$stripe_customer = \Stripe\Customer::create( $args );
@@ -233,7 +246,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			}
 		} else {
 			$previous_default_source         = $stripe_customer->default_source;
-			$stripe_customer->default_source = $request->get_token()->token;
+			$stripe_customer->default_source = $source;
 			$stripe_customer->save();
 		}
 

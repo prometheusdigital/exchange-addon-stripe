@@ -72,6 +72,34 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					it_exchange_stripe_addon_delete_stripe_id_from_customer( $stripe_object->id );
 					break;
 
+				case 'customer.source.deleted':
+
+					$token = ITE_Payment_Token::query()
+					                          ->where( 'token', '=', $stripe_object->id )
+					                          ->and_where( 'gateway', '=', 'stripe' )->first();
+
+					if ( $token ) {
+						$token->delete();
+					}
+
+					break;
+				case 'customer.source.updated':
+
+					/** @var ITE_Payment_Token $token */
+					$token = ITE_Payment_Token::query()
+					                          ->where( 'token', '=', $stripe_object->id )
+					                          ->and_where( 'gateway', '=', 'stripe' )->first();
+
+					if ( ! $token ) {
+						break;
+					}
+
+					if ( $stripe_object instanceof \Stripe\Card && $token instanceof ITE_Payment_Token_Card ) {
+						$token->set_expiration_month( $stripe_object->exp_month );
+						$token->set_expiration_year( $stripe_object->exp_year );
+					}
+
+					break;
 				case 'invoice.created':
 
 					/** @var \Stripe\Invoice $stripe_object */

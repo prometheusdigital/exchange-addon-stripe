@@ -16,7 +16,7 @@ if ( ! class_exists( 'Stripe' ) ) {
 
 // Set Stripe API version
 if ( !defined( 'ITE_STRIPE_API_VERSION' ) ) {
-	define( 'ITE_STRIPE_API_VERSION', '2015-01-11' );
+	define( 'ITE_STRIPE_API_VERSION', '2016-07-06' );
 }
 
 if ( function_exists( 'add_image_size' ) ) {

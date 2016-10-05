@@ -83,7 +83,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 		}
 
 		if ( $source instanceof \Stripe\Card ) {
-			$token = ITE_Payment_Token::create( array(
+			$token = ITE_Payment_Token_Card::create( array(
 				'customer' => $request->get_customer()->ID,
 				'token'    => $source->id,
 				'gateway'  => $this->gateway->get_slug(),
@@ -92,14 +92,14 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 			) );
 
 			if ( $token ) {
-				$token->update_meta( 'brand', $source->brand );
-				$token->update_meta( 'expiration_month', $source->exp_month );
-				$token->update_meta( 'expiration_year', $source->exp_year );
-				$token->update_meta( 'funding', $source->funding );
+				$token->set_brand( $source->brand );
+				$token->set_expiration_month( $source->exp_month );
+				$token->set_expiration_year( $source->exp_year );
+				$token->set_funding( $source->funding );
 				$token->update_meta( 'stripe_fingerprint', $source->fingerprint );
 			}
 		} elseif ( $source instanceof \Stripe\BankAccount ) {
-			$token = ITE_Payment_Token::create( array(
+			$token = ITE_Payment_Token_Bank_Account::create( array(
 				'customer' => $request->get_customer()->ID,
 				'token'    => $source->id,
 				'gateway'  => $this->gateway->get_slug(),
@@ -108,9 +108,9 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 			) );
 
 			if ( $token ) {
-				$token->update_meta( 'bank_name', $source->bank_name );
+				$token->set_bank_name( $source->bank_name );
+				$token->set_account_type( $source->account_holder_type );
 				$token->update_meta( 'stripe_fingerprint', $source->fingerprint );
-				$token->update_meta( 'account_type', $source->account_holder_type );
 			}
 		} else {
 			throw new UnexpectedValueException( sprintf(
@@ -135,5 +135,5 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 	/**
 	 * @inheritDoc
 	 */
-	public static function can_handle( $request_name ) { return 'tokenize'; }
+	public static function can_handle( $request_name ) { return $request_name === 'tokenize'; }
 }
