@@ -52,14 +52,14 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 			'email'       => $request->get_customer()->get_email(),
 			'name'        => $general['company-name'],
 			'description' => strip_tags( it_exchange_get_cart_description( array( 'cart' => $cart ) ) ),
-			'panelLabel'  => 'Checkout',
+			'panelLabel'  => __( 'Checkout', 'LION' ),
 			'zipCode'     => true,
 			'currency'    => $general['default-currency'],
 			'bitcoin'     => (bool) $this->get_gateway()->settings()->get( 'enable-bitcoin' )
 		);
 
 		if ( $plan = $this->helper->get_plan_for_cart( $cart, $general['default-currency'] ) ) {
-			$vars['plan'] = $plan->id;
+			$vars['plan']    = $plan->id;
 			$vars['bitcoin'] = false;
 		} elseif ( $plan === null ) {
 			$vars['amount'] = (int) number_format( $total, 2, '', '' );
@@ -133,55 +133,152 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 		ob_start();
 		?>
 		<script type="text/javascript">
-			jQuery( '#stripe-purchase-form' ).submit( function ( e ) {
+			(function ( $ ) {
+				var tokensEndpoint = '<?php echo esc_js( $tokens_endpoint ); ?>',
+					newMethodLabel = '<?php echo esc_js( __( 'New Payment Method', 'LION' ) ); ?>',
+					completeLabel = '<?php echo esc_js( __( 'Complete Purchase', 'LION' ) ); ?>',
+					cancelLabel = '<?php echo esc_js( __( 'Cancel', 'LION' ) ); ?>',
+					$purchaseForm = $( '#stripe-purchase-form' );
 
-				if ( jQuery( "[name='purchase_token'],[name='to_tokenize']", jQuery( this ) ).length ) {
-					return;
-				}
-
-				e.preventDefault();
-
-				jQuery( this ).attr( 'disabled', true );
-
-				itExchange.stripeAddonCheckoutEmail = '<?php echo esc_js( $config['email'] ); ?>';
-				itExchange.hooks.doAction( 'itExchangeStripeAddon.makePayment' );
-
-				var $purchaseForm = jQuery( this );
 				var stripeConfig = <?php echo wp_json_encode( $config ) ?>;
-				var tokensEndpoint = '<?php echo esc_js( $tokens_endpoint ); ?>';
-
 				stripeConfig.token = function ( token ) {
 
 					it_exchange_stripe_processing_payment_popup();
 
-					if ( tokensEndpoint.length ) {
-						jQuery.post( tokensEndpoint, {
-							gateway: 'stripe',
-							source : token.id,
-							primary: true
-						}, function ( result ) {
-							$purchaseForm.append( jQuery( '<input type="hidden" name="purchase_token">' ).val( result.id ) );
+					$purchaseForm.append( $( '<input type="hidden" name="to_tokenize">' ).val( token.id ) );
 
-							if ( stripeConfig.plan ) {
-								$purchaseForm.append( jQuery( '<input type="hidden" name="stripe_subscription_id">' ).val( stripeConfig.plan ) );
-							}
-
-							$purchaseForm.submit();
-						} );
-					} else {
-
-						$purchaseForm.append( jQuery( '<input type="hidden" name="to_tokenize">' ).val( token.id ) );
-
-						if ( stripeConfig.plan ) {
-							$purchaseForm.append( jQuery( '<input type="hidden" name="stripe_subscription_id">' ).val( stripeConfig.plan ) );
-						}
-
-						$purchaseForm.submit();
+					if ( stripeConfig.plan ) {
+						$purchaseForm.append( $( '<input type="hidden" name="stripe_subscription_id">' ).val( stripeConfig.plan ) );
 					}
+
+					$purchaseForm.submit();
 				};
 
-				StripeCheckout.open( stripeConfig );
-			} );
+				$purchaseForm.submit( function ( e ) {
+
+					if ( $( "input[name='purchase_token'],input[name='to_tokenize']", $( this ) ).length ) {
+						return;
+					}
+
+					e.preventDefault();
+
+					$( this ).attr( 'disabled', true );
+
+					itExchange.stripeAddonCheckoutEmail = '<?php echo esc_js( $config['email'] ); ?>';
+					itExchange.hooks.doAction( 'itExchangeStripeAddon.makePayment' );
+
+					getTokens().then( function ( tokens ) {
+						if ( ! tokens.length ) {
+							StripeCheckout.open( stripeConfig );
+
+							return;
+						}
+
+						var html = buildTokenSelector( tokens );
+						html += '<input type="submit" value="' + completeLabel + '" id="it-exchange-stripe-complete-button">';
+						html += '<a href="#" id="it-exchange-stripe-cancel" style="width: 100%;	display: inline-block; text-align: center;">';
+						html += cancelLabel;
+						html += '</a>';
+
+						$( '.payment-methods-wrapper > form, .it-exchange-purchase-button' ).hide();
+
+						$purchaseForm.after( '<div id="it-exchange-stripe-select-method">' + html + '</div>' );
+
+					} ).fail( function ( err ) {
+						console.log( 'Stripe Tokens Error: ' + err );
+
+						StripeCheckout.open( stripeConfig );
+					} );
+				} );
+
+				$( document ).on( 'click', '#new-method-stripe', function ( e ) {
+					StripeCheckout.open( stripeConfig );
+				} );
+
+				$( document ).on( 'click', '#it-exchange-stripe-cancel', function ( e ) {
+					e.preventDefault();
+
+					$( "#it-exchange-stripe-select-method" ).remove();
+					$( '.payment-methods-wrapper > form, .it-exchange-purchase-button' ).show();
+				} );
+
+				// Prime the cache asynchronously.
+				getTokens();
+
+				/**
+				 * Get all Stripe Payment Tokens.
+				 *
+				 * This function will internally cache the HTTP request.
+				 *
+				 * @since 1.11.0
+				 *
+				 * @returns {*} Promise that resolves to a list of tokens.
+				 */
+				function getTokens() {
+
+					var promise = $.Deferred();
+
+					if ( ! tokensEndpoint.length ) {
+
+						promise.resolve( [] );
+
+						return promise.promise();
+					}
+
+					if ( typeof this.tokens !== 'undefined' ) {
+						promise.resolve( this.tokens );
+
+						return promise.promise();
+					}
+
+					$.get( tokensEndpoint + '&gateway=stripe', (function ( data, statusText, xhr ) {
+						if ( xhr.status !== 200 ) {
+							promise.reject( data );
+						} else {
+							this.tokens = data;
+							promise.resolve( data );
+						}
+					}).bind( this ) );
+
+					return promise.promise();
+				}
+
+				/**
+				 * Build the tokens selector.
+				 *
+				 * @param {Object[]} tokens
+				 * @param {int} tokens[].id
+				 * @param {string} tokens[].label
+				 * @param {bool} tokens[].primary
+				 *
+				 * @returns {string}
+				 */
+				function buildTokenSelector( tokens ) {
+					var html = '<div class="it-exchange-credit-card-selector">';
+
+					for ( var i = 0, len = tokens.length; i < len; i ++ ) {
+
+						var token = tokens[ i ], c = '';
+
+						if ( token.primary ) {
+							c = ' checked="checked"';
+						}
+
+						html += '<label><input type="radio" name="purchase_token"' + c + ' value="' + token.id + '"> ';
+						html += token.label.rendered;
+						html += '</label><br>';
+					}
+
+					html += '<label><input type="radio" name="purchase_token" value="new_method" id="new-method-stripe"> ';
+					html += newMethodLabel;
+					html += '</label>';
+
+					html += '</div>';
+
+					return html;
+				}
+
+			})( jQuery );
 		</script>
 		<?php
 
