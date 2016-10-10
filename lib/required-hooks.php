@@ -12,6 +12,7 @@ add_action( 'it_exchange_register_gateways', function( ITE_Gateways $gateways ) 
 	require_once dirname( __FILE__ ) . '/handlers/class.purchase-dialog.php';
 	require_once dirname( __FILE__ ) . '/handlers/class.tokenize.php';
 	require_once dirname( __FILE__ ) . '/handlers/class.webhook.php';
+	require_once dirname( __FILE__ ) . '/handlers/class.refund.php';
 	$gateways::register( new IT_Exchange_Stripe_Gateway() );
 } );
 

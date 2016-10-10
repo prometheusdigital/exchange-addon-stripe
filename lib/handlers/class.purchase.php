@@ -180,9 +180,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 						html += cancelLabel;
 						html += '</a>';
 
-						$( '.payment-methods-wrapper > form, .it-exchange-purchase-button' ).hide();
+						$( '.payment-methods-wrapper > form input, .it-exchange-purchase-button' ).hide();
 
-						$purchaseForm.after( '<div id="it-exchange-stripe-select-method">' + html + '</div>' );
+						$purchaseForm.append( '<div id="it-exchange-stripe-select-method">' + html + '</div>' );
 
 					} ).fail( function ( err ) {
 						console.log( 'Stripe Tokens Error: ' + err );

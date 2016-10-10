@@ -216,30 +216,40 @@ function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $sta
  *
  * @since 0.1.0
  *
- * @param string $stripe_id
- * @param int    $refund
+ * @param string         $charge_id
+ * @param int            $refund_amount
+ * @param \Stripe\Refund $stripe_refund
 */
-function it_exchange_stripe_addon_add_refund_to_transaction( $stripe_id, $refund ) {
+function it_exchange_stripe_addon_add_refund_to_transaction( $charge_id, $refund_amount, $stripe_refund ) {
+
+	if ( ITE_Refund::query()->and_where( 'gateway_id', '=', $stripe_refund->id )->first() ) {
+		return;
+	}
 
     // Stripe money format comes in as cents. Divide by 100.
-    $refund = ( $refund / 100 );
+    $refund_amount /= 100;
 
     // Grab transaction
-    $transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
-    foreach( $transactions as $transaction ) { //really only one
+    $transactions = it_exchange_stripe_addon_get_transaction_id( $charge_id );
 
-        $refunds = it_exchange_get_transaction_refunds( $transaction );
+	//really only one
+    foreach ( $transactions as $transaction ) {
 
         $refunded_amount = 0;
-        foreach( ( array) $refunds as $refund_meta ) {
-            $refunded_amount += $refund_meta['amount'];
+
+        foreach ( $transaction->refunds as $refund_meta ) {
+            $refunded_amount += $refund_meta->amount;
         }
 
         // In Stripe the Refund is the total amount that has been refunded, not just this transaction
-        $this_refund = $refund - $refunded_amount;
+        $this_refund = $refund_amount - $refunded_amount;
 
-        // This refund is already formated on the way in. Don't reformat.
-        it_exchange_add_refund_to_transaction( $transaction, $this_refund );
+	    ITE_Refund::create( array(
+		    'transaction' => $transaction,
+		    'amount'      => $this_refund,
+		    'created_at'  => new \DateTime( "@{$stripe_refund->created}" ),
+		    'gateway_id'  => $stripe_refund->id,
+	    ) );
     }
 }
 

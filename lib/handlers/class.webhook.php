@@ -54,13 +54,24 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'failed' );
 					break;
 				case 'charge.refunded' :
+
+					$transaction = it_exchange_get_transaction_by_method_id( 'stripe', $stripe_object->id );
+
 					if ( $stripe_object->refunded ) {
-						it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'refunded' );
+						$transaction->update_status( 'refunded' );
+						error_log('updated status');
 					} else {
-						it_exchange_stripe_addon_update_transaction_status( $stripe_object->id, 'partial-refund' );
+						$transaction->update_status( 'partial-refund' );
+						error_log('updated status');
 					}
 
-					it_exchange_stripe_addon_add_refund_to_transaction( $stripe_object->id, $stripe_object->amount_refunded );
+					it_exchange_lock( "stripe-refund-created-{$transaction->ID}", 2 );
+
+					$refund = reset( $stripe_object->reefunds->data );
+
+					it_exchange_stripe_addon_add_refund_to_transaction( $stripe_object->id, $stripe_object->amount_refunded, $refund );
+
+					it_exchange_release_lock( "stripe-refund-created-{$transaction->ID}" );
 
 					break;
 				case 'charge.dispute.created' :

@@ -22,6 +22,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 		$factory          = new ITE_Gateway_Request_Factory();
 		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Webhook_Request_Handler( $this );
+		$this->handlers[] = new IT_Exchange_Stripe_Refund_Request_Handler();
 
 		$helper = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper();
 
@@ -87,7 +88,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/**
 	 * @inheritDoc
 	 */
-	protected function get_settings_fields() {
+	public function get_settings_fields() {
 
 		$image = wp_get_attachment_image_src(
 			$this->settings()->get( 'stripe-checkout-image' ),
@@ -211,7 +212,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/**
 	 * @inheritDoc
 	 */
-	protected function get_settings_name() { return 'addon_stripe'; }
+	public function get_settings_name() { return 'addon_stripe'; }
 
 	/**
 	 * Get the supported currency options by Stripe.

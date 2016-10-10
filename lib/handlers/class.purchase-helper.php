@@ -125,7 +125,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			it_exchange_setup_stripe_request();
 
-			$stripe_customer = $this->get_stripe_customer_for_request( $request, $previous_default_source );
+			$stripe_customer = $this->get_stripe_customer_for_request( $request, $previous_default_source, $payment_token );
 
 			if ( $plan_id ) {
 
@@ -137,7 +137,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 				$subscription = $stripe_customer->subscriptions->create( $args );
 
 				$txn_id = it_exchange_add_transaction( 'stripe', $subscription->id, 'succeeded', $cart, null, array(
-					'payment_token' => $request->get_token() ? $request->get_token()->ID : 0
+					'payment_token' => $payment_token ? $payment_token->ID : 0
 				) );
 
 				if ( ! $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
@@ -168,7 +168,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 				$args   = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
 				$charge = \Stripe\Charge::create( $args );
 				$txn_id = it_exchange_add_transaction( 'stripe', $charge->id, 'succeeded', $cart, null, array(
-					'payment_token' => $request->get_token() ? $request->get_token()->ID : 0
+					'payment_token' => $payment_token ? $payment_token->ID : 0
 				) );
 			}
 
@@ -203,17 +203,17 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	 *
 	 * @param \ITE_Gateway_Purchase_Request $request
 	 * @param string|null                   $previous_default_source
+	 * @param \ITE_Payment_Token|null       $token
 	 *
 	 * @return \Stripe\Customer
-	 *
-	 * @throws \InvalidArgumentException
 	 */
-	public function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request, &$previous_default_source ) {
+	public function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request, &$previous_default_source, &$token ) {
 
 		$stripe_customer = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
 		$stripe_customer = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
 
 		if ( $request->get_token() ) {
+			$token  = $request->get_token();
 			$source = $request->get_token()->token;
 		} elseif ( $request->get_tokenize() ) {
 			$token = ITE_Gateways::get( 'stripe' )->get_handler_for( $request->get_tokenize() )->handle( $request->get_tokenize() );
