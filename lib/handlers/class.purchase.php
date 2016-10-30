@@ -116,15 +116,22 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	/**
 	 * @inheritDoc
 	 */
+	public function get_data_for_REST( ITE_Gateway_Purchase_Request $request ) {
+		$data = parent::get_data_for_REST( $request );
+		$data['accepts'] = array( 'token', 'tokenize' );
+
+		return $data;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	protected function get_inline_js( ITE_Gateway_Purchase_Request $request ) {
 
 		$config = $this->get_stripe_checkout_config( $request );
 
 		if ( ! $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
-			$tokens_endpoint = \iThemes\Exchange\REST\get_rest_url(
-				new Tokens( new Serializer(), new ITE_Gateway_Request_Factory(), new Token( new Serializer() ) ),
-				array( 'customer_id' => $request->get_customer()->ID )
-			);
+			$tokens_endpoint = rest_url( "it_exchange/v1/customers/{$request->get_customer()->id}/tokens/" );
 			$tokens_endpoint = wp_nonce_url( $tokens_endpoint, 'wp_rest' );
 		} else {
 			$tokens_endpoint = '';
@@ -168,6 +175,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 					itExchange.hooks.doAction( 'itExchangeStripeAddon.makePayment' );
 
 					getTokens().then( function ( tokens ) {
+
 						if ( ! tokens.length ) {
 							StripeCheckout.open( stripeConfig );
 
@@ -184,7 +192,11 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 
 						$purchaseForm.append( '<div id="it-exchange-stripe-select-method">' + html + '</div>' );
 
-					} ).fail( function ( err ) {
+						if ( stripeConfig.plan ) {
+							$purchaseForm.append( $('<input type="hidden" name="stripe_subscription_id">').val(stripeConfig.plan) );
+						}
+
+						} ).fail( function ( err ) {
 						console.log( 'Stripe Tokens Error: ' + err );
 
 						StripeCheckout.open( stripeConfig );
@@ -220,25 +232,21 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 
 					if ( ! tokensEndpoint.length ) {
 
-						promise.resolve( [] );
-
-						return promise.promise();
+						return $.when( [] );
 					}
 
-					if ( typeof this.tokens !== 'undefined' ) {
-						promise.resolve( this.tokens );
-
-						return promise.promise();
+					if ( this.hasOwnProperty( 'tokens' ) ) {
+						return $.when( this.tokens );
 					}
 
-					$.get( tokensEndpoint + '&gateway=stripe', (function ( data, statusText, xhr ) {
+					$.get( tokensEndpoint + '&gateway=stripe', ( function ( data, statusText, xhr ) {
 						if ( xhr.status !== 200 ) {
 							promise.reject( data );
 						} else {
 							this.tokens = data;
 							promise.resolve( data );
 						}
-					}).bind( this ) );
+					} ).bind( this ) );
 
 					return promise.promise();
 				}

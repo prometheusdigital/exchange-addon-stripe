@@ -29,7 +29,7 @@ class IT_Exchange_Stripe_Refund_Request_Handler implements ITE_Gateway_Request_H
 			);
 		}
 
-		it_exchange_setup_stripe_request();
+		it_exchange_setup_stripe_request( $transaction->purchase_mode );
 
 		// Stripe sends webhooks insanely quick. Make sure we create the refund before the webhook handler does.
 		it_exchange_lock( "stripe-refund-created-{$transaction->ID}", 2 );

@@ -206,7 +206,17 @@ function it_exchange_stripe_addon_update_transaction_status( $stripe_id, $new_st
 */
 function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $status ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
-	foreach( $transactions as $transaction ) { //really only one
+
+	foreach ( $transactions as $transaction ) { //really only one
+		// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
+		it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 2 );
+
+		$subscription = it_exchange_get_subscription_by_transaction( it_exchange_get_transaction( $transaction ) );
+
+		if ( $subscription->get_status() === IT_Exchange_Subscription::STATUS_CANCELLED ) {
+			continue;
+		}
+
 		do_action( 'it_exchange_update_transaction_subscription_status', $transaction, $subscriber_id, $status );
 	}
 }
@@ -280,12 +290,18 @@ function it_exchange_stripe_addon_delete_stripe_id_from_customer( $stripe_id ) {
  * Setup a Stripe object.
  *
  * @since 1.36.0
+ *
+ * @param string $mode
  */
-function it_exchange_setup_stripe_request() {
+function it_exchange_setup_stripe_request( $mode = '' ) {
 
 	$gateway = ITE_Gateways::get( 'stripe' );
 
-	if ( $gateway->is_sandbox_mode() ) {
+	if ( ! $mode ) {
+		$mode = $gateway->is_sandbox_mode() ? IT_Exchange_Transaction::P_MODE_SANDBOX : IT_Exchange_Transaction::P_MODE_LIVE;
+	}
+
+	if ( $mode === IT_Exchange_Transaction::P_MODE_SANDBOX ) {
 		$secret_key = $gateway->settings()->get( 'stripe-test-secret-key' );
 	} else {
 		$secret_key = $gateway->settings()->get( 'stripe-live-secret-key' );

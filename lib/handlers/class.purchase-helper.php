@@ -73,6 +73,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 		$plan_config = md5( "{$total}|{$interval}|{$interval_count}|{$trial_period_days}" );
 		$plans       = get_post_meta( $product->ID, '_it_exchange_stripe_plans' );
 
+		it_exchange_setup_stripe_request();
+
 		if ( in_array( $plan_config, $plans, true ) ) {
 			$plan = \Stripe\Plan::retrieve( $plan_config );
 
@@ -94,11 +96,21 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			if ( $plan ) {
 				update_post_meta( $product->ID, '_it_exchange_stripe_plan_id', $plan_config );
+				add_post_meta( $product->ID, '_it_exchange_stripe_plans', $plan_config );
 			}
 
 			return $plan;
 		}
 		catch ( Exception $e ) {
+
+			if ( strpos( strtolower( $e->getMessage() ), 'plan already exists' ) !== false ) {
+
+				update_post_meta( $product->ID, '_it_exchange_stripe_plan_id', $plan_config );
+				add_post_meta( $product->ID, '_it_exchange_stripe_plans', $plan_config );
+
+				return \Stripe\Plan::retrieve( $plan_config );
+			}
+
 			$cart->get_feedback()->add_error(
 				sprintf( __( 'Error: Unable to create Plan in Stripe - %s', 'LION' ), $e->getMessage() )
 			);
@@ -133,15 +145,19 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					'plan'    => $plan_id,
 					'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ),
 				);
-				$args         = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
-				$subscription = $stripe_customer->subscriptions->create( $args );
+				$args                = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
+				$stripe_subscription = $stripe_customer->subscriptions->create( $args );
 
-				$txn_id = it_exchange_add_transaction( 'stripe', $subscription->id, 'succeeded', $cart, null, array(
+				$txn_id = it_exchange_add_transaction( 'stripe', $stripe_subscription->id, 'succeeded', $cart, null, array(
 					'payment_token' => $payment_token ? $payment_token->ID : 0
 				) );
 
+				if ( ! $txn_id ) {
+					return null;
+				}
+
 				if ( ! $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
-					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $request->get_customer()->ID, $subscription->id );
+					it_exchange_stripe_addon_set_stripe_customer_subscription_id( $request->get_customer()->ID, $stripe_subscription->id );
 				}
 
 				if ( function_exists( 'it_exchange_get_transaction_subscriptions' ) ) {
@@ -149,7 +165,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 					// should be only one
 					foreach ( $subscriptions as $subscription ) {
-						$subscription->set_subscriber_id( $subscription->id );
+						$subscription->set_subscriber_id( $stripe_subscription->id );
 					}
 				}
 			} else {

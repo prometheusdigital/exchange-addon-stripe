@@ -23,10 +23,11 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Webhook_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Refund_Request_Handler();
+		$this->handlers[] = new IT_Exchange_Stripe_Cancel_Subscription_Request_Handler();
 
 		$helper = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper();
 
-		if ( $this->settings()->get( 'use-checkout' ) ) {
+		if ( $this->settings()->has( 'use-checkout' ) && $this->settings()->get( 'use-checkout' ) ) {
 			$this->handlers[] = new IT_Exchange_Stripe_Purchase_Request_Handler( $this, $factory, $helper );
 		} else {
 			$this->handlers[] = new IT_Exchange_Stripe_Purchase_Dialog_Request_Handler( $this, $factory, $helper );
@@ -90,12 +91,16 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	 */
 	public function get_settings_fields() {
 
-		$image = wp_get_attachment_image_src(
-			$this->settings()->get( 'stripe-checkout-image' ),
-			'it-exchange-stripe-addon-checkout-image'
-		);
-
-		$remove_image_url = add_query_arg( 'remove-checkout-image', $this->settings()->get( 'stripe-checkout-image' ) );
+		if ( $this->settings()->has( 'stripe-checkout-image' ) ) {
+			$image = wp_get_attachment_image_src(
+				$this->settings()->get( 'stripe-checkout-image' ),
+				'it-exchange-stripe-addon-checkout-image'
+			);
+			$remove_image_url = add_query_arg( 'remove-checkout-image', $this->settings()->get( 'stripe-checkout-image' ) );
+		} else {
+			$image = array( '', 0, 0 );
+			$remove_image_url = '';
+		}
 
 		$fields = array(
 			array(
@@ -202,8 +207,10 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			),
 		);
 
-		if ( ! $this->settings()->get( 'stripe-checkout-image' ) || ! $this->settings()->get( 'use-checkout' ) ) {
-			unset( $fields['preview'] );
+		if ( $this->settings()->has( 'stripe-checkout-image' ) ) {
+			if ( ! $this->settings()->get( 'stripe-checkout-image' ) || ! $this->settings()->get( 'use-checkout' ) ) {
+				unset( $fields['preview'] );
+			}
 		}
 
 		return $fields;
@@ -247,6 +254,10 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	 * @since 1.36.0
 	 */
 	public function notify_invalid_currency_settings() {
+
+		if ( ! $this->settings()->get( 'stripe-live-secret-key' ) ) {
+			return;
+		}
 
 		$general_settings = it_exchange_get_option( 'settings_general' );
 
