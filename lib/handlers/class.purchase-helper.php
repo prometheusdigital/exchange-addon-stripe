@@ -100,8 +100,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			}
 
 			return $plan;
-		}
-		catch ( Exception $e ) {
+		} catch ( Exception $e ) {
 
 			if ( strpos( strtolower( $e->getMessage() ), 'plan already exists' ) !== false ) {
 
@@ -141,10 +140,17 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			if ( $plan_id ) {
 
-				$args         = array(
+				$args = array(
 					'plan'    => $plan_id,
 					'prorate' => apply_filters( 'it_exchange_stripe_subscription_prorate', false ),
 				);
+
+				if ( $request instanceof ITE_Gateway_Prorate_Purchase_Request && ( $prorates = $request->get_prorate_requests() ) ) {
+					if ( $end_at = $this->get_trial_end_at_for_prorate( $request ) ) {
+						$args['trial_end'] = $end_at;
+					}
+				}
+
 				$args                = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
 				$stripe_subscription = $stripe_customer->subscriptions->create( $args );
 
@@ -204,8 +210,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			}
 
 			return $transaction;
-		}
-		catch ( Exception $e ) {
+		} catch ( Exception $e ) {
 			$cart->get_feedback()->add_error( $e->getMessage() );
 
 			return null;
@@ -213,9 +218,37 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	}
 
 	/**
+	 * Get the trial end at time for a prorate purchase request.
+	 *
+	 * @since 1.11.0
+	 *
+	 * @param ITE_Gateway_Prorate_Purchase_Request $request
+	 *
+	 * @return int
+	 */
+	protected function get_trial_end_at_for_prorate( ITE_Gateway_Prorate_Purchase_Request $request ) {
+
+		/** @var ITE_Cart_Product $cart_product */
+		$cart_product = $cart->get_items( 'product' )->filter( function ( ITE_Cart_Product $product ) {
+			return $product->get_product()->has_feature( 'recurring-payments', array( 'setting' => 'auto-renew' ) );
+		} )->first();
+
+		if ( $cart_product && $cart_product->get_product() ) {
+
+			$product = $cart_product->get_product();
+
+			if ( isset( $prorates[ $product->ID ] ) && $prorates[ $product->ID ]->get_free_days() ) {
+				return time() + ( $prorates[ $product->ID ]->get_free_days() * DAY_IN_SECONDS );
+			}
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Get a Stripe customer object for a given purchase request.
 	 *
-	 * @since 1.36.0
+	 * @since 1.11.0
 	 *
 	 * @param \ITE_Gateway_Purchase_Request $request
 	 * @param string|null                   $previous_default_source

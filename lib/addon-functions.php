@@ -213,7 +213,7 @@ function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $sta
 
 		$subscription = it_exchange_get_subscription_by_transaction( it_exchange_get_transaction( $transaction ) );
 
-		if ( $subscription->get_status() === IT_Exchange_Subscription::STATUS_CANCELLED ) {
+		if ( $subscription->get_status() === IT_Exchange_Subscription::STATUS_CANCELLED && $status === 'cancelled' ) {
 			continue;
 		}
 
