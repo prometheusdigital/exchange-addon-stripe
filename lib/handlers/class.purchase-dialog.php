@@ -59,7 +59,7 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 	/**
 	 * @inheritDoc
 	 */
-	protected function get_html_before_form_end( ITE_Gateway_Purchase_Request $request ) {
+	protected function get_html_before_form_end( ITE_Gateway_Purchase_Request_Interface $request ) {
 
 		$setting     = $this->get_gateway()->is_sandbox_mode() ? 'stripe-test-publishable-key' : 'stripe-live-publishable-key';
 		$publishable = $this->get_gateway()->settings()->get( $setting );
