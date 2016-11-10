@@ -156,6 +156,6 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 		</script>
 
 		<?php
-		return $html . ob_get_clean();
+		return $html . ob_get_clean() . parent::get_html_before_form_end( $request );
 	}
 }
