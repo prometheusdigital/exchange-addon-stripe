@@ -140,13 +140,21 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 		$general_settings = it_exchange_get_option( 'settings_general' );
 		$currency         = $general_settings['default-currency'];
 
+		if ( $this->gateway->is_sandbox_mode() ) {
+			$publishable = $this->gateway->settings()->get( 'stripe-test-publishable-key' );
+		} else {
+			$publishable = $this->gateway->settings()->get( 'stripe-live-publishable-key' );
+		}
+
 		return <<<JS
 		
 		function( type, tokenize ) {
 		
 			var deferred = jQuery.Deferred();
 			
-			var tokenize = function() {
+			var fn = function() {
+			
+				window.Stripe.setPublishableKey( '$publishable' );
 			
 				var addressTransform = {
 					address1: 'address_line_1',
@@ -240,7 +248,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 					}
 					
 					toStripe.country = tokenize.address.country;
-					toStripe.currency = $currency;
+					toStripe.currency = '$currency';
 					
 					Stripe.bank.createToken( toStripe, function( status, response ) {
 						if ( response.error ) {
@@ -254,10 +262,10 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 				}
 			};
 			
-			if ( ! window.Stripe ) {
-				jQuery.getScript( 'https://js.stripe.com/v2/', tokenize );
+			if ( ! window.hasOwnProperty( 'Stripe' ) ) {
+				jQuery.getScript( 'https://js.stripe.com/v2/', fn );
 			} else {
-				tokenize();
+				fn();
 			}
 			
 			return deferred.promise();
