@@ -46,7 +46,7 @@ function it_exchange_print_stripe_wizard_settings( $form ) {
     </div>
     <?php
 }
-add_action( 'it_exchange_print_stripe_wizard_settings', 'it_exchange_print_stripe_wizard_settings' );
+//add_action( 'it_exchange_print_stripe_wizard_settings', 'it_exchange_print_stripe_wizard_settings' );
 
 /**
  * Saves stripe settings when the Wizard is saved

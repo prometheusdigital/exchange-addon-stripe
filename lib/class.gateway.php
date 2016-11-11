@@ -89,16 +89,41 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/**
 	 * @inheritDoc
 	 */
+	public function get_wizard_settings() {
+		$fields = array(
+			'preamble',
+			'step1',
+			'stripe-live-secret-key',
+			'stripe-live-publishable-key',
+			'step2',
+			'step3',
+			'stripe-purchase-button-label'
+		);
+
+		$wizard = array();
+
+		foreach ( $this->get_settings_fields() as $field ) {
+			if ( in_array( $field['slug'], $fields ) ) {
+				$wizard[] = $field;
+			}
+		}
+
+		return $wizard;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	public function get_settings_fields() {
 
 		if ( $this->settings()->has( 'stripe-checkout-image' ) ) {
-			$image = wp_get_attachment_image_src(
+			$image            = wp_get_attachment_image_src(
 				$this->settings()->get( 'stripe-checkout-image' ),
 				'it-exchange-stripe-addon-checkout-image'
 			);
 			$remove_image_url = add_query_arg( 'remove-checkout-image', $this->settings()->get( 'stripe-checkout-image' ) );
 		} else {
-			$image = array( '', 0, 0 );
+			$image            = array( '', 0, 0 );
 			$remove_image_url = '';
 		}
 
@@ -147,8 +172,12 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 						'<a href="https://manage.stripe.com/account/webhooks">', '</a>'
 					) . '</p><p>' .
 					__( 'Please log in to your account and add this URL to your Webhooks so iThemes Exchange is notified of things like refunds, payments, etc.', 'LION' ) .
-					'</p><code>' . it_exchange_get_webhook_url( 'stripe' ) . '</code><h4>' .
-					__( 'Step 3. Optional Configuration', 'LION' ) . '</h4>',
+					'</p><code>' . it_exchange_get_webhook_url( 'stripe' ) . '</code>',
+			),
+			array(
+				'type' => 'html',
+				'slug' => 'step3',
+				'html' => '<h4>' . __( 'Step 3. Optional Configuration', 'LION' ) . '</h4>',
 			),
 			array(
 				'type'    => 'text_box',
@@ -240,8 +269,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 				$country = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
 
 				$currencies = array_change_key_case( array_flip( $country->supported_payment_currencies ), CASE_UPPER );
-			}
-			catch ( Exception $e ) {
+			} catch ( Exception $e ) {
 			}
 		}
 
@@ -350,8 +378,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			\Stripe\Stripe::setApiKey( $values['stripe-live-secret-key'] );
 			\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 			\Stripe\Account::retrieve();
-		}
-		catch ( Exception $e ) {
+		} catch ( Exception $e ) {
 			$errors->add( '', $e->getMessage() );
 		}
 
@@ -369,8 +396,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 				\Stripe\Stripe::setApiKey( $values['stripe-test-secret-key'] );
 				\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 				\Stripe\Account::retrieve();
-			}
-			catch ( Exception $e ) {
+			} catch ( Exception $e ) {
 				$errors->add( '', $e->getMessage() );
 			}
 		}
