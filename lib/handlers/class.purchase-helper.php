@@ -237,8 +237,11 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			$product = $cart_product->get_product();
 
-			if ( isset( $prorates[ $product->ID ] ) && $prorates[ $product->ID ]->get_free_days() ) {
-				return time() + ( $prorates[ $product->ID ]->get_free_days() * DAY_IN_SECONDS );
+			if ( isset( $prorates[ $product->ID ] ) && $prorates[ $product->ID ]->get_credit_type() === 'days' ) {
+
+				if ( $prorates[ $product->ID ]->get_free_days() ) {
+					return time() + ( $prorates[ $product->ID ]->get_free_days() * DAY_IN_SECONDS );
+				}
 			}
 		}
 
