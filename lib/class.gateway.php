@@ -89,6 +89,11 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/**
 	 * @inheritDoc
 	 */
+	public function get_ssl_mode() { return self::SSL_REQUIRED; }
+
+	/**
+	 * @inheritDoc
+	 */
 	public function get_wizard_settings() {
 		$fields = array(
 			'preamble',
