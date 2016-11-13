@@ -108,7 +108,7 @@ function it_exchange_stripe_addon_get_currency_options( $default_currencies ) {
 	}
 	return $default_currencies;
 }
-add_filter( 'it_exchange_get_currencies', 'it_exchange_stripe_addon_get_currency_options' );
+//add_filter( 'it_exchange_get_currencies', 'it_exchange_stripe_addon_get_currency_options' );
 
 /**
  * Class for Stripe

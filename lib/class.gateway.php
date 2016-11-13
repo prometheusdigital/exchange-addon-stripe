@@ -33,10 +33,6 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			$this->handlers[] = new IT_Exchange_Stripe_Purchase_Dialog_Request_Handler( $this, $factory, $helper );
 		}
 
-		add_action( "it_exchange_{$this->get_settings_name()}_top", array(
-			$this,
-			'notify_invalid_currency_settings'
-		) );
 		add_filter( "it_exchange_save_admin_form_settings_for_{$this->get_settings_name()}", array(
 			$this,
 			'sanitize_settings'
@@ -188,7 +184,6 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 				'type'    => 'text_box',
 				'slug'    => 'stripe-purchase-button-label',
 				'label'   => __( 'Edit Purchase Button Label', 'LION' ),
-				'tooltip' => __( 'This should be a square image (128x128 pixels) and will appear in the Stripe checkout', 'LION' ),
 				'default' => __( 'Purchase', 'LION' ),
 			),
 			array(
@@ -256,54 +251,38 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	public function get_settings_name() { return 'addon_stripe'; }
 
 	/**
-	 * Get the supported currency options by Stripe.
-	 *
-	 * @since 1.36.0
-	 *
-	 * @return array
+	 * @inheritDoc
 	 */
-	public function get_supported_currency_options() {
-
-		$currencies       = array();
-		$general_settings = it_exchange_get_option( 'settings_general' );
-
-		if ( $this->settings()->has( 'stripe-live-secret-key' ) ) {
-			try {
-				\Stripe\Stripe::setApiKey( $this->settings()->get( 'stripe-live-secret-key' ) );
-
-				$country = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
-
-				$currencies = array_change_key_case( array_flip( $country->supported_payment_currencies ), CASE_UPPER );
-			} catch ( Exception $e ) {
-			}
-		}
-
-		return $currencies;
-	}
+	public function is_currency_support_limited() { return true; }
 
 	/**
-	 * Notify the user if an invalid currency is selected.
-	 *
-	 * @since 1.36.0
+	 * @inheritDoc
 	 */
-	public function notify_invalid_currency_settings() {
+	public function get_supported_currencies() {
 
-		if ( ! $this->settings()->get( 'stripe-live-secret-key' ) ) {
-			return;
+		$currencies = get_transient( 'it-exchange-stripe-currencies' );
+
+		if ( empty( $currencies ) || ! is_array( $currencies ) ) {
+
+			$currencies       = array();
+			$general_settings = it_exchange_get_option( 'settings_general' );
+
+			if ( $this->settings()->has( 'stripe-live-secret-key' ) ) {
+				try {
+					\Stripe\Stripe::setApiKey( $this->settings()->get( 'stripe-live-secret-key' ) );
+
+					$country = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
+				} catch ( Exception $e ) {
+
+				}
+			}
+
+			set_transient( 'it-exchange-stripe-currencies', $currencies, DAY_IN_SECONDS );
 		}
 
-		$general_settings = it_exchange_get_option( 'settings_general' );
+		$currencies = array_map( 'strtoupper', $currencies );
 
-		if ( array_key_exists( $general_settings['default-currency'], $this->get_supported_currency_options() ) ) {
-			return;
-		}
-
-		echo '<div class="notice notice-error"><p>';
-		printf(
-			__( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'LION' ),
-			esc_url( add_query_arg( 'page', 'it-exchange-settings' ) )
-		);
-		echo '</p></div>';
+		return $currencies;
 	}
 
 	/**
