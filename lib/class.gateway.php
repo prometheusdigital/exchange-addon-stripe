@@ -14,6 +14,9 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/** @var ITE_Gateway_Request_Handler[] */
 	private $handlers = array();
 
+	/** @var array */
+	private $fields = array();
+
 	/**
 	 * IT_Exchange_Stripe_Gateway constructor.
 	 */
@@ -116,6 +119,10 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	 * @inheritDoc
 	 */
 	public function get_settings_fields() {
+
+		if ( $this->fields ) {
+			return $this->fields;
+		}
 
 		if ( $this->settings()->has( 'stripe-checkout-image' ) ) {
 			$image            = wp_get_attachment_image_src(
@@ -242,6 +249,8 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			}
 		}
 
+		$this->fields = $fields;
+
 		return $fields;
 	}
 
@@ -272,6 +281,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 					\Stripe\Stripe::setApiKey( $this->settings()->get( 'stripe-live-secret-key' ) );
 
 					$country = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
+					$currencies = $country->supported_payment_currencies;
 				} catch ( Exception $e ) {
 
 				}

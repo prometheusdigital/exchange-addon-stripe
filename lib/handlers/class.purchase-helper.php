@@ -32,7 +32,19 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			return null;
 		}
 
-		$total   = it_exchange_get_cart_total( false, array( 'cart' => $cart ) );
+		$total = $cart->get_total();
+
+		// If we only have products, fees, and taxes, then we can adjust the total by using tax_percent in Stripe.
+		if ( count( array_diff( $cart->get_item_types(), array( 'product', 'fee', 'tax' ) ) ) === 0 ) {
+			$total = $cart_product->get_total();
+		}
+
+		$fee = $cart_product->get_line_items()->with_only( 'fee' )
+		                    ->having_param( 'is_free_trial', 'is_prorate_days' )->first();
+		if ( $fee ) {
+			$total += $fee->get_total() * - 1;
+		}
+
 		$total   = number_format( $total, 2, '', '' );
 		$product = $cart_product->get_product();
 
@@ -151,6 +163,31 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					}
 				}
 
+				if ( count( array_diff( $cart->get_item_types(), array( 'product', 'fee', 'tax' ) ) ) === 0 ) {
+
+					/** @var ITE_Cart_Product $cart_product */
+					$cart_product = $cart->get_items( 'product' )->filter( function ( ITE_Cart_Product $product ) {
+						return $product->get_product()->has_feature( 'recurring-payments', array( 'setting' => 'auto-renew' ) );
+					} )->first();
+
+					$total = $cart_product->get_total();
+					$taxes = $cart->calculate_total( 'tax' );
+
+					if ( $cart->get_total() == 0 ) {
+						/** @var ITE_Fee_Line_Item $fee */
+						$fee = $cart->get_items()->flatten()->with_only( 'fee' )
+						            ->having_param( 'is_free_trial', 'is_prorate_days' )->first();
+
+						if ( $fee ) {
+							$total += $fee->get_total() * - 1;
+							$taxes += $fee->get_line_items()->with_only( 'tax' )->total() * - 1;
+						}
+					}
+
+					$tax_percent = $total / $taxes;
+					$args['tax_percent'] = number_format( $tax_percent, 4, '.', '' );
+				}
+
 				$args                = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
 				$stripe_subscription = $stripe_customer->subscriptions->create( $args );
 
@@ -177,7 +214,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			} else {
 
 				$general = it_exchange_get_option( 'settings_general' );
-				$total   = it_exchange_get_cart_total( false, array( 'cart' => $cart ) );
+				$total   = $cart->get_total();
 
 				// Now that we have a valid Customer ID, charge them!
 				$args = array(
