@@ -26,6 +26,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Webhook_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Refund_Request_Handler();
+		$this->handlers[] = new ITE_Stripe_Update_Subscription_Payment_Method_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Cancel_Subscription_Request_Handler();
 
 		$helper = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper();
@@ -280,7 +281,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 				try {
 					\Stripe\Stripe::setApiKey( $this->settings()->get( 'stripe-live-secret-key' ) );
 
-					$country = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
+					$country    = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
 					$currencies = $country->supported_payment_currencies;
 				} catch ( Exception $e ) {
 
