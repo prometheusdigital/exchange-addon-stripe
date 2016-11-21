@@ -49,7 +49,10 @@ class IT_Exchange_Stripe_Cancel_Subscription_Request_Handler implements ITE_Gate
 		}
 
 		if ( $deleted->canceled_at ) {
-			$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
+
+			if ( $request->should_set_status() ) {
+				$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
+			}
 
 			if ( $request->get_cancelled_by() ) {
 				$subscription->set_cancelled_by( $request->get_cancelled_by() );

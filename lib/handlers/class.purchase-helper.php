@@ -184,14 +184,14 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 						}
 					}
 
-					$tax_percent = $total / $taxes;
+					$tax_percent         = $total / $taxes;
 					$args['tax_percent'] = number_format( $tax_percent, 4, '.', '' );
 				}
 
 				$args                = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
 				$stripe_subscription = $stripe_customer->subscriptions->create( $args );
 
-				$txn_id = it_exchange_add_transaction( 'stripe', $stripe_subscription->id, 'succeeded', $cart, null, array(
+				$txn_id = $this->add_transaction( $request, $stripe_subscription->id, 'succeeded', array(
 					'payment_token' => $payment_token ? $payment_token->ID : 0
 				) );
 
@@ -226,7 +226,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 				$args   = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
 				$charge = \Stripe\Charge::create( $args );
-				$txn_id = it_exchange_add_transaction( 'stripe', $charge->id, 'succeeded', $cart, null, array(
+				$txn_id = $this->add_transaction( $request, $charge->id, 'succeeded', array(
 					'payment_token' => $payment_token ? $payment_token->ID : 0
 				) );
 			}
@@ -255,6 +255,27 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	}
 
 	/**
+	 * Add the transaction in Exchange.
+	 *
+	 * @since 1.11.0
+	 *
+	 * @param ITE_Gateway_Purchase_Request_Interface $request
+	 * @param string                                 $method_id
+	 * @param string                                 $status
+	 * @param array                                  $args
+	 *
+	 * @return int|false
+	 */
+	protected function add_transaction( ITE_Gateway_Purchase_Request_Interface $request, $method_id, $status, $args ) {
+
+		if ( $p = $request->get_child_of() ) {
+			return it_exchange_add_child_transaction( 'stripe', $method_id, $status, $request->get_cart(), $p->get_ID(), $args );
+		}
+
+		return it_exchange_add_transaction( 'stripe', $method_id, $status, $request->get_cart(), null, $args );
+	}
+
+	/**
 	 * Get the trial end at time for a prorate purchase request.
 	 *
 	 * @since 1.11.0
@@ -266,7 +287,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	protected function get_trial_end_at_for_prorate( ITE_Gateway_Prorate_Purchase_Request $request ) {
 
 		/** @var ITE_Cart_Product $cart_product */
-		$cart_product = $cart->get_items( 'product' )->filter( function ( ITE_Cart_Product $product ) {
+		$cart_product = $request->get_cart()->get_items( 'product' )->filter( function ( ITE_Cart_Product $product ) {
 			return $product->get_product()->has_feature( 'recurring-payments', array( 'setting' => 'auto-renew' ) );
 		} )->first();
 

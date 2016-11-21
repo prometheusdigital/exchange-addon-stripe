@@ -199,7 +199,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 				case 'invoice.payment_failed' :
 					$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object );
-					it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'deactivated' );
+					it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'suspended' );
 					break;
 
 				case 'customer.subscription.created' :
