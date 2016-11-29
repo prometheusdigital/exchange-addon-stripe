@@ -218,6 +218,8 @@ function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $sta
 		}
 
 		do_action( 'it_exchange_update_transaction_subscription_status', $transaction, $subscriber_id, $status );
+
+		it_exchange_release_lock( "stripe-cancel-subscription-{$transaction->ID}" );
 	}
 }
 
