@@ -196,7 +196,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 							$purchaseForm.append( $('<input type="hidden" name="stripe_subscription_id">').val(stripeConfig.plan) );
 						}
 
-						} ).fail( function ( err ) {
+					} ).fail( function ( err ) {
 						console.log( 'Stripe Tokens Error: ' + err );
 
 						StripeCheckout.open( stripeConfig );

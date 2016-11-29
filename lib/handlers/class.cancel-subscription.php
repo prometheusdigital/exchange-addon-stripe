@@ -35,15 +35,17 @@ class IT_Exchange_Stripe_Cancel_Subscription_Request_Handler implements ITE_Gate
 			throw new UnexpectedValueException( 'Unable to find Stripe Subscription with id ' . $subscription->get_subscriber_id() );
 		}
 
+		$lock = "stripe-cancel-subscription-{$subscription->get_transaction()->ID}";
+
 		// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
-		it_exchange_lock( "stripe-cancel-subscription-{$subscription->get_transaction()->ID}", 2 );
+		it_exchange_lock( $lock, 2 );
 
 		$deleted = $stripe_subscription->cancel( array(
 			'at_period_end' => $request->is_at_period_end()
 		) );
 
 		if ( ! $deleted->canceled_at ) {
-			it_exchange_release_lock( "stripe-cancel-subscription-{$subscription->get_transaction()->ID}" );
+			it_exchange_release_lock( $lock );
 
 			return false;
 		}
@@ -63,7 +65,7 @@ class IT_Exchange_Stripe_Cancel_Subscription_Request_Handler implements ITE_Gate
 			}
 		}
 
-		it_exchange_release_lock( "stripe-cancel-subscription-{$subscription->get_transaction()->ID}" );
+		it_exchange_release_lock( $lock );
 
 		return true;
 	}

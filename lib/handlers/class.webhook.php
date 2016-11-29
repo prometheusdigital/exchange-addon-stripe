@@ -59,10 +59,8 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 					if ( $stripe_object->refunded ) {
 						$transaction->update_status( 'refunded' );
-						error_log('updated status');
 					} else {
 						$transaction->update_status( 'partial-refund' );
-						error_log('updated status');
 					}
 
 					it_exchange_lock( "stripe-refund-created-{$transaction->ID}", 2 );
