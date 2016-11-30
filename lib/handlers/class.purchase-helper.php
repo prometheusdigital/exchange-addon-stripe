@@ -150,6 +150,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			$stripe_customer = $this->get_stripe_customer_for_request( $request, $previous_default_source, $payment_token );
 
+			error_log(print_r($stripe_customer,true));
+
 			if ( $plan_id ) {
 
 				$args = array(
@@ -223,6 +225,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					'currency'    => strtolower( $general['default-currency'] ),
 					'description' => strip_tags( it_exchange_get_cart_description( array( 'cart' => $cart ) ) ),
 				);
+				error_log(print_r($args,true));
 
 				$args   = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
 				$charge = \Stripe\Charge::create( $args );
@@ -248,6 +251,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			return $transaction;
 		} catch ( Exception $e ) {
+			error_log( $e->getMessage() );
 			$cart->get_feedback()->add_error( $e->getMessage() );
 
 			return null;
@@ -319,10 +323,35 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	 */
 	public function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request, &$previous_default_source, &$token ) {
 
-		$stripe_customer = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
-		$stripe_customer = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
+		$general_settings = it_exchange_get_option( 'settings_general' );
+		$stripe_customer  = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
+		$stripe_customer  = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
 
-		if ( $request->get_token() ) {
+		if ( $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
+			$to_tokenize = $request->get_tokenize()->get_source_to_tokenize();
+			if ( is_string( $to_tokenize ) ) {
+				$source = $to_tokenize;
+			} elseif ( $to_tokenize instanceof ITE_Gateway_Card ) {
+				$source = array(
+					'object'    => 'card',
+					'exp_month' => $to_tokenize->get_expiration_month(),
+					'exp_year'  => $to_tokenize->get_expiration_year(),
+					'number'    => $to_tokenize->get_number(),
+					'cvc'       => $to_tokenize->get_cvc(),
+					'name'      => $to_tokenize->get_holder_name(),
+				);
+			} elseif ( $to_tokenize instanceof ITE_Gateway_Bank_Account ) {
+				$source = array(
+					'object'              => 'bank_account',
+					'account_number'      => $to_tokenize->get_account_number(),
+					'country'             => $request->get_customer()->get_billing_address()->offsetGet( 'country' ),
+					'currency'            => strtolower( $general_settings['default-currency'] ),
+					'account_holder_name' => $to_tokenize->get_holder_name(),
+					'account_holder_type' => $to_tokenize->get_type(),
+					'routing_number'      => $to_tokenize->get_routing_number(),
+				);
+			}
+		} elseif ( $request->get_token() ) {
 			$token  = $request->get_token();
 			$source = $request->get_token()->token;
 		} elseif ( $request->get_tokenize() ) {
