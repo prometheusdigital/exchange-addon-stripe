@@ -263,7 +263,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/**
 	 * @inheritDoc
 	 */
-	public function is_currency_support_limited() { return true; }
+	public function is_currency_support_limited() { return $this->settings()->has( 'stripe-live-secret-key' ); }
 
 	/**
 	 * @inheritDoc
