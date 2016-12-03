@@ -39,15 +39,10 @@ class ITE_Stripe_Update_Subscription_Payment_Method_Handler implements ITE_Gatew
 		}
 
 		$subscription = $request->get_subscription();
-
-		if ( ! $subscription->set_payment_token( $token ) ) {
-			return false;
-		}
-
-		$failed = $subscription->get_meta( 'stripe_failed_invoice', true );
+		$failed       = $subscription->get_meta( 'stripe_failed_invoice', true );
 
 		if ( ! $failed ) {
-			return true;
+			return $subscription->set_payment_token( $token );
 		}
 
 		$invoice  = \Stripe\Invoice::retrieve( $failed, array( 'expand' => array( 'customer' ) ) );
@@ -66,16 +61,25 @@ class ITE_Stripe_Update_Subscription_Payment_Method_Handler implements ITE_Gatew
 			$customer->save();
 		}
 
-		$invoice->pay();
+		try {
+			$invoice->pay();
+			$success = ! empty( $invoice->paid );
+		} catch ( \Stripe\Error\Card $e ) {
+			$success = false;
+		}
 
 		if ( $previous_default_source ) {
 			$customer->default_source = $previous_default_source;
 			$customer->save();
 		}
 
-		$subscription->delete_meta( 'stripe_failed_invoice' );
+		if ( $success ) {
+			$subscription->delete_meta( 'stripe_failed_invoice' );
 
-		return true;
+			return $subscription->set_payment_token( $token );
+		}
+
+		return false;
 	}
 
 	/**
