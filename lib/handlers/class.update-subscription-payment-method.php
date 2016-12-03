@@ -38,7 +38,44 @@ class ITE_Stripe_Update_Subscription_Payment_Method_Handler implements ITE_Gatew
 			$token = $request->get_payment_token();
 		}
 
-		return $request->get_subscription()->set_payment_token( $token );
+		$subscription = $request->get_subscription();
+
+		if ( ! $subscription->set_payment_token( $token ) ) {
+			return false;
+		}
+
+		$failed = $subscription->get_meta( 'stripe_failed_invoice', true );
+
+		if ( ! $failed ) {
+			return true;
+		}
+
+		$invoice  = \Stripe\Invoice::retrieve( $failed, array( 'expand' => array( 'customer' ) ) );
+		$customer = $invoice->customer;
+
+		if ( ! $customer ) {
+			return false;
+		}
+
+		$payment_token           = $subscription->get_payment_token();
+		$previous_default_source = '';
+
+		if ( $customer->default_source !== $payment_token->token ) {
+			$previous_default_source  = $customer->default_source;
+			$customer->default_source = $payment_token->token;
+			$customer->save();
+		}
+
+		$invoice->pay();
+
+		if ( $previous_default_source ) {
+			$customer->default_source = $previous_default_source;
+			$customer->save();
+		}
+
+		$subscription->delete_meta( 'stripe_failed_invoice' );
+
+		return true;
 	}
 
 	/**
