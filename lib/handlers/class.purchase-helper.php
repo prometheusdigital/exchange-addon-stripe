@@ -150,8 +150,6 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			$stripe_customer = $this->get_stripe_customer_for_request( $request, $previous_default_source, $payment_token );
 
-			error_log(print_r($stripe_customer,true));
-
 			if ( $plan_id ) {
 
 				$args = array(
@@ -225,7 +223,6 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					'currency'    => strtolower( $general['default-currency'] ),
 					'description' => strip_tags( it_exchange_get_cart_description( array( 'cart' => $cart ) ) ),
 				);
-				error_log(print_r($args,true));
 
 				$args   = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
 				$charge = \Stripe\Charge::create( $args );

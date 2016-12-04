@@ -45,6 +45,8 @@ class ITE_Stripe_Update_Subscription_Payment_Method_Handler implements ITE_Gatew
 			return $subscription->set_payment_token( $token );
 		}
 
+		it_exchange_setup_stripe_request( $subscription->get_transaction()->purchase_mode );
+
 		$invoice  = \Stripe\Invoice::retrieve( $failed, array( 'expand' => array( 'customer' ) ) );
 		$customer = $invoice->customer;
 

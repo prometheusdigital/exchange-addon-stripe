@@ -96,14 +96,21 @@ function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_st
  * @since 0.1.0
  *
  * @param integer $customer_id the WP customer ID
+ * @param string  $mode
  *
- * @return integer
+ * @return string
 */
-function it_exchange_stripe_addon_get_stripe_customer_id( $customer_id ) {
-    $settings = it_exchange_get_option( 'addon_stripe' );
-    $mode     = ( $settings['stripe-test-mode'] ) ? '_test_mode' : '_live_mode';
+function it_exchange_stripe_addon_get_stripe_customer_id( $customer_id, $mode = '' ) {
 
-    return get_user_meta( $customer_id, '_it_exchange_stripe_id' . $mode, true );
+	$gateway = ITE_Gateways::get( 'stripe' );
+
+	if ( ! $mode ) {
+		$mode = $gateway->is_sandbox_mode() ? IT_Exchange_Transaction::P_MODE_SANDBOX : IT_Exchange_Transaction::P_MODE_LIVE;
+	}
+
+	$suffix = $mode === IT_Exchange_Transaction::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
+
+    return get_user_meta( $customer_id, '_it_exchange_stripe_id' . $suffix, true );
 }
 
 /**
@@ -113,13 +120,21 @@ function it_exchange_stripe_addon_get_stripe_customer_id( $customer_id ) {
  *
  * @param integer $customer_id the WP user ID
  * @param integer $stripe_id the stripe customer ID
- * @return boolean
+ * @param string  $mode
+ *
+ * @return bool
 */
-function it_exchange_stripe_addon_set_stripe_customer_id( $customer_id, $stripe_id ) {
-    $settings = it_exchange_get_option( 'addon_stripe' );
-    $mode     = ( $settings['stripe-test-mode'] ) ? '_test_mode' : '_live_mode';
+function it_exchange_stripe_addon_set_stripe_customer_id( $customer_id, $stripe_id, $mode = '' ) {
 
-    return update_user_meta( $customer_id, '_it_exchange_stripe_id' . $mode, $stripe_id );
+	$gateway = ITE_Gateways::get( 'stripe' );
+
+	if ( ! $mode ) {
+		$mode = $gateway->is_sandbox_mode() ? IT_Exchange_Transaction::P_MODE_SANDBOX : IT_Exchange_Transaction::P_MODE_LIVE;
+	}
+
+	$suffix = $mode === IT_Exchange_Transaction::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
+
+    return (bool) update_user_meta( $customer_id, '_it_exchange_stripe_id' . $suffix, $stripe_id );
 }
 
 /**
