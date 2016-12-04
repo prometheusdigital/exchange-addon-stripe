@@ -60,12 +60,11 @@ class ITE_Stripe_Update_Subscription_Payment_Method_Handler implements ITE_Gatew
 			return false;
 		}
 
-		$payment_token           = $subscription->get_payment_token();
 		$previous_default_source = '';
 
-		if ( $customer->default_source !== $payment_token->token ) {
+		if ( $customer->default_source !== $token->token ) {
 			$previous_default_source  = $customer->default_source;
-			$customer->default_source = $payment_token->token;
+			$customer->default_source = $token->token;
 			$customer->save();
 		}
 
