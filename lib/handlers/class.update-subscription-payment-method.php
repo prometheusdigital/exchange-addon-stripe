@@ -47,8 +47,14 @@ class ITE_Stripe_Update_Subscription_Payment_Method_Handler implements ITE_Gatew
 
 		it_exchange_setup_stripe_request( $subscription->get_transaction()->purchase_mode );
 
-		$invoice  = \Stripe\Invoice::retrieve( $failed, array( 'expand' => array( 'customer' ) ) );
+		$invoice  = \Stripe\Invoice::retrieve( $failed );
 		$customer = $invoice->customer;
+
+		if ( ! $customer ) {
+			return false;
+		}
+
+		$customer = Stripe\Customer::retrieve( $customer );
 
 		if ( ! $customer ) {
 			return false;
