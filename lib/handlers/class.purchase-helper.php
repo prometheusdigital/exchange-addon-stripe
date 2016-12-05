@@ -321,8 +321,6 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	public function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request, &$previous_default_source, &$token ) {
 
 		$general_settings = it_exchange_get_option( 'settings_general' );
-		$stripe_customer  = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
-		$stripe_customer  = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
 
 		if ( $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
 			$to_tokenize = $request->get_tokenize()->get_source_to_tokenize();
@@ -362,6 +360,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 		if ( empty( $source ) ) {
 			throw new InvalidArgumentException( __( 'Unable to create Payment Token.', 'LION' ) );
 		}
+		
+		$stripe_customer  = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
+		$stripe_customer  = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
 
 		if ( ! $stripe_customer || ! empty( $stripe_customer->deleted ) ) {
 
