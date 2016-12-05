@@ -211,7 +211,23 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					break;
 
 				case 'customer.subscription.deleted' :
-					it_exchange_stripe_addon_update_subscriber_status( $stripe_object->id, 'cancelled' );
+
+					$subscription = it_exchange_get_subscription_by_subscriber_id( 'stripe', $stripe_object->id );
+
+					if ( ! $subscription ) {
+						break;
+					}
+
+					$transaction = $subscription->get_transaction();
+
+					// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
+					it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 2 );
+
+					if ( ! $subscription->are_occurrences_limited() || $subscription->get_remaining_occurrences() === 0 ) {
+						$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
+					}
+
+					it_exchange_release_lock( "stripe-cancel-subscription-{$transaction->ID}" );
 					break;
 			}
 		}

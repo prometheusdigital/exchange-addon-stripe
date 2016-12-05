@@ -223,8 +223,6 @@ function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $sta
 	$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
 
 	foreach ( $transactions as $transaction ) { //really only one
-		// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
-		it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 2 );
 
 		$subscription = it_exchange_get_subscription_by_transaction( it_exchange_get_transaction( $transaction ) );
 
@@ -233,8 +231,6 @@ function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $sta
 		}
 
 		do_action( 'it_exchange_update_transaction_subscription_status', $transaction, $subscriber_id, $status );
-
-		it_exchange_release_lock( "stripe-cancel-subscription-{$transaction->ID}" );
 	}
 }
 
