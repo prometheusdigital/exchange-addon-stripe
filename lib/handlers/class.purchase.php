@@ -111,6 +111,16 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 
 		if ( empty( $http_request['stripe_subscription_id'] ) ) {
 			$plan = $this->helper->get_plan_for_cart( $cart, $cart->get_currency_code() );
+
+			if ( $plan === false ) {
+				$cart->get_feedback()->add_error(
+					__ ('Purchase failed. Unable to create subscription.', 'it-l10n-ithemes-exchange' )
+				);
+				
+				return null;
+			}
+
+			$plan = $plan instanceof \Stripe\Plan ? $plan->id : '';
 		} else {
 			$plan = $http_request['stripe_subscription_id'];
 		}
