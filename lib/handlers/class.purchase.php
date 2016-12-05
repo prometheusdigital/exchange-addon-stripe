@@ -108,7 +108,12 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 		}
 
 		$http_request = $request->get_http_request();
-		$plan         = empty( $http_request['stripe_subscription_id'] ) ? '' : $http_request['stripe_subscription_id'];
+
+		if ( empty( $http_request['stripe_subscription_id'] ) ) {
+			$plan = $this->helper->get_plan_for_cart( $cart, $cart->get_currency_code() );
+		} else {
+			$plan = $http_request['stripe_subscription_id'];
+		}
 
 		return $this->helper->do_transaction( $request, $plan );
 	}

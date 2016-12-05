@@ -40,8 +40,7 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 			throw new InvalidArgumentException();
 		}
 
-		$general = it_exchange_get_option( 'settings_general' );
-		$cart    = $request->get_cart();
+		$cart = $request->get_cart();
 
 		if ( ! wp_verify_nonce( $request->get_nonce(), $this->get_nonce_action() ) ) {
 			$cart->get_feedback()->add_error(
@@ -51,7 +50,7 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 			return null;
 		}
 
-		$plan = $this->helper->get_plan_for_cart( $cart, $general['default-currency'] );
+		$plan = $this->helper->get_plan_for_cart( $cart, $cart->get_currency_code() );
 
 		return $this->helper->do_transaction( $request, $plan ? $plan->id : '' );
 	}
