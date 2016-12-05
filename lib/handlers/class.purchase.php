@@ -59,8 +59,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 		);
 
 		if ( $plan = $this->helper->get_plan_for_cart( $cart, $general['default-currency'] ) ) {
-			$vars['plan']    = $plan->id;
-			$vars['bitcoin'] = false;
+			$vars['panelLabel'] = 'Subscribe';
+			$vars['bitcoin']    = false;
 		} elseif ( $plan === null ) {
 			$vars['amount'] = (int) number_format( $total, 2, '', '' );
 		} else {
@@ -107,23 +107,17 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 			return null;
 		}
 
-		$http_request = $request->get_http_request();
+		$plan = $this->helper->get_plan_for_cart( $cart, $cart->get_currency_code() );
 
-		if ( empty( $http_request['stripe_subscription_id'] ) ) {
-			$plan = $this->helper->get_plan_for_cart( $cart, $cart->get_currency_code() );
+		if ( $plan === false ) {
+			$cart->get_feedback()->add_error(
+				__ ('Purchase failed. Unable to create subscription.', 'it-l10n-ithemes-exchange' )
+			);
 
-			if ( $plan === false ) {
-				$cart->get_feedback()->add_error(
-					__ ('Purchase failed. Unable to create subscription.', 'it-l10n-ithemes-exchange' )
-				);
-
-				return null;
-			}
-
-			$plan = $plan instanceof \Stripe\Plan ? $plan->id : '';
-		} else {
-			$plan = $http_request['stripe_subscription_id'];
+			return null;
 		}
+
+		$plan = $plan instanceof \Stripe\Plan ? $plan->id : '';
 
 		return $this->helper->do_transaction( $request, $plan );
 	}
@@ -168,10 +162,6 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 					it_exchange_stripe_processing_payment_popup();
 
 					$purchaseForm.append( $( '<input type="hidden" name="to_tokenize">' ).val( token.id ) );
-
-					if ( stripeConfig.plan ) {
-						$purchaseForm.append( $( '<input type="hidden" name="stripe_subscription_id">' ).val( stripeConfig.plan ) );
-					}
 
 					$purchaseForm.submit();
 				};

@@ -349,8 +349,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 		} elseif ( $request->get_token() ) {
 			$token  = $request->get_token();
 			$source = $request->get_token()->token;
-		} elseif ( $request->get_tokenize() ) {
-			$token = ITE_Gateways::get( 'stripe' )->get_handler_for( $request->get_tokenize() )->handle( $request->get_tokenize() );
+		} elseif ( $tokenize = $request->get_tokenize() ) {
+			$token = ITE_Gateways::get( 'stripe' )->get_handler_for( $tokenize )->handle( $tokenize );
 
 			if ( $token ) {
 				$source = $token->token;
@@ -358,9 +358,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 		}
 
 		if ( empty( $source ) ) {
-			throw new InvalidArgumentException( __( 'Unable to create Payment Token.', 'LION' ) );
+			throw new InvalidArgumentException( __( 'Unable to create payment source.', 'LION' ) );
 		}
-		
+
 		$stripe_customer  = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
 		$stripe_customer  = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
 
