@@ -58,7 +58,7 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 	/**
 	 * @inheritDoc
 	 */
-	public function get_data_for_REST( ITE_Gateway_Purchase_Request_Interface $request ) {
+	public function get_data_for_REST( ITE_Gateway_Purchase_Request $request ) {
 		$data = parent::get_data_for_REST( $request );
 
 		$data['accepts'][] = 'tokenize';
@@ -70,7 +70,7 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 	/**
 	 * @inheritDoc
 	 */
-	protected function get_html_before_form_end( ITE_Gateway_Purchase_Request_Interface $request ) {
+	protected function get_html_before_form_end( ITE_Gateway_Purchase_Request $request ) {
 
 		$setting     = $this->get_gateway()->is_sandbox_mode() ? 'stripe-test-publishable-key' : 'stripe-live-publishable-key';
 		$publishable = $this->get_gateway()->settings()->get( $setting );

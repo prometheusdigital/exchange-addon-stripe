@@ -34,12 +34,12 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	 *
 	 * @since 1.11.0
 	 *
-	 * @param \ITE_Gateway_Purchase_Request_Interface $request
+	 * @param \ITE_Gateway_Purchase_Request $request
 	 *
 	 * @return array
 	 * @throws \UnexpectedValueException
 	 */
-	protected function get_stripe_checkout_config( ITE_Gateway_Purchase_Request_Interface $request ) {
+	protected function get_stripe_checkout_config( ITE_Gateway_Purchase_Request $request ) {
 
 		$general = it_exchange_get_option( 'settings_general' );
 		$setting = $this->get_gateway()->is_sandbox_mode() ? 'stripe-test-publishable-key' : 'stripe-live-publishable-key';
@@ -116,7 +116,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 				$cart->get_feedback()->add_error(
 					__ ('Purchase failed. Unable to create subscription.', 'it-l10n-ithemes-exchange' )
 				);
-				
+
 				return null;
 			}
 
@@ -131,7 +131,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	/**
 	 * @inheritDoc
 	 */
-	public function get_data_for_REST( ITE_Gateway_Purchase_Request_Interface $request ) {
+	public function get_data_for_REST( ITE_Gateway_Purchase_Request $request ) {
 		$data = parent::get_data_for_REST( $request );
 		$data['accepts'] = array( 'token', 'tokenize' );
 
@@ -141,7 +141,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	/**
 	 * @inheritDoc
 	 */
-	protected function get_inline_js( ITE_Gateway_Purchase_Request_Interface $request ) {
+	protected function get_inline_js( ITE_Gateway_Purchase_Request $request ) {
 
 		$config = $this->get_stripe_checkout_config( $request );
 

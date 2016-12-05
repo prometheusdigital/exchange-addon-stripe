@@ -260,14 +260,14 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	 *
 	 * @since 1.11.0
 	 *
-	 * @param ITE_Gateway_Purchase_Request_Interface $request
+	 * @param ITE_Gateway_Purchase_Request $request
 	 * @param string                                 $method_id
 	 * @param string                                 $status
 	 * @param array                                  $args
 	 *
 	 * @return int|false
 	 */
-	protected function add_transaction( ITE_Gateway_Purchase_Request_Interface $request, $method_id, $status, $args ) {
+	protected function add_transaction( ITE_Gateway_Purchase_Request $request, $method_id, $status, $args ) {
 
 		if ( $p = $request->get_child_of() ) {
 			return it_exchange_add_child_transaction( 'stripe', $method_id, $status, $request->get_cart(), $p->get_ID(), $args );
