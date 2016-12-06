@@ -79,26 +79,7 @@ function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_st
 		
 		if ( $parent ) {
 
-			$cart = ITE_Cart::create(
-				new ITE_Line_Item_Cached_Session_Repository(
-					new IT_Exchange_In_Memory_Session( null ),
-					$parent->get_customer(),
-					new ITE_Line_Item_Repository_Events()
-				),
-				$parent->get_customer()
-			);
-
-			foreach ( $parent->get_items() as $item ) {
-				$cart->add_item( $item->clone_with_new_id() );
-			}
-
-			$cart->get_items()->flatten()->with_only( 'fee' )
-				->having_param( 'is_prorate_days', 'is_free_trial' )
-				->delete();
-
-			$transaction_object        = it_exchange_generate_transaction_object( $cart );
-			$transaction_object->total = $amount / 100;
-			$args                      = array();
+			$args = array();
 
 			$charge = \Stripe\Charge::retrieve( $invoice->charge );
 
@@ -112,7 +93,8 @@ function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_st
 				}
 			}
 
-			it_exchange_add_child_transaction( 'stripe', $stripe_id, $payment_status, $cart, $parent->get_ID(), $transaction_object, $args );
+			it_exchange_add_subscription_renewal_payment( $parent, $stripe_id, $payment_status, $amount / 100, $args );
+
 			return true;
 		}
 	}
