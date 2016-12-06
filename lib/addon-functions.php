@@ -52,38 +52,67 @@ function it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $stripe_
  * This transaction needs to be linked to the parent transaction.
  *
  * @since 1.3.0
+ * @since 1.11.0 Added $invoice parameter.
  *
- * @param integer     $stripe_id id of paypal transaction
- * @param string      $payment_status new status
- * @param string|bool $subscriber_id Optionally, specify the subscriber ID.
- * @param int         $amount Amount of the child transaction in cents.
+ * @param integer         $stripe_id id of paypal transaction
+ * @param string          $payment_status new status
+ * @param string|bool     $subscriber_id Optionally, specify the subscriber ID.
+ * @param int             $amount Amount of the child transaction in cents.
+ * @param \Stripe\Invoice $invoice
  *
  * @return bool
 */
-function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_status, $subscriber_id = false, $amount ) {
+function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_status, $subscriber_id = false, $amount, $invoice ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
 	if ( !empty( $transactions ) ) {
 		//this transaction DOES exist, don't try to create a new one, just update the status
 		it_exchange_stripe_addon_update_transaction_status( $stripe_id, $payment_status );		
 	} else { 
-	
-		if ( !empty( $subscriber_id ) ) {
-			
-			$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
-			foreach( $transactions as $transaction ) { //really only one
-				$parent_tx_id = $transaction->ID;
-				$customer_id = get_post_meta( $transaction->ID, '_it_exchange_customer_id', true );
-			}
-			
-		} else {
-			$parent_tx_id = false;
-			$customer_id = false;
+
+		$parent = null;
+
+		$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
+
+		foreach ( $transactions as $transaction ) { //really only one
+			$parent = $transaction;
 		}
 		
-		if ( ! empty( $parent_tx_id ) && ! empty( $customer_id ) ) {
-			$transaction_object = new stdClass;
+		if ( $parent ) {
+
+			$cart = ITE_Cart::create(
+				new ITE_Line_Item_Cached_Session_Repository(
+					new IT_Exchange_In_Memory_Session( null ),
+					$parent->get_customer(),
+					new ITE_Line_Item_Repository_Events()
+				),
+				$parent->get_customer()
+			);
+
+			foreach ( $parent->get_items() as $item ) {
+				$cart->add_item( $item->clone_with_new_id() );
+			}
+
+			$cart->get_items()->flatten()->with_only( 'fee' )
+				->having_param( 'is_prorate_days', 'is_free_trial' )
+				->delete();
+
+			$transaction_object        = it_exchange_generate_transaction_object( $cart );
 			$transaction_object->total = $amount / 100;
-			it_exchange_add_child_transaction( 'stripe', $stripe_id, $payment_status, $customer_id, $parent_tx_id, $transaction_object );
+			$args                      = array();
+
+			$charge = \Stripe\Charge::retrieve( $invoice->charge );
+
+			if ( $charge && $charge->source ) {
+				$token = ITE_Payment_Token::query()
+					->where( array( 'gateway' => 'stripe', 'token' => $charge->source->id ) )
+					->first();
+
+				if ( $token ) {
+					$args['payment_token'] = $token->get_pk();
+				}
+			}
+
+			it_exchange_add_child_transaction( 'stripe', $stripe_id, $payment_status, $cart, $parent->get_ID(), $transaction_object, $args );
 			return true;
 		}
 	}

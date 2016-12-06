@@ -40,7 +40,13 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 		try {
 
-			it_exchange_setup_stripe_request();
+			if ( ! isset( $stripe_payload->livemode ) ) {
+				it_exchange_setup_stripe_request();
+			} elseif ( $stripe_payload->livemode ) {
+				it_exchange_setup_stripe_request( IT_Exchange_Transaction::P_MODE_LIVE );
+			} else {
+				it_exchange_setup_stripe_request( IT_Exchange_Transaction::P_MODE_SANDBOX );
+			}
 
 			$stripe_event  = \Stripe\Event::retrieve( $stripe_payload->id );
 			$stripe_object = $stripe_event->data->object;
@@ -189,7 +195,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					if ( ! it_exchange_stripe_addon_update_transaction_status( $find_by, 'succeeded' ) ) {
 						//If the transaction isn't found, we've got a new payment
 						$GLOBALS['it_exchange']['child_transaction'] = true;
-						it_exchange_stripe_addon_add_child_transaction( $find_by, 'succeeded', $subscriber_id, $stripe_object->total );
+						it_exchange_stripe_addon_add_child_transaction( $find_by, 'succeeded', $subscriber_id, $stripe_object->total, $stripe_object );
 					}
 
 					it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, 'active' );
