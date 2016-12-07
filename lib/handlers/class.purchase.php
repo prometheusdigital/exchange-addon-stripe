@@ -122,15 +122,6 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 		return $this->helper->do_transaction( $request, $plan );
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function get_data_for_REST( ITE_Gateway_Purchase_Request $request ) {
-		$data = parent::get_data_for_REST( $request );
-		$data['accepts'] = array( 'token', 'tokenize' );
-
-		return $data;
-	}
 
 	/**
 	 * @inheritDoc

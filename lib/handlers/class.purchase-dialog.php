@@ -54,16 +54,4 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 
 		return $this->helper->do_transaction( $request, $plan ? $plan->id : '' );
 	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function get_data_for_REST( ITE_Gateway_Purchase_Request $request ) {
-		$data = parent::get_data_for_REST( $request );
-
-		$data['accepts'][] = 'tokenize';
-		$data['accepts'][] = 'token';
-
-		return $data;
-	}
 }
