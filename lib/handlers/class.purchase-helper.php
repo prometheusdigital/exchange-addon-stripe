@@ -40,7 +40,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 		}
 
 		$fee = $cart_product->get_line_items()->with_only( 'fee' )
-		                    ->having_param( 'is_free_trial', 'is_prorate_days' )->first();
+		                    ->filter( function ( ITE_Fee_Line_Item $fee ) { return ! $fee->is_recurring(); } )
+		                    ->first();
+
 		if ( $fee ) {
 			$total += $fee->get_total() * - 1;
 		}
@@ -175,8 +177,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 					if ( $cart->get_total() == 0 ) {
 						/** @var ITE_Fee_Line_Item $fee */
-						$fee = $cart->get_items()->flatten()->with_only( 'fee' )
-						            ->having_param( 'is_free_trial', 'is_prorate_days' )->first();
+						$fee = $cart_product->get_line_items()->with_only( 'fee' )
+						                    ->filter( function ( ITE_Fee_Line_Item $fee ) { return ! $fee->is_recurring(); } )
+						                    ->first();
 
 						if ( $fee ) {
 							$total += $fee->get_total() * - 1;
@@ -261,9 +264,9 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	 * @since 1.11.0
 	 *
 	 * @param ITE_Gateway_Purchase_Request $request
-	 * @param string                                 $method_id
-	 * @param string                                 $status
-	 * @param array                                  $args
+	 * @param string                       $method_id
+	 * @param string                       $status
+	 * @param array                        $args
 	 *
 	 * @return int|false
 	 */
@@ -361,8 +364,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			throw new InvalidArgumentException( __( 'Unable to create payment source.', 'LION' ) );
 		}
 
-		$stripe_customer  = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
-		$stripe_customer  = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
+		$stripe_customer = it_exchange_stripe_addon_get_stripe_customer_id( $request->get_customer()->ID );
+		$stripe_customer = $stripe_customer ? \Stripe\Customer::retrieve( $stripe_customer ) : '';
 
 		if ( ! $stripe_customer || ! empty( $stripe_customer->deleted ) ) {
 
