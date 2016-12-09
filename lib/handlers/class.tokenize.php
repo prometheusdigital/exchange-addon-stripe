@@ -135,7 +135,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 	/**
 	 * @inheritDoc
 	 */
-	public function get_js() {
+	public function get_tokenize_js_function() {
 
 		$general_settings = it_exchange_get_option( 'settings_general' );
 		$currency         = $general_settings['default-currency'];
