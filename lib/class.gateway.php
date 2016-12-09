@@ -125,8 +125,8 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			return $this->fields;
 		}
 
-		if ( $image = $this->settings()->get( 'stripe-checkout-image' ) ) {
-			$image            = wp_get_attachment_image_src( $image,'it-exchange-stripe-addon-checkout-image' );
+		if ( $this->settings()->has( 'stripe-checkout-image' ) && $image = $this->settings()->get( 'stripe-checkout-image' ) ) {
+			$image            = wp_get_attachment_image_src( $image, 'it-exchange-stripe-addon-checkout-image' );
 			$remove_image_url = add_query_arg( 'remove-checkout-image', $this->settings()->get( 'stripe-checkout-image' ) );
 		} else {
 			$image            = array( '', 0, 0 );
@@ -241,8 +241,10 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			),
 		);
 
-		if ( ! $this->settings()->get( 'stripe-checkout-image' ) || ! $this->settings()->get( 'use-checkout' ) ) {
-			unset( $fields['preview'] );
+		if ( $this->settings()->has( 'stripe-checkout-image' ) && $this->settings()->has( 'use-checkout' ) ) {
+			if ( ! $this->settings()->get( 'stripe-checkout-image' ) || ! $this->settings()->get( 'use-checkout' ) ) {
+				unset( $fields['preview'] );
+			}
 		}
 
 		$this->fields = $fields;
@@ -272,7 +274,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			$currencies       = array();
 			$general_settings = it_exchange_get_option( 'settings_general' );
 
-			if ( $this->settings()->get( 'stripe-live-secret-key' ) ) {
+			if ( $this->settings()->has( 'stripe-live-secret-key' ) && $this->settings()->get( 'stripe-live-secret-key' ) ) {
 				try {
 					\Stripe\Stripe::setApiKey( $this->settings()->get( 'stripe-live-secret-key' ) );
 
