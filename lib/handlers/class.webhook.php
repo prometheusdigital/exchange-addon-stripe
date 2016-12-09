@@ -207,7 +207,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					$subscription  = it_exchange_get_subscription_by_subscriber_id( 'stripe', $subscriber_id );
 
 					if ( $subscription ) {
-						$subscription->set_status( IT_Exchange_Subscription::STATUS_SUSPENDED );
+						$subscription->set_status( IT_Exchange_Subscription::STATUS_PAYMENT_FAILED );
 						$subscription->update_meta( 'stripe_failed_invoice', $stripe_object->id );
 					}
 					break;
