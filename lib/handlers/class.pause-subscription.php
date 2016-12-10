@@ -58,10 +58,14 @@ class IT_Exchange_Stripe_Pause_Subscription_Request_Handler implements ITE_Gatew
 	 */
 	protected function get_or_create_pause_coupon() {
 
-		$coupon = \Stripe\Coupon::retrieve( self::COUPON );
+		try {
+			$coupon = \Stripe\Coupon::retrieve( self::COUPON );
 
-		if ( $coupon ) {
-			return $coupon;
+			if ( $coupon ) {
+				return $coupon;
+			}
+		} catch ( Stripe\Error\Api $e ) {
+
 		}
 
 		return \Stripe\Coupon::create( array(
