@@ -27,6 +27,8 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 		$this->handlers[] = new IT_Exchange_Stripe_Webhook_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Refund_Request_Handler();
 		$this->handlers[] = new ITE_Stripe_Update_Subscription_Payment_Method_Handler( $this );
+		$this->handlers[] = new IT_Exchange_Stripe_Pause_Subscription_Request_Handler();
+		$this->handlers[] = new IT_Exchange_Stripe_Resume_Subscription_Request_Handler();
 		$this->handlers[] = new IT_Exchange_Stripe_Cancel_Subscription_Request_Handler();
 
 		$helper = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper();

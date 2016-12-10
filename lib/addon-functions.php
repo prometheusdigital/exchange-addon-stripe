@@ -64,41 +64,49 @@ function it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $stripe_
 */
 function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_status, $subscriber_id = false, $amount, $invoice ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
-	if ( !empty( $transactions ) ) {
+
+	if ( ! empty( $transactions ) ) {
 		//this transaction DOES exist, don't try to create a new one, just update the status
-		it_exchange_stripe_addon_update_transaction_status( $stripe_id, $payment_status );		
-	} else { 
+		it_exchange_stripe_addon_update_transaction_status( $stripe_id, $payment_status );
 
-		$parent = null;
+		return false;
+	}
 
-		$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
-
-		foreach ( $transactions as $transaction ) { //really only one
-			$parent = $transaction;
-		}
-		
-		if ( $parent ) {
-
-			$args = array();
-
-			$charge = \Stripe\Charge::retrieve( $invoice->charge );
-
-			if ( $charge && $charge->source ) {
-				$token = ITE_Payment_Token::query()
-					->where( array( 'gateway' => 'stripe', 'token' => $charge->source->id ) )
-					->first();
-
-				if ( $token ) {
-					$args['payment_token'] = $token->get_pk();
-				}
-			}
-
-			it_exchange_add_subscription_renewal_payment( $parent, $stripe_id, $payment_status, $amount / 100, $args );
-
-			return true;
+	if ( ( $discount = $invoice->discount ) && $discount->coupon ) {
+		if ( $discount->coupon->id === IT_Exchange_Stripe_Pause_Subscription_Request_Handler::COUPON ) {
+			return false;
 		}
 	}
-	return false;
+
+	$parent = null;
+
+	$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
+
+	foreach ( $transactions as $transaction ) { //really only one
+		$parent = $transaction;
+	}
+
+	if ( ! $parent ) {
+		return false;
+	}
+
+	$args = array();
+
+	$charge = \Stripe\Charge::retrieve( $invoice->charge );
+
+	if ( $charge && $charge->source ) {
+		$token = ITE_Payment_Token::query()
+			->where( array( 'gateway' => 'stripe', 'token' => $charge->source->id ) )
+			->first();
+
+		if ( $token ) {
+			$args['payment_token'] = $token->get_pk();
+		}
+	}
+
+	it_exchange_add_subscription_renewal_payment( $parent, $stripe_id, $payment_status, $amount / 100, $args );
+
+	return true;
 }
 
 /**
