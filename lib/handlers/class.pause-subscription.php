@@ -37,7 +37,7 @@ class IT_Exchange_Stripe_Pause_Subscription_Request_Handler implements ITE_Gatew
 			throw new UnexpectedValueException( 'Unable to find Stripe Subscription with id ' . $subscription->get_subscriber_id() );
 		}
 
-		$stripe_subscription->discount = $this->get_or_create_pause_coupon();
+		$stripe_subscription->coupon = $this->get_or_create_pause_coupon();
 		$stripe_subscription->save();
 
 		$r = ! empty( $stripe_subscription->discount );
@@ -64,7 +64,7 @@ class IT_Exchange_Stripe_Pause_Subscription_Request_Handler implements ITE_Gatew
 			if ( $coupon ) {
 				return $coupon;
 			}
-		} catch ( Stripe\Error\Api $e ) {
+		} catch ( Exception $e ) {
 
 		}
 
