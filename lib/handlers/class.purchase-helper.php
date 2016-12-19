@@ -187,8 +187,10 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 						}
 					}
 
-					$tax_percent         = $total / $taxes;
-					$args['tax_percent'] = number_format( $tax_percent, 4, '.', '' );
+					if ( $taxes ) {
+						$tax_percent         = $total / $taxes;
+						$args['tax_percent'] = number_format( $tax_percent, 4, '.', '' );
+					}
 				}
 
 				$args                = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
