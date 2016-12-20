@@ -200,7 +200,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 					$subscription = it_exchange_get_subscription_by_subscriber_id( 'stripe', $subscriber_id );
 
-					if ( $subscription && ! $subscription->is_status( $subscription::STATUS_PAUSED ) ) {
+					if ( $subscription && ! $subscription->is_status( $subscription::STATUS_PAUSED, $subscription::STATUS_ACTIVE ) ) {
 						$subscription->set_status( $subscription::STATUS_ACTIVE );
 					}
 
