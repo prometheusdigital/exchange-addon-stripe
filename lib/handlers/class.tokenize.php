@@ -89,6 +89,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 				'gateway'  => $this->gateway->get_slug(),
 				'label'    => $request->get_label(),
 				'redacted' => $source->last4,
+				'mode'     => $this->gateway->is_sandbox_mode() ? 'sandbox' : 'live',
 			) );
 
 			if ( $token ) {
@@ -105,6 +106,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 				'gateway'  => $this->gateway->get_slug(),
 				'label'    => $request->get_label(),
 				'redacted' => $source->last4,
+				'mode'     => $this->gateway->is_sandbox_mode() ? 'sandbox' : 'live',
 			) );
 
 			if ( $token ) {
@@ -137,7 +139,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 	 */
 	public function update_token( ITE_Payment_Token $token, array $update ) {
 
-		it_exchange_setup_stripe_request();
+		it_exchange_setup_stripe_request( $token->mode );
 
 		if ( $token instanceof ITE_Payment_Token_Card ) {
 
