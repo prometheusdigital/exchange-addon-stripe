@@ -114,14 +114,15 @@ function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_st
  *
  * @since 0.1.0
  *
- * @param integer $customer_id the WP customer ID
+ * @param int|IT_Exchange_Customer $customer the WP customer ID
  * @param string  $mode
  *
  * @return string
 */
-function it_exchange_stripe_addon_get_stripe_customer_id( $customer_id, $mode = '' ) {
+function it_exchange_stripe_addon_get_stripe_customer_id( $customer, $mode = '' ) {
 
-	$gateway = ITE_Gateways::get( 'stripe' );
+	$customer_id = $customer instanceof IT_Exchange_Customer ? $customer->get_ID() : $customer;
+	$gateway     = ITE_Gateways::get( 'stripe' );
 
 	if ( ! $mode ) {
 		$mode = $gateway->is_sandbox_mode() ? IT_Exchange_Transaction::P_MODE_SANDBOX : IT_Exchange_Transaction::P_MODE_LIVE;
