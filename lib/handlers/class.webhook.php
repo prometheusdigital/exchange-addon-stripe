@@ -133,8 +133,12 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 						break;
 					}
 
-					$transaction  = reset( $transactions );
-					$subscription = it_exchange_get_subscription_by_transaction( $transaction );
+					$transaction = reset( $transactions );
+					try {
+						$subscription = it_exchange_get_subscription_by_transaction( $transaction );
+					} catch ( Exception $e ) {
+						break;
+					}
 
 					if ( ! $subscription || ! method_exists( $subscription, 'get_payment_token' ) || ! $subscription->get_payment_token() ) {
 						break;
@@ -212,7 +216,10 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					$subscription  = it_exchange_get_subscription_by_subscriber_id( 'stripe', $subscriber_id );
 
 					if ( $subscription ) {
-						$subscription->set_status( IT_Exchange_Subscription::STATUS_PAYMENT_FAILED );
+						if ( ! $subscription->is_status( $subscription::STATUS_PAYMENT_FAILED ) ) {
+							$subscription->set_status( $subscription::STATUS_PAYMENT_FAILED );
+						}
+
 						$subscription->update_meta( 'stripe_failed_invoice', $stripe_object->id );
 					}
 					break;
@@ -234,15 +241,14 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
 					it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 2 );
 
-					if ( ! $subscription->are_occurrences_limited() || $subscription->get_remaining_occurrences() === 0 ) {
+					if ( ! $subscription->are_occurrences_limited() ) {
 						$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
 					}
 
 					it_exchange_release_lock( "stripe-cancel-subscription-{$transaction->ID}" );
 					break;
 			}
-		}
-		catch ( Exception $e ) {
+		} catch ( Exception $e ) {
 			error_log( sprintf( __( 'Invalid webhook ID sent from Stripe: %s', 'it-l10n-ithemes-exchange' ), $e->getMessage() ) );
 
 			return new WP_REST_Response( '', 400 );
