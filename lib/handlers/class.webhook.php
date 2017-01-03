@@ -249,7 +249,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					break;
 			}
 		} catch ( Exception $e ) {
-			error_log( sprintf( __( 'Invalid webhook ID sent from Stripe: %s', 'it-l10n-ithemes-exchange' ), $e->getMessage() ) );
+			error_log( sprintf( __( 'Invalid webhook %s sent from Stripe: %s', 'it-l10n-ithemes-exchange' ), $stripe_payload->id, $e->getMessage() ) );
 
 			return new WP_REST_Response( '', 400 );
 		}
