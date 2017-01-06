@@ -38,7 +38,7 @@ class IT_Exchange_Stripe_Cancel_Subscription_Request_Handler implements ITE_Gate
 		$lock = "stripe-cancel-subscription-{$subscription->get_transaction()->ID}";
 
 		// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
-		it_exchange_lock( $lock, 2 );
+		it_exchange_lock( $lock, 5 );
 
 		$deleted = $stripe_subscription->cancel( array(
 			'at_period_end' => $request->is_at_period_end()

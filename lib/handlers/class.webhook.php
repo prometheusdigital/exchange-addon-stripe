@@ -43,9 +43,9 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 			if ( ! isset( $stripe_payload->livemode ) ) {
 				it_exchange_setup_stripe_request();
 			} elseif ( $stripe_payload->livemode ) {
-				it_exchange_setup_stripe_request( IT_Exchange_Transaction::P_MODE_LIVE );
+				it_exchange_setup_stripe_request( ITE_Const::P_MODE_LIVE );
 			} else {
-				it_exchange_setup_stripe_request( IT_Exchange_Transaction::P_MODE_SANDBOX );
+				it_exchange_setup_stripe_request( ITE_Const::P_MODE_SANDBOX );
 			}
 
 			$stripe_event  = \Stripe\Event::retrieve( $stripe_payload->id );
@@ -239,7 +239,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					$transaction = $subscription->get_transaction();
 
 					// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
-					it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 2 );
+					it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 5 );
 
 					if ( ! $subscription->are_occurrences_limited() ) {
 						$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );

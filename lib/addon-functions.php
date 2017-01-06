@@ -125,10 +125,10 @@ function it_exchange_stripe_addon_get_stripe_customer_id( $customer, $mode = '' 
 	$gateway     = ITE_Gateways::get( 'stripe' );
 
 	if ( ! $mode ) {
-		$mode = $gateway->is_sandbox_mode() ? IT_Exchange_Transaction::P_MODE_SANDBOX : IT_Exchange_Transaction::P_MODE_LIVE;
+		$mode = $gateway->is_sandbox_mode() ? ITE_Const::P_MODE_SANDBOX : ITE_Const::P_MODE_LIVE;
 	}
 
-	$suffix = $mode === IT_Exchange_Transaction::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
+	$suffix = $mode === ITE_Const::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
 
     return get_user_meta( $customer_id, '_it_exchange_stripe_id' . $suffix, true );
 }
@@ -149,10 +149,10 @@ function it_exchange_stripe_addon_set_stripe_customer_id( $customer_id, $stripe_
 	$gateway = ITE_Gateways::get( 'stripe' );
 
 	if ( ! $mode ) {
-		$mode = $gateway->is_sandbox_mode() ? IT_Exchange_Transaction::P_MODE_SANDBOX : IT_Exchange_Transaction::P_MODE_LIVE;
+		$mode = $gateway->is_sandbox_mode() ? ITE_Const::P_MODE_SANDBOX : ITE_Const::P_MODE_LIVE;
 	}
 
-	$suffix = $mode === IT_Exchange_Transaction::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
+	$suffix = $mode === ITE_Const::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
 
     return (bool) update_user_meta( $customer_id, '_it_exchange_stripe_id' . $suffix, $stripe_id );
 }
@@ -331,10 +331,10 @@ function it_exchange_setup_stripe_request( $mode = '' ) {
 	$gateway = ITE_Gateways::get( 'stripe' );
 
 	if ( ! $mode ) {
-		$mode = $gateway->is_sandbox_mode() ? IT_Exchange_Transaction::P_MODE_SANDBOX : IT_Exchange_Transaction::P_MODE_LIVE;
+		$mode = $gateway->is_sandbox_mode() ? ITE_Const::P_MODE_SANDBOX : ITE_Const::P_MODE_LIVE;
 	}
 
-	if ( $mode === IT_Exchange_Transaction::P_MODE_SANDBOX ) {
+	if ( $mode === ITE_Const::P_MODE_SANDBOX ) {
 		$secret_key = $gateway->settings()->get( 'stripe-test-secret-key' );
 	} else {
 		$secret_key = $gateway->settings()->get( 'stripe-live-secret-key' );
