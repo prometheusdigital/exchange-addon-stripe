@@ -135,7 +135,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	/**
 	 * Perform the transaction for a given request.
 	 *
-	 * @since 1.11.0
+	 * @since 2.0.0
 	 *
 	 * @param \ITE_Gateway_Purchase_Request $request
 	 * @param string                        $plan_id
@@ -263,7 +263,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	/**
 	 * Add the transaction in Exchange.
 	 *
-	 * @since 1.11.0
+	 * @since 2.0.0
 	 *
 	 * @param ITE_Gateway_Purchase_Request $request
 	 * @param string                       $method_id
@@ -284,7 +284,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	/**
 	 * Get the trial end at time for a prorate purchase request.
 	 *
-	 * @since 1.11.0
+	 * @since 2.0.0
 	 *
 	 * @param ITE_Gateway_Prorate_Purchase_Request $request
 	 *
@@ -315,7 +315,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	/**
 	 * Get a Stripe customer object for a given purchase request.
 	 *
-	 * @since 1.11.0
+	 * @since 2.0.0
 	 *
 	 * @param \ITE_Gateway_Purchase_Request $request
 	 * @param string|null                   $previous_default_source

@@ -32,7 +32,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	/**
 	 * Get Checkout.js configuration.
 	 *
-	 * @since 1.11.0
+	 * @since 2.0.0
 	 *
 	 * @param \ITE_Gateway_Purchase_Request $request
 	 *

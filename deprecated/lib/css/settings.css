@@ -1,0 +1,17 @@
+.stripe-circle-image {
+	display: block;
+	background: #FFF;
+	width: 64px;
+	height: 64px;
+	margin: 0;
+	-webkit-border-radius: 32px;
+	-moz-border-radius: 32px;
+	-ms-border-radius: 32px;
+	-o-border-radius: 32px;
+	border-radius: 32px;
+	-webkit-box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px rgba(0,0,0,0.1), 0 1px 5px 5px rgba(0,0,0,0.25);
+	-moz-box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px rgba(0,0,0,0.1), 0 1px 5px 5px rgba(0,0,0,0.25);
+	-ms-box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px rgba(0,0,0,0.1), 0 1px 5px 5px rgba(0,0,0,0.25);
+	-o-box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px rgba(0,0,0,0.1), 0 1px 5px 5px rgba(0,0,0,0.25);
+	box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px rgba(0,0,0,0.1), 0 1px 5px 5px rgba(0,0,0,0.25);
+}

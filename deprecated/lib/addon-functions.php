@@ -52,61 +52,42 @@ function it_exchange_stripe_addon_convert_subscription_id_to_charge_id( $stripe_
  * This transaction needs to be linked to the parent transaction.
  *
  * @since 1.3.0
- * @since 2.0.0 Added $invoice parameter.
  *
- * @param integer         $stripe_id id of paypal transaction
- * @param string          $payment_status new status
- * @param string|bool     $subscriber_id Optionally, specify the subscriber ID.
- * @param int             $amount Amount of the child transaction in cents.
- * @param \Stripe\Invoice $invoice
+ * @param integer     $stripe_id id of paypal transaction
+ * @param string      $payment_status new status
+ * @param string|bool $subscriber_id Optionally, specify the subscriber ID.
+ * @param int         $amount Amount of the child transaction in cents.
  *
  * @return bool
 */
-function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_status, $subscriber_id = false, $amount, $invoice ) {
+function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_status, $subscriber_id = false, $amount ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
-
-	if ( ! empty( $transactions ) ) {
+	if ( !empty( $transactions ) ) {
 		//this transaction DOES exist, don't try to create a new one, just update the status
-		it_exchange_stripe_addon_update_transaction_status( $stripe_id, $payment_status );
-
-		return false;
-	}
-
-	if ( ( $discount = $invoice->discount ) && $discount->coupon ) {
-		if ( $discount->coupon->id === IT_Exchange_Stripe_Pause_Subscription_Request_Handler::COUPON ) {
-			return false;
+		it_exchange_stripe_addon_update_transaction_status( $stripe_id, $payment_status );		
+	} else { 
+	
+		if ( !empty( $subscriber_id ) ) {
+			
+			$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
+			foreach( $transactions as $transaction ) { //really only one
+				$parent_tx_id = $transaction->ID;
+				$customer_id = get_post_meta( $transaction->ID, '_it_exchange_customer_id', true );
+			}
+			
+		} else {
+			$parent_tx_id = false;
+			$customer_id = false;
+		}
+		
+		if ( ! empty( $parent_tx_id ) && ! empty( $customer_id ) ) {
+			$transaction_object = new stdClass;
+			$transaction_object->total = $amount / 100;
+			it_exchange_add_child_transaction( 'stripe', $stripe_id, $payment_status, $customer_id, $parent_tx_id, $transaction_object );
+			return true;
 		}
 	}
-
-	$parent = null;
-
-	$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
-
-	foreach ( $transactions as $transaction ) { //really only one
-		$parent = $transaction;
-	}
-
-	if ( ! $parent ) {
-		return false;
-	}
-
-	$args = array();
-
-	$charge = \Stripe\Charge::retrieve( $invoice->charge );
-
-	if ( $charge && $charge->source ) {
-		$token = ITE_Payment_Token::query()
-			->where( array( 'gateway' => 'stripe', 'token' => $charge->source->id ) )
-			->first();
-
-		if ( $token ) {
-			$args['payment_token'] = $token->get_pk();
-		}
-	}
-
-	it_exchange_add_subscription_renewal_payment( $parent, $stripe_id, $payment_status, $amount / 100, $args );
-
-	return true;
+	return false;
 }
 
 /**
@@ -114,23 +95,15 @@ function it_exchange_stripe_addon_add_child_transaction( $stripe_id, $payment_st
  *
  * @since 0.1.0
  *
- * @param int|IT_Exchange_Customer $customer the WP customer ID
- * @param string  $mode
+ * @param integer $customer_id the WP customer ID
  *
- * @return string
+ * @return integer
 */
-function it_exchange_stripe_addon_get_stripe_customer_id( $customer, $mode = '' ) {
+function it_exchange_stripe_addon_get_stripe_customer_id( $customer_id ) {
+    $settings = it_exchange_get_option( 'addon_stripe' );
+    $mode     = ( $settings['stripe-test-mode'] ) ? '_test_mode' : '_live_mode';
 
-	$customer_id = $customer instanceof IT_Exchange_Customer ? $customer->get_ID() : $customer;
-	$gateway     = ITE_Gateways::get( 'stripe' );
-
-	if ( ! $mode ) {
-		$mode = $gateway->is_sandbox_mode() ? ITE_Const::P_MODE_SANDBOX : ITE_Const::P_MODE_LIVE;
-	}
-
-	$suffix = $mode === ITE_Const::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
-
-    return get_user_meta( $customer_id, '_it_exchange_stripe_id' . $suffix, true );
+    return get_user_meta( $customer_id, '_it_exchange_stripe_id' . $mode, true );
 }
 
 /**
@@ -140,21 +113,13 @@ function it_exchange_stripe_addon_get_stripe_customer_id( $customer, $mode = '' 
  *
  * @param integer $customer_id the WP user ID
  * @param integer $stripe_id the stripe customer ID
- * @param string  $mode
- *
- * @return bool
+ * @return boolean
 */
-function it_exchange_stripe_addon_set_stripe_customer_id( $customer_id, $stripe_id, $mode = '' ) {
+function it_exchange_stripe_addon_set_stripe_customer_id( $customer_id, $stripe_id ) {
+    $settings = it_exchange_get_option( 'addon_stripe' );
+    $mode     = ( $settings['stripe-test-mode'] ) ? '_test_mode' : '_live_mode';
 
-	$gateway = ITE_Gateways::get( 'stripe' );
-
-	if ( ! $mode ) {
-		$mode = $gateway->is_sandbox_mode() ? ITE_Const::P_MODE_SANDBOX : ITE_Const::P_MODE_LIVE;
-	}
-
-	$suffix = $mode === ITE_Const::P_MODE_SANDBOX ? '_test_mode' : '_live_mode';
-
-    return (bool) update_user_meta( $customer_id, '_it_exchange_stripe_id' . $suffix, $stripe_id );
+    return update_user_meta( $customer_id, '_it_exchange_stripe_id' . $mode, $stripe_id );
 }
 
 /**
@@ -241,15 +206,7 @@ function it_exchange_stripe_addon_update_transaction_status( $stripe_id, $new_st
 */
 function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $status ) {
 	$transactions = it_exchange_stripe_addon_get_transaction_id_by_subscriber_id( $subscriber_id );
-
-	foreach ( $transactions as $transaction ) { //really only one
-
-		$subscription = it_exchange_get_subscription_by_transaction( it_exchange_get_transaction( $transaction ) );
-
-		if ( $subscription->get_status() === IT_Exchange_Subscription::STATUS_CANCELLED && $status === 'cancelled' ) {
-			continue;
-		}
-
+	foreach( $transactions as $transaction ) { //really only one
 		do_action( 'it_exchange_update_transaction_subscription_status', $transaction, $subscriber_id, $status );
 	}
 }
@@ -259,40 +216,30 @@ function it_exchange_stripe_addon_update_subscriber_status( $subscriber_id, $sta
  *
  * @since 0.1.0
  *
- * @param string         $charge_id
- * @param int            $refund_amount
- * @param \Stripe\Refund $stripe_refund
+ * @param string $stripe_id
+ * @param int    $refund
 */
-function it_exchange_stripe_addon_add_refund_to_transaction( $charge_id, $refund_amount, $stripe_refund ) {
-
-	if ( ITE_Refund::query()->and_where( 'gateway_id', '=', $stripe_refund->id )->first() ) {
-		return;
-	}
+function it_exchange_stripe_addon_add_refund_to_transaction( $stripe_id, $refund ) {
 
     // Stripe money format comes in as cents. Divide by 100.
-    $refund_amount /= 100;
+    $refund = ( $refund / 100 );
 
     // Grab transaction
-    $transactions = it_exchange_stripe_addon_get_transaction_id( $charge_id );
+    $transactions = it_exchange_stripe_addon_get_transaction_id( $stripe_id );
+    foreach( $transactions as $transaction ) { //really only one
 
-	//really only one
-    foreach ( $transactions as $transaction ) {
+        $refunds = it_exchange_get_transaction_refunds( $transaction );
 
         $refunded_amount = 0;
-
-        foreach ( $transaction->refunds as $refund_meta ) {
-            $refunded_amount += $refund_meta->amount;
+        foreach( ( array) $refunds as $refund_meta ) {
+            $refunded_amount += $refund_meta['amount'];
         }
 
         // In Stripe the Refund is the total amount that has been refunded, not just this transaction
-        $this_refund = $refund_amount - $refunded_amount;
+        $this_refund = $refund - $refunded_amount;
 
-	    ITE_Refund::create( array(
-		    'transaction' => $transaction,
-		    'amount'      => $this_refund,
-		    'created_at'  => new \DateTime( "@{$stripe_refund->created}" ),
-		    'gateway_id'  => $stripe_refund->id,
-	    ) );
+        // This refund is already formated on the way in. Don't reformat.
+        it_exchange_add_refund_to_transaction( $transaction, $this_refund );
     }
 }
 
@@ -317,29 +264,4 @@ function it_exchange_stripe_addon_delete_stripe_id_from_customer( $stripe_id ) {
 
         }
     }
-}
-
-/**
- * Setup a Stripe object.
- *
- * @since 1.36.0
- *
- * @param string $mode
- */
-function it_exchange_setup_stripe_request( $mode = '' ) {
-
-	$gateway = ITE_Gateways::get( 'stripe' );
-
-	if ( ! $mode ) {
-		$mode = $gateway->is_sandbox_mode() ? ITE_Const::P_MODE_SANDBOX : ITE_Const::P_MODE_LIVE;
-	}
-
-	if ( $mode === ITE_Const::P_MODE_SANDBOX ) {
-		$secret_key = $gateway->settings()->get( 'stripe-test-secret-key' );
-	} else {
-		$secret_key = $gateway->settings()->get( 'stripe-live-secret-key' );
-	}
-
-	\Stripe\Stripe::setApiKey( $secret_key );
-	\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 }

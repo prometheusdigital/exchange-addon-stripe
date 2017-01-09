@@ -2,7 +2,7 @@
 /**
  * Pause Subscription Handler.
  *
- * @since   1.11.0
+ * @since   2.0.0
  * @license GPLv2
  */
 
@@ -52,7 +52,7 @@ class IT_Exchange_Stripe_Pause_Subscription_Request_Handler implements ITE_Gatew
 	/**
 	 * Get or create the Pause coupon.
 	 *
-	 * @since 1.11.0
+	 * @since 2.0.0
 	 *
 	 * @return \Stripe\Coupon
 	 */

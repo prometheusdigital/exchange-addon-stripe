@@ -2,7 +2,7 @@
 /**
  * Resume Subscription Handler.
  *
- * @since   1.11.0
+ * @since   2.0.0
  * @license GPLv2
  */
 

@@ -1,0 +1,172 @@
+1.0.0 - 2013-07-08 - Lew Ayotte, Glenn Ansley, Justin Kopepasah, Brad Ulrich
+	Initial Release
+1.0.1 - 2013-07-08 - Lew Ayotte
+  	Update Video Links
+1.0.2 - 2013-07-10 - Lew Ayotte
+    Added Setup Add-on link on plugin page's row action
+1.0.3 - 2013-07-29 - Lew Ayotte, Justin Kopepasah, Brad Ulrich
+	Updated Logo
+	Added Localization
+1.0.4 - 2013-08-01 - Glenn Ansley
+	Reorganized plugin structure and added docblock comments to explain add-on API
+	Updated plugin description
+1.0.5 - 2013-08-02 - Lew Ayotte
+	Updated currencies to support GBP and EUR for Stripe's new beta programs
+1.0.6 - 2013-08-06 - Lew Ayotte
+    Fixed bug in i18n directory naming
+1.0.7 - 2013-08-15 - Glenn Ansley
+	Fixing 404ing sytlesheet
+1.0.8 - 2013-08-26 - Glenn Ansley
+	Added Australian Dollar to currencies
+1.1.0 - 2013-09-17 - Lew Ayotte
+	Updating Stripe to work with the Recurring Payments add-on
+1.1.1 - 2013-09-17 - Lew Ayotte
+	Removing debug code from Stripe, replaced with correct output
+1.1.2 - 2013-09-20 - Lew Ayotte
+	Adding cancel links to Payments Edit screen
+1.1.3 - 2013-09-20 - Packaging Bot
+	Updated lib/updater to version 1.0.3
+1.1.4 - 2013-10-02 - Packaging Bot (lib/updater)
+	Big rewrite to the updater in order to make the code more flexible. This improves compatibility with plugins that allow for remote updating of plugins and themes.
+	The updater now supports providing changelog details for plugins and themes that have updates available. These details can be viewed by clicking the "View version **** details" link for the appropriate plugin or theme.
+1.1.5 - 2013-10-04 - Packaging Bot (lib/updater)
+	Enhancement: When releases with four version digits are released (such as 2.1.0.3), by default, the updater will not offer to update if just this last digit is updated. For instance, it will not automatically offer to update 2.1.0.1 to 2.1.0.3; rather, an automatic upgrade will become available when version 2.1.1 or greater is released. If you wish to force an update to these versions, you can add ithemes-updater-force-minor-update=1 to an admin page request (such as http://domain.com/wp-admin/index.php?ithemes-updater-force-minor-update=1) in order to force the updater make these releases available for an hour. If the update is not performed within the hour, the updater reverts back to default behavior.
+	Bug Fix: Corrected source of the following error when updating: Download failed. SSL certificate problem, verify that the CA cert is OK. Details: error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed
+	Bug Fix: Corrected source of the following warning: Warning: require_once(/api.php) [function.require-once]: failed to open stream: No such file or directory
+1.1.6 - 2013-10-07 - Packaging Bot (lib/updater)
+	Bug Fix: Corrected another source of the following warning which occur immediate after updating the plugin or theme: Warning: require_once(/api.php) [function.require-once]: failed to open stream: No such file or directory
+1.1.7 - 2013-10-28 - Packaging Bot (lib/updater)
+	Enhancement: Added a "Quick Release Updates" setting to the bottom of the licensing page. Enabling this option allows the site to receive automatic update notices for product quick releases (releases that do not have automatic update support by default).
+	Enhancement: Changed how the licensing page works on Multisite. Now it will appear at Settings > iThemes Licensing in the network admin Dashboard and at Settings > iThemes Licensing on sites when the current user is a network admin. This prevents exposing the licensing page to users that don't are not super users and thus should not be performing updates. As this update makes the functionality of the "Licensing Page Access" setting obsolete, the setting has been removed.
+	Enhancement: Using the ithemes-updater-force-minor-update query string variable will now force a data flush, allowing any available quick release updates to appear instantly.
+	Enhancement: Added "License" links to the Plugins and Themes pages for the Network Admin Dashboard of multisite installs.
+1.1.8 - 2013-10-30 - Lew Ayotte
+	Fixed currency bug
+1.1.9 - 2013-12-13 - Packaging Bot (lib/updater)
+	Enhancement: Recently updated plugins and themes no longer report that an update is available.
+	Enhancement: Added alternate line styling to the listings on the licensing page.
+	Enhancement: Products with iThemes in the name will now properly capitalize the name.
+	Enhancement: The updater and licensing system now handle iThemes server outages without causing long page delays or by reporting confusing error messages.
+1.1.10 - 2013-12-18 - Lew Ayotte
+	Changed Stripe tip for available currencies
+1.1.11 - 2013-12-18 - Packaging Bot (lib/updater)
+	Bug Fix: Removed unneeded check on package-info.ithemes.com which was causing performance issues on some sites.
+1.1.12 - 2013-12-19 - Packaging Bot (lib/updater)
+	Bug Fix: Licensing will now be universal across all sites of a multisite network. This means that you will only need to license on one site to have the license apply across the entire network.
+1.1.13 - 2014-01-02 - Lew Ayotte
+	Fixed bug not displaying the store name in the stripe popup.
+1.1.14 - Lew Ayotte, Justin Kopepasah
+	Add the event handler to the second script.
+	Change return false; to event.preventDefault(); so other scripts can latch into the event for that element.
+	Merge branch 'dev' of projectpress.net:exchange-addon-stripe into dev
+	Fixed bug not displaying the store name in the stripe popup
+	Fixed bug not displaying the store name in the stripe popup
+1.1.15 - 2014-02-03 - Packaging Bot (lib/updater)
+	Bug Fix: Licensing on SSL-enabled sites now works properly.
+1.1.16 - 2014-02-11 - Lew Ayotte
+	Modified supported currencies to pull from Stripe's API, now open to up to 139 currencies!
+1.1.17 - 2014-02-11 - Lew Ayotte
+	Fixes Stripe API error on activation, when no stripe key has been added (yet)
+1.1.18 - 2014-02-11 - Lew Ayotte
+	Fixed empty stripe API key check	
+1.1.19 - 2014-02-19 - Lew Ayotte
+	Adding upcoming upgrade/downgrade functionality
+	Updating subscription functionality for new Stripe API
+	Test Stripe API keys on save
+	Fixing docblock and spacing
+1.1.20 - 2014-02-19 - Lew Ayotte
+	Removing Stripe-PHP git submodule, conflicting with Updater script
+1.1.21 - 2014-02-25 - Lew Ayotte
+	Added checks to verify old subscription information is set before adding it to the Stripe form
+1.1.22 - 2014-02-27 - Lew Ayotte
+	Updating for upgrade/downgrade functionality
+	Removed unused code
+	Added better handling of membership cancellations
+1.1.23 - 2014-03-11 - Lew Ayotte
+	Make sure we only verify currencies in admin screen
+1.1.24 - 2014-03-20 - Lew Ayotte, Glenn Ansley
+	Adding Stripe Image styling
+	Moved filter/hooks to required-hooks file
+	Only load stripe api on settings page and setup page
+	Added a few more filters for modifying the Stripe Checkout form, the Stripe Charge and Plan creation calls.
+	Added Stripe Image support.
+1.1.24.1 - 2014-03-20 - Lew Ayotte
+	Quick fix for get_current_screen() call on store frontend
+1.1.25 - 2014-04-11 - Lew Ayotte, Elise Alley
+	Fixed bug in tracking old subscriber IDs through cancellation session
+1.1.26 - 2014-05-01 - Glenn Ansley
+	Wrapped it_exchange_get_cart_description in strip_tags() for Stripe Popup Dialog
+1.1.27 - 2014-06-05 - Lew Ayotte
+	Add HTML ID to payment button with unique ID, helps prevent cases where two stripe buttons appear on one page causing both to open when one is clicked
+	Fixing no image uploaded error
+1.1.28 - 2014-06-05 - Lew Ayotte
+	Incrementing tag
+1.1.29 - 2014-06-18 - Lew Ayotte
+	Fix warning about calling non-static methods statically
+1.1.30 - 2014-08-26 - Lew Ayotte
+	Fixed Relative URL for Stripe icon, for sites with WordPress installed in a subdirectory
+1.1.31 - 2014-10-09 - Glenn Ansley
+	Added JS hooks to purchase button
+1.1.32 - 2014-11-14 - Packaging Bot (lib/updater)
+	Enhancement: Reduced caching to allow updates to appear more quickly.
+	Enhancement: Authenticating users now uses the new authentication system.
+1.1.33 - 2014-11-19 - Glenn Ansley, Elise Alley
+	Disabled Purchase button on click so it can only be triggered once prior to stripe popup appearing.
+1.1.34 - 2014-12-16 - Lew Ayotte
+	Updated stripe-php API
+1.1.35 - 2015-02-02 - Lew Ayotte
+	Updates for Recurring Payments updates
+1.1.36 - 2015-02-25 - Lew Ayotte
+	Moving API VERSION definition outside of Stripe include block
+	Update for Recurring Payments payments edit screen
+1.1.37 - 2015-03-30 - Lew Ayotte
+	Better security for Stripe Webhook handling
+1.2.0 - 2015-04-20 - Lew Ayotte
+	Multiple updates involving add_query_arg and remove_query_arg to esc_url()
+1.2.1 - 2015-04-23 - Packaging Bot (lib/updater)
+	Compatibility Fix: Updated plugin and theme update data format to match changes in WordPress 4.2.
+1.3.0 - 2015-05-13 - Lew Ayotte
+	Fixes for Recurring Payments bug
+1.3.1 - 2015-05-13 - Lew Ayotte
+	Updating updater origin url
+1.4.0 - 2015-06-30 - Lew Ayotte
+	Adding warning when deactivating payment gateway
+1.4.1 - 2015-07-14 - Packaging Bot (lib/updater)
+	Enhancement: Updated link to iThemes support.
+1.5.0 - 2015-07-17 - Lew Ayotte, Elise Alley
+	Feature: trim API keys on save
+1.6.0 - 2015-08-17 - Lew Ayotte, Elise Alley
+	Don't limit Exchange currencies until after Stripe is setup
+	Including ZIP in Stripe checkout
+	Change how deactivation warning works
+1.7.0 - 2015-10-29 - Lew Ayotte, Elise Alley
+	Adding Bitcoin Support (requires USD currency setting and US bank account)
+1.8.0 - 2015-11-05 - Lew Ayotte
+	PHP7 Updates
+1.8.1 - 2015-11-05 - Lew Ayotte, Elise Alley
+	Fixing tagged version
+1.9.0 - 2015-11-11 - Lew Ayotte, Elise Alley
+	Don't allow bitcoin for subscriptions/plans
+1.9.1 - 2015-11-11 - Lew Ayotte, Elise Alley
+	Adding some helper text to bitcoin option
+1.10.0 - 2016-03-28 - Lew Ayotte, Elise Alley, Timothy B. Jacobs
+	Updating to latest Stripe SDK (uses Namespace)
+	Fixing Currency Call
+	Minor code cleanup
+	Prevent not defined errors
+	Shorten status labels
+1.10.1 - 2016-04-13 - Lew Ayotte, Elise Alley, Timothy B. Jacobs
+	Fix: Directory for SSL certificate chain
+1.10.2 - 2016-04-13 - Lew Ayotte, Elise Alley, Timothy B, Jacobs
+	Fix: Properly load old and new Stripe SDKs
+1.10.3 - 2016-04-28 - Timothy B. Jacobs, Elise Alley
+	Add: Allow for specifying customer ID during cancellation request
+	Fix: Set subscriber ID immediately.
+	Fix: Only convert tepmorary method ID to a charge ID if a valid charge is given.
+	Fix: Remove dead code.
+1.10.4 - 2016-05-20 - Timothy B. Jacobs, Elise Alley
+	Tweak: Add notice if PHP version requirement is not met.
+1.10.5 - 2016-08-08 - Timothy B. Jacobs, Elise Alley
+	Fix: Update Stripe SDK to v3.19.0 to fix issues with TLS 1.2 on some server setups.
+1.10.6 - 2016-09-06 - Timothy B. Jacobs, Elise Alley
+	Fix: Issue with Stripe trials not converting to full subscriptions
