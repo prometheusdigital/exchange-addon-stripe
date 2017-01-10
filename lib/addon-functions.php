@@ -322,7 +322,7 @@ function it_exchange_stripe_addon_delete_stripe_id_from_customer( $stripe_id ) {
 /**
  * Setup a Stripe object.
  *
- * @since 1.36.0
+ * @since 2.0.0
  *
  * @param string $mode
  */

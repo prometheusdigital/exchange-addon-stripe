@@ -2,7 +2,7 @@
 /**
  * Stripe Gateway class.
  *
- * @since   1.36.0
+ * @since   2.0.0
  * @license GPLv2
  */
 
@@ -313,7 +313,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/**
 	 * Sanitize settings.
 	 *
-	 * @since 1.36.0
+	 * @since 2.0.0
 	 *
 	 * @param array $values
 	 *
@@ -356,7 +356,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	/**
 	 * Validate settings.
 	 *
-	 * @since 1.36.0
+	 * @since 2.0.0
 	 *
 	 * @param WP_Error|null $errors
 	 * @param array         $values

@@ -56,3 +56,5 @@ include( 'lib/addon-webhooks.php' );
  * need to do similar things. This includes enqueueing scripts, formatting data for stripe, etc.
 */
 include( 'lib/addon-functions.php' );
+
+require_once dirname(__FILE__) . '/lib/deprecated.php';

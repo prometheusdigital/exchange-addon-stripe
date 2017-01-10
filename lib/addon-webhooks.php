@@ -6,7 +6,7 @@
  * registering and processing functions in this file.
 */
 
-/*
+/**
  * Adds the stripe webhook key to the global array of keys to listen for
  *
  * If your add-on wants to use our API for listening and initing webhooks,
@@ -17,15 +17,19 @@
  *
  * @since 0.1.0
  *
+ * @deprecated 2.0.0
+ *
  * @param array $webhooks existing
  * @return array
 */
 function it_exchange_stripe_addon_register_webhook_key() {
+
+	_deprecated_function( __FUNCTION__, '2.0.0' );
+
     $key   = 'stripe';
     $param = apply_filters( 'it_exchange_stripe_addon_webhook', 'it_exchange_stripe' );
     it_exchange_register_webhook( $key, $param );
 }
-//add_filter( 'init', 'it_exchange_stripe_addon_register_webhook_key' );
 
 /**
  * Processes webhooks for Stripe
@@ -36,11 +40,14 @@ function it_exchange_stripe_addon_register_webhook_key() {
  * - it_exchange_webhook_it_exchange_[addon-slug]
  *
  * @since 0.1.0
- * @todo actually handle the exceptions
+ *
+ * @deprecated 2.0.0
  *
  * @param array $request really just passing  $_REQUEST
  */
 function it_exchange_stripe_addon_process_webhook( $request ) {
+
+	_deprecated_function( __FUNCTION__, '2.0.0' );
 
     $body = @file_get_contents('php://input');
     $stripe_payload = json_decode( $body );
@@ -139,4 +146,3 @@ function it_exchange_stripe_addon_process_webhook( $request ) {
     }
 
 }
-//add_action( 'it_exchange_webhook_it_exchange_stripe', 'it_exchange_stripe_addon_process_webhook' );

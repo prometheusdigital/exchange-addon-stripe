@@ -2,7 +2,7 @@
 /**
  * Purchase Request Handler Helper.
  *
- * @since   1.36.0
+ * @since   2.0.0
  * @license GPLv2
  */
 
@@ -14,7 +14,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	/**
 	 * Get the Stripe plan for a cart.
 	 *
-	 * @since 1.36.0
+	 * @since 2.0.0
 	 *
 	 * @param \ITE_Cart $cart
 	 * @param string    $currency
