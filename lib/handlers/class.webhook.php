@@ -241,7 +241,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
 					it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 5 );
 
-					if ( ! $subscription->are_occurrences_limited() ) {
+					if ( ! $subscription->are_occurrences_limited() && ! $subscription->is_status( $subscription::STATUS_CANCELLED ) ) {
 						$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
 					}
 
