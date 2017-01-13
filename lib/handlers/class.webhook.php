@@ -232,7 +232,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 					$subscription = it_exchange_get_subscription_by_subscriber_id( 'stripe', $stripe_object->id );
 
-					if ( ! $subscription || $subscription->is_status( $subscription::STATUS_CANCELLED ) ) {
+					if ( ! $subscription || $subscription->is_status( $subscription::STATUS_CANCELLED, $subscription::STATUS_COMPLIMENTARY ) ) {
 						break;
 					}
 
