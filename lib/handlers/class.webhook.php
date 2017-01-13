@@ -71,7 +71,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 					it_exchange_lock( "stripe-refund-created-{$transaction->ID}", 2 );
 
-					$refund = reset( $stripe_object->reefunds->data );
+					$refund = reset( $stripe_object->refunds->data );
 
 					it_exchange_stripe_addon_add_refund_to_transaction( $stripe_object->id, $stripe_object->amount_refunded, $refund );
 
