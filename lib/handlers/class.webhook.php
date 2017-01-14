@@ -215,13 +215,12 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					$subscriber_id = it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object );
 					$subscription  = it_exchange_get_subscription_by_subscriber_id( 'stripe', $subscriber_id );
 
-					if ( $subscription ) {
-						if ( ! $subscription->is_status( $subscription::STATUS_PAYMENT_FAILED ) ) {
-							$subscription->set_status( $subscription::STATUS_PAYMENT_FAILED );
-						}
-
-						$subscription->update_meta( 'stripe_failed_invoice', $stripe_object->id );
+					if ( ! $subscription ) {
+						break;
 					}
+
+					$subscription->set_status_from_gateway_update( $subscription::STATUS_PAYMENT_FAILED );
+					$subscription->update_meta( 'stripe_failed_invoice', $stripe_object->id );
 					break;
 
 				case 'customer.subscription.created' :
@@ -232,7 +231,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 					$subscription = it_exchange_get_subscription_by_subscriber_id( 'stripe', $stripe_object->id );
 
-					if ( ! $subscription || $subscription->is_status( $subscription::STATUS_CANCELLED, $subscription::STATUS_COMPLIMENTARY ) ) {
+					if ( ! $subscription ) {
 						break;
 					}
 
@@ -240,13 +239,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 					// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
 					it_exchange_lock( "stripe-cancel-subscription-{$transaction->ID}", 5 );
-
-					if ( $subscription->are_occurrences_limited() && $subscription->get_remaining_occurrences() === 0 ) {
-						break;
-					}
-
-					$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
-
+					$subscription->set_status_from_gateway_update( IT_Exchange_Subscription::STATUS_CANCELLED );
 					it_exchange_release_lock( "stripe-cancel-subscription-{$transaction->ID}" );
 					break;
 			}
