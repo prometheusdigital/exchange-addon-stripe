@@ -110,8 +110,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					}
 
 					if ( $stripe_object instanceof \Stripe\Card && $token instanceof ITE_Payment_Token_Card ) {
-						$token->set_expiration_month( $stripe_object->exp_month );
-						$token->set_expiration_year( $stripe_object->exp_year );
+						$token->set_expiration( $stripe_object->exp_month, $stripe_object->exp_year );
 					}
 
 					break;

@@ -94,8 +94,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 
 			if ( $token ) {
 				$token->set_brand( $source->brand );
-				$token->set_expiration_month( $source->exp_month );
-				$token->set_expiration_year( $source->exp_year );
+				$token->set_expiration( $source->exp_month, $source->exp_year );
 				$token->set_funding( $source->funding );
 				$token->update_meta( 'stripe_fingerprint', $source->fingerprint );
 			}
@@ -161,8 +160,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 				return null;
 			}
 
-			$token->set_expiration_month( $card->exp_month );
-			$token->set_expiration_year( $card->exp_year );
+			$token->set_expiration( $card->exp_month, $card->exp_year );
 		}
 
 		return $token;
