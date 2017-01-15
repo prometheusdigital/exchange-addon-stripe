@@ -188,7 +188,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					}
 
 					if ( $taxes ) {
-						$tax_percent         = $total / $taxes;
+						$tax_percent         = ( $taxes / $total ) * 100;
 						$args['tax_percent'] = number_format( $tax_percent, 4, '.', '' );
 					}
 				}
