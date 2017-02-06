@@ -471,6 +471,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 					case 'auto-renew':
 					case 'trial':
 					case 'trial-profile':
+					case 'max-occurrences':
 						return true;
 					default:
 						return false;
