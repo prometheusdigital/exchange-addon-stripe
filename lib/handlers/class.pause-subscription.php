@@ -11,7 +11,7 @@
  */
 class IT_Exchange_Stripe_Pause_Subscription_Request_Handler implements ITE_Gateway_Request_Handler {
 
-	const COUPON = 'PAUSE';
+	const COUPON = 'IT_EXCHANGE_PAUSE';
 
 	/**
 	 * @inheritDoc

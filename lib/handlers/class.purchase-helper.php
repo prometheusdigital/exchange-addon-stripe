@@ -11,6 +11,16 @@
  */
 class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
+	/** @var ITE_Gateway */
+	private $gateway;
+
+	/**
+	 * IT_Exchange_Stripe_Purchase_Request_Handler_Helper constructor.
+	 *
+	 * @param ITE_Gateway $gateway
+	 */
+	public function __construct( ITE_Gateway $gateway ) { $this->gateway = $gateway; }
+
 	/**
 	 * Get the Stripe plan for a cart.
 	 *
@@ -231,9 +241,20 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 				$args   = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
 				$charge = \Stripe\Charge::create( $args );
-				$txn_id = $this->add_transaction( $request, $charge->id, 'succeeded', array(
-					'payment_token' => $payment_token ? $payment_token->ID : 0
-				) );
+				$txn_args = array();
+
+				if ( $payment_token ) {
+					$txn_args['payment_token'] = $payment_token->ID;
+				} elseif ( $request->get_one_time_token() && $charge->source ) {
+					$txn_args['card'] = new ITE_Gateway_Card(
+						$charge->source->last4,
+						$charge->source->exp_year,
+						$charge->source->exp_month,
+						0
+					);
+				}
+
+				$txn_id = $this->add_transaction( $request, $charge->id, 'succeeded', $txn_args );
 			}
 
 			$transaction = it_exchange_get_transaction( $txn_id );
@@ -325,32 +346,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 	 */
 	public function get_stripe_customer_for_request( ITE_Gateway_Purchase_Request $request, &$previous_default_source, &$token ) {
 
-		$general_settings = it_exchange_get_option( 'settings_general' );
-
 		if ( $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
-			$to_tokenize = $request->get_tokenize()->get_source_to_tokenize();
-			if ( is_string( $to_tokenize ) ) {
-				$source = $to_tokenize;
-			} elseif ( $to_tokenize instanceof ITE_Gateway_Card ) {
-				$source = array(
-					'object'    => 'card',
-					'exp_month' => $to_tokenize->get_expiration_month(),
-					'exp_year'  => $to_tokenize->get_expiration_year(),
-					'number'    => $to_tokenize->get_number(),
-					'cvc'       => $to_tokenize->get_cvc(),
-					'name'      => $to_tokenize->get_holder_name(),
-				);
-			} elseif ( $to_tokenize instanceof ITE_Gateway_Bank_Account ) {
-				$source = array(
-					'object'              => 'bank_account',
-					'account_number'      => $to_tokenize->get_account_number(),
-					'country'             => $request->get_customer()->get_billing_address()->offsetGet( 'country' ),
-					'currency'            => strtolower( $general_settings['default-currency'] ),
-					'account_holder_name' => $to_tokenize->get_holder_name(),
-					'account_holder_type' => $to_tokenize->get_type(),
-					'routing_number'      => $to_tokenize->get_routing_number(),
-				);
-			}
+			$source = $request->get_one_time_token();
 		} elseif ( $request->get_token() ) {
 			$token  = $request->get_token();
 			$source = $request->get_token()->token;
@@ -393,5 +390,150 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 		}
 
 		return $stripe_customer;
+	}
+
+	/**
+	 * Get the JS function to tokenize a source.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return string
+	 */
+	public function get_tokenize_js_function() {
+
+		$general_settings = it_exchange_get_option( 'settings_general' );
+		$currency         = $general_settings['default-currency'];
+
+		if ( $this->gateway->is_sandbox_mode() ) {
+			$publishable = $this->gateway->settings()->get( 'stripe-test-publishable-key' );
+		} else {
+			$publishable = $this->gateway->settings()->get( 'stripe-live-publishable-key' );
+		}
+
+		return <<<JS
+		
+		function( type, tokenize ) {
+		
+			var deferred = jQuery.Deferred();
+			
+			var fn = function() {
+			
+				window.Stripe.setPublishableKey( '$publishable' );
+			
+				var addressTransform = {
+					address1: 'address_line_1',
+					address2: 'address_line_2',
+					city: 'address_city',
+					state: 'address_state',
+					zip: 'address_zip',
+					country: 'address_country'
+				};
+				
+				var cardTransform = {
+					number: 'number',
+					cvc: 'cvc',
+					year: 'exp_year',
+					month: 'exp_month',
+				};
+				
+				var bankTransform = {
+					name: 'account_holder_name',
+					number: 'account_number',
+					type: 'account_holder_type',
+					routing: 'routing_number',
+				};
+				
+				var toStripe = {};
+				
+				if ( tokenize.name ) {
+					toStripe.name;
+				}
+				
+				if ( tokenize.address ) {
+					for ( var from in addressTransform ) {
+						if ( ! addressTransform.hasOwnProperty( from ) ) {
+							continue;
+						}
+						
+						var to = addressTransform[ from ];
+						
+						if ( tokenize.address[ from ] ) {
+							toStripe[ to ] = tokenze.address[ from ];
+						}
+					}
+				}
+			
+				if ( type === 'card' ) {
+					for ( var from in cardTransform ) {
+						if ( ! cardTransform.hasOwnProperty( from ) ) {
+							continue;
+						}
+						
+						var to = cardTransform[ from ];
+						
+						if ( tokenize[from] ) {
+							toStripe[to] = tokenize[from];
+						} else {
+							deferred.reject( 'Missing property ' + from );
+							
+							return;
+						}
+					}
+					
+					Stripe.card.createToken( toStripe, function( status, response ) {
+						if ( response.error ) {
+							deferred.reject( response.error.message );
+						} else {
+							deferred.resolve( response.id );
+						}
+					} );
+				} else if ( type === 'bank' ) {
+					for ( var from in bankTransform ) {
+						if ( ! bankTransform.hasOwnProperty( from ) ) {
+							continue;
+						}
+						
+						var to = bankTransform[ from ];
+						
+						if ( tokenize[from] ) {
+							toStripe[to] = tokenize[from];
+						} else {
+							deferred.reject( 'Missing property ' + from );
+							
+							return;
+						}
+					}
+						
+					if ( ! tokenize.address || ! tokenize.address.country ) {
+						
+						deferred.reject( 'Missing property address.country' );
+						
+						return;
+					}
+					
+					toStripe.country = tokenize.address.country;
+					toStripe.currency = '$currency';
+					
+					Stripe.bank.createToken( toStripe, function( status, response ) {
+						if ( response.error ) {
+							deferred.reject( response.error.message );
+						} else {
+							deferred.resolve( response.id );
+						}
+					} );
+				} else {
+					deferred.reject( 'Unknown token request type.' );
+				}
+			};
+			
+			if ( ! window.hasOwnProperty( 'Stripe' ) ) {
+				jQuery.getScript( 'https://js.stripe.com/v2/', fn );
+			} else {
+				fn();
+			}
+			
+			return deferred.promise();
+		}
+JS;
 	}
 }

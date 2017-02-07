@@ -5,14 +5,14 @@
  * @since   2.0.0
  * @license GPLv2
  */
-use iThemes\Exchange\REST\Route\Customer\Token\Serializer;
-use iThemes\Exchange\REST\Route\Customer\Token\Token;
-use iThemes\Exchange\REST\Route\Customer\Token\Tokens;
+use iThemes\Exchange\REST\Route\v1\Customer\Token\Serializer;
+use iThemes\Exchange\REST\Route\v1\Customer\Token\Token;
+use iThemes\Exchange\REST\Route\v1\Customer\Token\Tokens;
 
 /**
  * Class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler
  */
-class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purchase_Request_Handler {
+class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purchase_Request_Handler implements ITE_Gateway_JS_Tokenize_Handler {
 
 	/** @var \IT_Exchange_Stripe_Purchase_Request_Handler_Helper */
 	private $helper;
@@ -54,4 +54,14 @@ class IT_Exchange_Stripe_Purchase_Dialog_Request_Handler extends ITE_Dialog_Purc
 
 		return $this->helper->do_transaction( $request, $plan ? $plan->id : '' );
 	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_tokenize_js_function() { return $this->helper->get_tokenize_js_function(); }
+
+	/**
+	 * @inheritDoc
+	 */
+	public function is_js_tokenizer_configured() { return true; }
 }

@@ -23,10 +23,11 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	public function __construct() {
 
 		$factory          = new ITE_Gateway_Request_Factory();
-		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this );
+		$helper           = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper( $this );
+
+		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this, $helper );
 		$this->handlers[] = new IT_Exchange_Stripe_Webhook_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Refund_Request_Handler();
-
 
 		if ( class_exists( 'ITE_Update_Subscription_Payment_Method_Request' ) ) {
 			$this->handlers[] = new ITE_Stripe_Update_Subscription_Payment_Method_Handler( $this );
@@ -44,22 +45,16 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 			$this->handlers[] = new IT_Exchange_Stripe_Cancel_Subscription_Request_Handler();
 		}
 
-		$helper = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper();
-
 		if ( $this->settings()->has( 'use-checkout' ) && $this->settings()->get( 'use-checkout' ) ) {
 			$this->handlers[] = new IT_Exchange_Stripe_Purchase_Request_Handler( $this, $factory, $helper );
 		} else {
 			$this->handlers[] = new IT_Exchange_Stripe_Purchase_Dialog_Request_Handler( $this, $factory, $helper );
 		}
 
-		add_filter( "it_exchange_save_admin_form_settings_for_{$this->get_settings_name()}", array(
-			$this,
-			'sanitize_settings'
-		) );
-		add_filter( "it_exchange_validate_admin_form_settings_for_{$this->get_settings_name()}", array(
-			$this,
-			'validate_settings'
-		), 10, 2 );
+		$name = $this->get_settings_name();
+
+		add_filter( "it_exchange_save_admin_form_settings_for_{$name}", array( $this, 'sanitize_settings' ) );
+		add_filter( "it_exchange_validate_admin_form_settings_for_{$name}", array( $this, 'validate_settings' ), 10, 2 );
 
 		if (
 			! empty( $_GET['remove-checkout-image'] ) &&
