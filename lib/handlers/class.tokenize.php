@@ -9,7 +9,7 @@
 /**
  * Class IT_Exchange_Stripe_Tokenize_Request_Handler
  */
-class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request_Handler, ITE_Gateway_JS_Tokenize_Handler, ITE_Update_Payment_Token_Handler {
+class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request_Handler, ITE_Gateway_JS_Tokenize_Handler {
 
 	/** @var ITE_Gateway */
 	private $gateway;
@@ -137,39 +137,6 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 			$token->make_primary();
 		} elseif ( $request->get_customer()->get_tokens()->count() === 1 ) {
 			$token->make_primary();
-		}
-
-		return $token;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function update_token( ITE_Payment_Token $token, array $update ) {
-
-		it_exchange_setup_stripe_request( $token->mode );
-
-		if ( $token instanceof ITE_Payment_Token_Card ) {
-
-			$customer = \Stripe\Customer::retrieve( it_exchange_stripe_addon_get_stripe_customer_id( $token->customer ) );
-			/** @var \Stripe\Card $card */
-			$card = $customer->sources->retrieve( $token->token );
-
-			if ( ! empty( $update['expiration_year'] ) ) {
-				$card->exp_year = $update['expiration_year'];
-			}
-
-			if ( ! empty( $update['expiration_month'] ) ) {
-				$card->exp_month = $update['expiration_month'];
-			}
-
-			try {
-				$card->save();
-			} catch ( Exception $e ) {
-				return null;
-			}
-
-			$token->set_expiration( $card->exp_month, $card->exp_year );
 		}
 
 		return $token;

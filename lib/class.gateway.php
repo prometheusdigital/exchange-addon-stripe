@@ -26,6 +26,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 		$helper           = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper( $this );
 
 		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this, $helper );
+		$this->handlers[] = new IT_Exchange_Stripe_Update_Token_Handler();
 		$this->handlers[] = new IT_Exchange_Stripe_Webhook_Request_Handler( $this );
 		$this->handlers[] = new IT_Exchange_Stripe_Refund_Request_Handler();
 
