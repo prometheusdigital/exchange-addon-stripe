@@ -72,4 +72,5 @@ add_action( 'admin_notices', 'it_exchange_stripe_addon_show_php_version_nag' );
 function it_exchange_stripe_set_textdomain() {
 	load_plugin_textdomain( 'LION', false, dirname( plugin_basename( __FILE__  ) ) . '/lang/' );
 }
-add_action( 'plugins_loaded', 'it_exchange_stripe_set_textdomain' );
+
+it_exchange_stripe_set_textdomain();
