@@ -16,6 +16,10 @@
 */
 function it_exchange_stripe_addon_convert_get_subscriber_id( $stripe_object ) {
 
+	if ( isset( $stripe_object->subscription ) ) {
+		return $stripe_object->subscription;
+	}
+
 	if ( isset( $stripe_object->id ) && strpos( $stripe_object->id, 'sub' ) === 0 ) {
 		return $stripe_object->id;
 	}

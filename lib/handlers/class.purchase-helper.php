@@ -42,20 +42,25 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			return null;
 		}
 
-		$total = $cart->get_total();
+		$tax_excluded = false;
+		$total        = $cart->get_total();
 
-		// If we only have products, fees, and taxes, then we can adjust the total by using tax_percent in Stripe.
 		if ( count( array_diff( $cart->get_item_types(), array( 'product', 'fee', 'tax' ) ) ) === 0 ) {
-			$total = $cart_product->get_total();
+			$total -= $cart->calculate_total( 'tax' );
+			$tax_excluded = true;
 		}
 
-		$fee = $cart_product->get_line_items()->with_only( 'fee' )
-		                    ->filter( function ( ITE_Fee_Line_Item $fee ) { return ! $fee->is_recurring(); } )
-		                    ->first();
+		$one_time  = $cart->get_items( 'fee', true )->filter( function ( ITE_Fee_Line_Item $fee ) { return ! $fee->is_recurring(); } );
+		$otf_total = $one_time->total();
 
-		if ( $fee ) {
-			$total += $fee->get_total() * - 1;
+		if ( $tax_excluded ) {
+			$otf_sum = $one_time->flatten()->summary_only()->without( 'tax' )->total();
+		} else {
+			$otf_sum = $one_time->flatten()->summary_only()->total();
 		}
+
+		// ITE_Line_Item::get_total() excludes summary only line items when getting each items total.
+		$total -= ( $otf_total + $otf_sum );
 
 		$total   = number_format( $total, 2, '', '' );
 		$product = $cart_product->get_product();
@@ -175,35 +180,60 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					}
 				}
 
+				$one_time_fee = $cart->get_items( 'fee', true )->filter( function ( ITE_Fee_Line_Item $fee ) { return ! $fee->is_recurring(); } );
+				$sign_up_fee  = $one_time_fee->not_having_param( 'is_free_trial' );
+
+				// The goal here is to reuse plans by utilizing Stripe's tax_percent support.
 				if ( count( array_diff( $cart->get_item_types(), array( 'product', 'fee', 'tax' ) ) ) === 0 ) {
 
-					/** @var ITE_Cart_Product $cart_product */
-					$cart_product = $cart->get_items( 'product' )->filter( function ( ITE_Cart_Product $product ) {
-						return $product->get_product()->has_feature( 'recurring-payments', array( 'setting' => 'auto-renew' ) );
-					} )->first();
+					// Goal is for total to end up as the recurring total amount without taxes and taxes to be the
+					// total taxed on the recurring amount only.
 
-					$total = $cart_product->get_total();
+					// We have to account that the total cart amount can be filtered.
+					$total = $cart->get_total();
 					$taxes = $cart->calculate_total( 'tax' );
 
-					if ( $cart->get_total() == 0 ) {
-						/** @var ITE_Fee_Line_Item $fee */
-						$fee = $cart_product->get_line_items()->with_only( 'fee' )
-						                    ->filter( function ( ITE_Fee_Line_Item $fee ) { return ! $fee->is_recurring(); } )
-						                    ->first();
+					$total_wo_tax = $total - $taxes;
 
-						if ( $fee ) {
-							$total += $fee->get_total() * - 1;
-							$taxes += $fee->get_line_items()->with_only( 'tax' )->total() * - 1;
-						}
-					}
+					$otf_total = $one_time_fee->total();
+					$taxes -= $one_time_fee->flatten()->summary_only()->with_only( 'tax' )->total();
+					$otf_sum = $one_time_fee->flatten()->summary_only()->without( 'tax' )->total();
+
+					// ITE_Line_Item::get_total() excludes summary only line items when getting each items total.
+					$total_wo_tax -= ( $otf_total + $otf_sum );
 
 					if ( $taxes ) {
-						$tax_percent         = ( $taxes / $total ) * 100;
+						$tax_percent         = ( $taxes / $total_wo_tax ) * 100;
 						$args['tax_percent'] = number_format( $tax_percent, 4, '.', '' );
 					}
 				}
 
-				$args                = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
+				$args = apply_filters( 'it_exchange_stripe_addon_subscription_args', $args, $request );
+
+				if ( $sign_up_fee->total() ) {
+
+					$invoice_item_amount = $sign_up_fee->total();
+
+					// Stripe uses 'tax_percent' for Invoice Items
+					if ( empty( $args['tax_percent'] ) ) {
+						$invoice_item_amount += $sign_up_fee->flatten()->summary_only()->total();
+					} else {
+						$invoice_item_amount_with_tax = $invoice_item_amount +  $sign_up_fee->flatten()->summary_only()->total();
+						$invoice_item_amount = $invoice_item_amount_with_tax / ( 1 + $args['tax_percent'] / 100 );
+					}
+
+					\Stripe\InvoiceItem::create( array(
+						'customer'     => $stripe_customer,
+						'amount'       => $invoice_item_amount * 100,
+						'currency'     => $cart->get_currency_code(),
+						'description'  => it_exchange_get_line_item_collection_description( $sign_up_fee, $cart ),
+						'discountable' => false,
+						'metadata'     => array(
+							'cart' => $cart->get_id(),
+						)
+					) );
+				}
+
 				$stripe_subscription = $stripe_customer->subscriptions->create( $args );
 
 				$txn_id = $this->add_transaction( $request, $stripe_subscription->id, 'succeeded', array(
@@ -228,19 +258,18 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 				}
 			} else {
 
-				$general = it_exchange_get_option( 'settings_general' );
-				$total   = $cart->get_total();
+				$total = $cart->get_total();
 
 				// Now that we have a valid Customer ID, charge them!
 				$args = array(
 					'customer'    => $stripe_customer->id,
 					'amount'      => number_format( $total, 2, '', '' ),
-					'currency'    => strtolower( $general['default-currency'] ),
+					'currency'    => strtolower( $cart->get_currency_code() ),
 					'description' => strip_tags( it_exchange_get_cart_description( array( 'cart' => $cart ) ) ),
 				);
 
-				$args   = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
-				$charge = \Stripe\Charge::create( $args );
+				$args     = apply_filters( 'it_exchange_stripe_addon_charge_args', $args, $request );
+				$charge   = \Stripe\Charge::create( $args );
 				$txn_args = array();
 
 				if ( $payment_token ) {
@@ -352,7 +381,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			$token  = $request->get_token();
 			$source = $request->get_token()->token;
 		} elseif ( $tokenize = $request->get_tokenize() ) {
-			$token = ITE_Gateways::get( 'stripe' )->get_handler_for( $tokenize )->handle( $tokenize );
+			$token = $this->gateway->get_handler_for( $tokenize )->handle( $tokenize );
 
 			if ( $token ) {
 				$source = $token->token;
