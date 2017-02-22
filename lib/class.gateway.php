@@ -22,8 +22,8 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	 */
 	public function __construct() {
 
-		$factory          = new ITE_Gateway_Request_Factory();
-		$helper           = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper( $this );
+		$factory = new ITE_Gateway_Request_Factory();
+		$helper  = new IT_Exchange_Stripe_Purchase_Request_Handler_Helper( $this );
 
 		$this->handlers[] = new IT_Exchange_Stripe_Tokenize_Request_Handler( $this, $helper );
 		$this->handlers[] = new IT_Exchange_Stripe_Update_Token_Handler();
@@ -55,7 +55,10 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 		$name = $this->get_settings_name();
 
 		add_filter( "it_exchange_save_admin_form_settings_for_{$name}", array( $this, 'sanitize_settings' ) );
-		add_filter( "it_exchange_validate_admin_form_settings_for_{$name}", array( $this, 'validate_settings' ), 10, 2 );
+		add_filter( "it_exchange_validate_admin_form_settings_for_{$name}", array(
+			$this,
+			'validate_settings'
+		), 10, 2 );
 
 		if (
 			! empty( $_GET['remove-checkout-image'] ) &&
@@ -434,6 +437,7 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 
 		switch ( $feature->get_feature_slug() ) {
 			case 'recurring-payments':
+			case 'one-time-fee':
 				return true;
 		}
 
@@ -446,6 +450,13 @@ class IT_Exchange_Stripe_Gateway extends ITE_Gateway {
 	public function supports_feature_and_detail( ITE_Optionally_Supported_Feature $feature, $slug, $detail ) {
 
 		switch ( $feature->get_feature_slug() ) {
+			case 'one-time-fee':
+				switch ( $slug ) {
+					case 'discount':
+						return true;
+					default:
+						return false;
+				}
 			case 'recurring-payments':
 				switch ( $slug ) {
 					case 'profile':
