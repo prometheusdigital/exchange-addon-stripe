@@ -158,7 +158,12 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					if ( $customer->default_source !== $payment_token->token ) {
 						$previous_default_source  = $customer->default_source;
 						$customer->default_source = $payment_token->token;
-						$customer->save();
+
+						try {
+							$customer->save();
+						} catch ( Exception $e ) {
+							break;
+						}
 					}
 
 					$stripe_object->pay();
