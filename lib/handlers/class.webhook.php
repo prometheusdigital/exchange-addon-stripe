@@ -142,7 +142,7 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 						break;
 					}
 
-					if ( ! $subscription || ! method_exists( $subscription, 'get_payment_token' ) || ! $subscription->get_payment_token() ) {
+					if ( ! $subscription || ! ( $payment_token = $subscription->get_payment_token() ) || $payment_token->get_raw_attribute( 'gateway' ) !== 'stripe' ) {
 						break;
 					}
 
@@ -152,7 +152,6 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 						break;
 					}
 
-					$payment_token           = $subscription->get_payment_token();
 					$previous_default_source = '';
 
 					if ( $customer->default_source !== $payment_token->token ) {
