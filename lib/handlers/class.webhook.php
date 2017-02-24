@@ -34,8 +34,6 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 		$stripe_payload = json_decode( $request->get_raw_post_data() );
 
-		error_log(print_r($stripe_payload,true));
-
 		if ( empty( $stripe_payload->id ) ) {
 			return new WP_REST_Response( '', 200 );
 		}
@@ -52,7 +50,6 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 
 			$stripe_event  = \Stripe\Event::retrieve( $stripe_payload->id );
 			$stripe_object = $stripe_event->data->object;
-			error_log(print_r($stripe_object, true));
 
 			//https://stripe.com/docs/api#event_types
 			switch ( $stripe_event->type ) {
