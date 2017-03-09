@@ -222,9 +222,11 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 						$invoice_item_amount = $invoice_item_amount_with_tax / ( 1 + $args['tax_percent'] / 100 );
 					}
 
+					$invoice_item_amount_formatted = number_format( $invoice_item_amount, 2, '', '' );
+
 					\Stripe\InvoiceItem::create( array(
 						'customer'     => $stripe_customer,
-						'amount'       => $invoice_item_amount * 100,
+						'amount'       => $invoice_item_amount_formatted,
 						'currency'     => $cart->get_currency_code(),
 						'description'  => it_exchange_get_line_item_collection_description( $sign_up_fee, $cart ),
 						'discountable' => false,
