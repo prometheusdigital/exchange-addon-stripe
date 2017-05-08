@@ -64,6 +64,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 		// This is a token returned from Checkout or Stripe.js
 		if ( is_string( $to_tokenize ) ) {
 			$source = $stripe_customer->sources->create( array( 'source' => $to_tokenize ) );
+			$from   = 'JS token';
 		} elseif ( $to_tokenize instanceof ITE_Gateway_Card ) {
 			$source = $stripe_customer->sources->create( array(
 				'source' => array(
@@ -75,6 +76,7 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 					'name'      => $to_tokenize->get_holder_name(),
 				)
 			) );
+			$from   = 'card';
 		} elseif ( $to_tokenize instanceof ITE_Gateway_Bank_Account ) {
 			$source = $stripe_customer->sources->create( array(
 				'source' => array(
@@ -87,7 +89,11 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 					'routing_number'      => $to_tokenize->get_routing_number(),
 				)
 			) );
+			$from   = 'bank account';
 		} else {
+			it_exchange_log( 'Not enough information provided to create Stripe token.', array(
+				'_group' => 'token'
+			) );
 			throw new InvalidArgumentException( 'Unable to create source from given information.' );
 		}
 
@@ -123,6 +129,13 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 				$token->update_meta( 'stripe_fingerprint', $source->fingerprint );
 			}
 		} else {
+
+			it_exchange_log( 'Stripe returned unexpected response while creating token from {from}: {response}.', array(
+				'response' => $source,
+				'from'     => $from,
+				'_group'   => 'token',
+			) );
+
 			throw new UnexpectedValueException( sprintf(
 				'Unexpected response object from Stripe %s.',
 				is_object( $source ) ? get_class( $source ) : gettype( $source )
@@ -130,6 +143,12 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 		}
 
 		if ( ! $token ) {
+
+			it_exchange_log( 'Failed to create ITE_Payment_Token object for Stripe {type}', array(
+				'type'   => $from,
+				'_group' => 'token',
+			) );
+
 			throw new UnexpectedValueException( 'Unable to create payment token.' );
 		}
 
@@ -138,6 +157,12 @@ class IT_Exchange_Stripe_Tokenize_Request_Handler implements ITE_Gateway_Request
 		} elseif ( $request->get_customer()->get_tokens()->count() === 1 ) {
 			$token->make_primary();
 		}
+
+		it_exchange_log( 'Stripe tokenize request for {for} resulted in token #{token}', ITE_Log_Levels::INFO, array(
+			'for'    => $from,
+			'token'  => $token->get_ID(),
+			'_group' => 'token',
+		) );
 
 		return $token;
 	}

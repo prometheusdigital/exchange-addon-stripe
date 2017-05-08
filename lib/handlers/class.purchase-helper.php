@@ -46,7 +46,7 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 		$total        = $cart->get_total();
 
 		if ( count( array_diff( $cart->get_item_types(), array( 'product', 'fee', 'tax' ) ) ) === 0 ) {
-			$total -= $cart->calculate_total( 'tax' );
+			$total        -= $cart->calculate_total( 'tax' );
 			$tax_excluded = true;
 		}
 
@@ -99,13 +99,14 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			$trial_period_days = $trial_interval_count * $days;
 		}
 
-		$plan_config = md5( "{$total}|{$interval}|{$interval_count}|{$trial_period_days}" );
+		$plan_config = "{$total}|{$interval}|{$interval_count}|{$trial_period_days}";
+		$plan_hash   = md5( $plan_config );
 		$plans       = get_post_meta( $product->ID, '_it_exchange_stripe_plans' );
 
 		it_exchange_setup_stripe_request();
 
-		if ( in_array( $plan_config, $plans, true ) ) {
-			$plan = \Stripe\Plan::retrieve( $plan_config );
+		if ( in_array( $plan_hash, $plans, true ) ) {
+			$plan = \Stripe\Plan::retrieve( $plan_hash );
 
 			if ( $plan ) {
 				return $plan;
@@ -119,24 +120,36 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 				'interval_count'    => $interval_count,
 				'name'              => get_the_title( $product->ID ),
 				'currency'          => $currency,
-				'id'                => $plan_config,
+				'id'                => $plan_hash,
 				'trial_period_days' => $trial_period_days,
 			) );
 
 			if ( $plan ) {
-				update_post_meta( $product->ID, '_it_exchange_stripe_plan_id', $plan_config );
-				add_post_meta( $product->ID, '_it_exchange_stripe_plans', $plan_config );
+				update_post_meta( $product->ID, '_it_exchange_stripe_plan_id', $plan_hash );
+				add_post_meta( $product->ID, '_it_exchange_stripe_plans', $plan_hash );
+
+				it_exchange_log( 'Created Stripe plan #{id} {config}.', ITE_Log_Levels::DEBUG, array(
+					'config' => $plan_config,
+					'id'     => $plan_hash,
+					'_group' => 'gateway',
+				) );
 			}
 
-			return $plan;
+			return $plan ?: false;
 		} catch ( Exception $e ) {
 
 			if ( strpos( strtolower( $e->getMessage() ), 'plan already exists' ) !== false ) {
 
-				update_post_meta( $product->ID, '_it_exchange_stripe_plan_id', $plan_config );
-				add_post_meta( $product->ID, '_it_exchange_stripe_plans', $plan_config );
+				it_exchange_log( 'Stripe plan #{id} {config} migrated to shared storage.', ITE_Log_Levels::DEBUG, array(
+					'config' => $plan_config,
+					'id'     => $plan_hash,
+					'_group' => 'gateway',
+				) );
 
-				return \Stripe\Plan::retrieve( $plan_config );
+				update_post_meta( $product->ID, '_it_exchange_stripe_plan_id', $plan_hash );
+				add_post_meta( $product->ID, '_it_exchange_stripe_plans', $plan_hash );
+
+				return \Stripe\Plan::retrieve( $plan_hash );
 			}
 
 			$cart->get_feedback()->add_error(
@@ -196,8 +209,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					$total_wo_tax = $total - $taxes;
 
 					$otf_total = $one_time_fee->total();
-					$taxes -= $one_time_fee->flatten()->summary_only()->with_only( 'tax' )->total();
-					$otf_sum = $one_time_fee->flatten()->summary_only()->without( 'tax' )->total();
+					$taxes     -= $one_time_fee->flatten()->summary_only()->with_only( 'tax' )->total();
+					$otf_sum   = $one_time_fee->flatten()->summary_only()->without( 'tax' )->total();
 
 					// ITE_Line_Item::get_total() excludes summary only line items when getting each items total.
 					$total_wo_tax -= ( $otf_total + $otf_sum );
@@ -218,8 +231,8 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 					if ( empty( $args['tax_percent'] ) ) {
 						$invoice_item_amount += $sign_up_fee->flatten()->summary_only()->total();
 					} else {
-						$invoice_item_amount_with_tax = $invoice_item_amount +  $sign_up_fee->flatten()->summary_only()->total();
-						$invoice_item_amount = $invoice_item_amount_with_tax / ( 1 + $args['tax_percent'] / 100 );
+						$invoice_item_amount_with_tax = $invoice_item_amount + $sign_up_fee->flatten()->summary_only()->total();
+						$invoice_item_amount          = $invoice_item_amount_with_tax / ( 1 + $args['tax_percent'] / 100 );
 					}
 
 					$invoice_item_amount_formatted = number_format( $invoice_item_amount, 2, '', '' );
@@ -303,10 +316,21 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 				$stripe_customer->save();
 			}
 
+			it_exchange_log( 'Stripe payment for cart {cart_id} resulted in transaction {txn_id}', ITE_Log_Levels::INFO, array(
+				'txn_id'  => $transaction->get_ID(),
+				'cart_id' => $request->get_cart()->get_id(),
+				'_group'  => 'gateway',
+			) );
+
 			return $transaction;
 		} catch ( Exception $e ) {
-			error_log( $e->getMessage() );
 			$cart->get_feedback()->add_error( $e->getMessage() );
+
+			it_exchange_log( 'Stripe payment for cart {cart_id} failed to create a transaction: {exception}.', ITE_Log_Levels::WARNING, array(
+				'cart_id'   => $request->get_cart()->get_id(),
+				'exception' => $e,
+				'_group'    => 'gateway',
+			) );
 
 			return null;
 		}
@@ -383,14 +407,28 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			$token  = $request->get_token();
 			$source = $request->get_token()->token;
 		} elseif ( $tokenize = $request->get_tokenize() ) {
+			/** @var ITE_Payment_Token $token */
 			$token = $this->gateway->get_handler_for( $tokenize )->handle( $tokenize );
 
 			if ( $token ) {
 				$source = $token->token;
+
+				it_exchange_log( 'Created Stripe token #{source} {label} via tokenize request for cart {cart_id}.', ITE_Log_Levels::DEBUG, array(
+					'_group'  => 'gateway',
+					'cart_id' => $request->get_cart()->get_id(),
+					'source'  => $source,
+					'label'   => $token->get_label(),
+				) );
 			}
 		}
 
 		if ( empty( $source ) ) {
+
+			it_exchange_log( 'No valid payment source given to Stripe for cart {cart_id}.', array(
+				'cart_id' => $request->get_cart()->get_id(),
+				'_group'  => 'gateway',
+			) );
+
 			throw new InvalidArgumentException( __( 'Unable to create payment source.', 'LION' ) );
 		}
 
@@ -411,13 +449,28 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 
 			$stripe_customer = \Stripe\Customer::create( $args );
 
+			it_exchange_log( 'Created Stripe customer #{stripe_id} for cart {cart_id} and customer {customer}.', ITE_Log_Levels::DEBUG, array(
+				'cart_id'   => $request->get_cart()->get_id(),
+				'customer'  => $request->get_customer()->get_ID() ?: $request->get_customer()->get_email(),
+				'stripe_id' => $stripe_customer->id,
+				'_group'    => 'gateway',
+			) );
+
 			if ( ! $request->get_customer() instanceof IT_Exchange_Guest_Customer ) {
 				it_exchange_stripe_addon_set_stripe_customer_id( $request->get_customer()->ID, $stripe_customer->id );
 			}
-		} else {
+		} elseif ( $stripe_customer->default_source !== $source ) {
 			$previous_default_source         = $stripe_customer->default_source;
 			$stripe_customer->default_source = $source;
 			$stripe_customer->save();
+
+			it_exchange_log( 'Updated Stripe customer #{stripe_id} default source to {new} from {old} for cart {cart_id}.', ITE_Log_Levels::DEBUG, array(
+				'new'       => $source,
+				'old'       => $previous_default_source,
+				'stripe_id' => $stripe_customer->id,
+				'cart_id'   => $request->get_cart()->get_id(),
+				'_group'    => 'gateway',
+			) );
 		}
 
 		return $stripe_customer;
@@ -566,5 +619,63 @@ class IT_Exchange_Stripe_Purchase_Request_Handler_Helper {
 			return deferred.promise();
 		}
 JS;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function supports_feature( ITE_Optionally_Supported_Feature $feature ) {
+
+		switch ( $feature->get_feature_slug() ) {
+			case 'recurring-payments':
+			case 'one-time-fee':
+				return true;
+		}
+
+		return null;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function supports_feature_and_detail( ITE_Optionally_Supported_Feature $feature, $slug, $detail ) {
+
+		switch ( $feature->get_feature_slug() ) {
+			case 'one-time-fee':
+				switch ( $slug ) {
+					case 'discount':
+						return true;
+					default:
+						return false;
+				}
+			case 'recurring-payments':
+				switch ( $slug ) {
+					case 'profile':
+
+						/** @var $detail IT_Exchange_Recurring_Profile */
+						switch ( $detail->get_interval_type() ) {
+							case IT_Exchange_Recurring_Profile::TYPE_DAY:
+								return $detail->get_interval_count() <= 365;
+							case IT_Exchange_Recurring_Profile::TYPE_WEEK:
+								return $detail->get_interval_count() <= 52;
+							case IT_Exchange_Recurring_Profile::TYPE_MONTH:
+								return $detail->get_interval_count() <= 12;
+							case IT_Exchange_Recurring_Profile::TYPE_YEAR:
+								return $detail->get_interval_count() <= 1;
+							default:
+								return false;
+						}
+
+					case 'auto-renew':
+					case 'trial':
+					case 'trial-profile':
+					case 'max-occurrences':
+						return true;
+					default:
+						return false;
+				}
+		}
+
+		return null;
 	}
 }

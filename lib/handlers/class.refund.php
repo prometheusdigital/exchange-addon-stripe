@@ -33,6 +33,10 @@ class IT_Exchange_Stripe_Refund_Request_Handler implements ITE_Gateway_Request_H
 
 		// Stripe sends webhooks insanely quick. Make sure we create the refund before the webhook handler does.
 		it_exchange_lock( "stripe-refund-created-{$transaction->ID}", 2 );
+		it_exchange_log( 'Acquiring Stripe refund lock for transaction #{txn_id}', ITE_Log_Levels::DEBUG, array(
+			'txn_id' => $transaction->get_ID(),
+			'_group' => 'refund',
+		) );
 
 		$response = \Stripe\Refund::create( array(
 			'charge'   => $method_id,
@@ -49,6 +53,13 @@ class IT_Exchange_Stripe_Refund_Request_Handler implements ITE_Gateway_Request_H
 			'gateway_id'  => $response->id,
 			'reason'      => $request->get_reason(),
 			'issued_by'   => $request->issued_by(),
+		) );
+
+		it_exchange_log( 'Created Stripe refund of {amount} for transaction #{txn_id} and charge {charge}.', ITE_Log_Levels::DEBUG, array(
+			'amount' => $response->amount,
+			'txn_id' => $transaction->get_ID(),
+			'charge' => $method_id,
+			'_group' => 'refund',
 		) );
 
 		it_exchange_release_lock( "stripe-refund-created-{$transaction->ID}" );

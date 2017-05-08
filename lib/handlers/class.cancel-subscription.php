@@ -39,6 +39,11 @@ class IT_Exchange_Stripe_Cancel_Subscription_Request_Handler implements ITE_Gate
 
 		// Stripe sends webhooks insanely quick. Make sure we update the subscription before the webhook handler does.
 		it_exchange_lock( $lock, 5 );
+		it_exchange_log( 'Acquiring Stripe cancel subscription #{sub_id} lock for transaction #{txn_id}', ITE_Log_Levels::DEBUG, array(
+			'txn_id' => $subscription->get_transaction()->get_ID(),
+			'sub_id' => $subscriber_id,
+			'_group' => 'subscription',
+		) );
 
 		$deleted = $stripe_subscription->cancel( array(
 			'at_period_end' => $request->is_at_period_end()
@@ -47,25 +52,34 @@ class IT_Exchange_Stripe_Cancel_Subscription_Request_Handler implements ITE_Gate
 		if ( ! $deleted->canceled_at ) {
 			it_exchange_release_lock( $lock );
 
+			it_exchange_log( 'Failed to cancel Stripe subscription #{sub_id} lock for transaction #{txn_id}', array(
+				'txn_id' => $subscription->get_transaction()->get_ID(),
+				'sub_id' => $subscriber_id,
+				'_group' => 'subscription',
+			) );
+
 			return false;
 		}
 
-		if ( $deleted->canceled_at ) {
+		if ( $request->should_set_status() ) {
+			$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
+		}
 
-			if ( $request->should_set_status() ) {
-				$subscription->set_status( IT_Exchange_Subscription::STATUS_CANCELLED );
-			}
+		if ( $request->get_cancelled_by() ) {
+			$subscription->set_cancelled_by( $request->get_cancelled_by() );
+		}
 
-			if ( $request->get_cancelled_by() ) {
-				$subscription->set_cancelled_by( $request->get_cancelled_by() );
-			}
-
-			if ( $request->get_reason() ) {
-				$subscription->set_cancellation_reason( $request->get_reason() );
-			}
+		if ( $request->get_reason() ) {
+			$subscription->set_cancellation_reason( $request->get_reason() );
 		}
 
 		it_exchange_release_lock( $lock );
+
+		it_exchange_log( 'Cancelled Stripe subscription #{sub_id} lock for transaction #{txn_id}', ITE_Log_Levels::INFO, array(
+			'txn_id' => $subscription->get_transaction()->get_ID(),
+			'sub_id' => $subscriber_id,
+			'_group' => 'subscription',
+		) );
 
 		return true;
 	}

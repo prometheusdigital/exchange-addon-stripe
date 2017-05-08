@@ -51,6 +51,12 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 			$stripe_event  = \Stripe\Event::retrieve( $stripe_payload->id );
 			$stripe_object = $stripe_event->data->object;
 
+			it_exchange_log( 'Stripe processing {type} webhook {webhook}', ITE_Log_Levels::DEBUG, array(
+				'type'    => $stripe_event->type,
+				'webhook' => wp_json_encode( $stripe_object ),
+				'_group'  => 'webhook'
+			) );
+
 			//https://stripe.com/docs/api#event_types
 			switch ( $stripe_event->type ) {
 				case 'charge.succeeded' :
@@ -247,7 +253,11 @@ class IT_Exchange_Stripe_Webhook_Request_Handler implements ITE_Gateway_Request_
 					break;
 			}
 		} catch ( Exception $e ) {
-			error_log( sprintf( __( 'Invalid webhook %s sent from Stripe: %s', 'it-l10n-ithemes-exchange' ), $stripe_payload->id, $e->getMessage() ) );
+			it_exchange_log( 'Invalid webhook {webhook_id} sent from Stripe: {exception}', ITE_Log_Levels::ERROR, array(
+				'webhook_id' => $stripe_payload->id,
+				'exception'  => $e,
+				'_group'     => 'webhook'
+			) );
 
 			return new WP_REST_Response( '', 400 );
 		}

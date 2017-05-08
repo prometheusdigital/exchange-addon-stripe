@@ -30,6 +30,18 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	}
 
 	/**
+	 * @inheritDoc
+	 */
+	public function get_payment_button_label() {
+
+		if ( $this->get_gateway()->settings()->has( 'stripe-purchase-button-label' ) ) {
+			return $this->get_gateway()->settings()->get( 'stripe-purchase-button-label' );
+		}
+
+		return parent::get_payment_button_label();
+	}
+
+	/**
 	 * Get Checkout.js configuration.
 	 *
 	 * @since 2.0.0
@@ -180,4 +192,30 @@ class IT_Exchange_Stripe_Purchase_Request_Handler extends ITE_IFrame_Purchase_Re
 	 * @inheritDoc
 	 */
 	public function is_js_tokenizer_configured() { return true; }
+
+	/**
+	 * @inheritDoc
+	 */
+	public function supports_feature( ITE_Optionally_Supported_Feature $feature ) {
+	    $supports = $this->helper->supports_feature( $feature );
+
+	    if ( $supports === null ) {
+	        return parent::supports_feature( $feature );
+        }
+
+        return $supports;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function supports_feature_and_detail( ITE_Optionally_Supported_Feature $feature, $slug, $detail ) {
+		$supports = $this->helper->supports_feature_and_detail( $feature, $slug, $detail );
+
+		if ( $supports === null ) {
+			return parent::supports_feature_and_detail( $feature, $slug, $detail );
+		}
+
+		return $supports;
+	}
 }

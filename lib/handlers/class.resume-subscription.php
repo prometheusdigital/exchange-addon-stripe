@@ -42,6 +42,17 @@ class IT_Exchange_Stripe_Resume_Subscription_Request_Handler implements ITE_Gate
 
 		if ( $r ) {
 			$subscription->set_resumed_by( $request->get_resumed_by() );
+			it_exchange_log( 'Resumed Stripe subscription #{sub_id} for transaction {txn_id}.', ITE_Log_Levels::INFO, array(
+				'sub_id' => $subscriber_id,
+				'txn_id' => $subscription->get_transaction()->get_ID(),
+				'_group' => 'subscription',
+			) );
+		} else {
+			it_exchange_log( 'Failed to resume Stripe subscription #{sub_id} for transaction {txn_id}, discount failed to remove.', array(
+				'sub_id' => $subscriber_id,
+				'txn_id' => $subscription->get_transaction()->get_ID(),
+				'_group' => 'subscription',
+			) );
 		}
 
 		return $r;

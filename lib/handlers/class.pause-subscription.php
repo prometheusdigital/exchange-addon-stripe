@@ -44,6 +44,17 @@ class IT_Exchange_Stripe_Pause_Subscription_Request_Handler implements ITE_Gatew
 
 		if ( $r ) {
 			$subscription->set_paused_by( $request->get_paused_by() );
+			it_exchange_log( 'Paused Stripe subscription #{sub_id} for transaction {txn_id}.', ITE_Log_Levels::INFO, array(
+				'sub_id' => $subscriber_id,
+				'txn_id' => $subscription->get_transaction()->get_ID(),
+				'_group' => 'subscription',
+			) );
+		} else {
+			it_exchange_log( 'Failed to pause Stripe subscription #{sub_id} for transaction {txn_id}, discount failed to apply.', array(
+				'sub_id' => $subscriber_id,
+				'txn_id' => $subscription->get_transaction()->get_ID(),
+				'_group' => 'subscription',
+			) );
 		}
 
 		return $r;
