@@ -3,7 +3,7 @@
  * Exchange will build your add-on's settings page for you and link to it from our add-on
  * screen. You are free to link from it elsewhere as well if you'd like... or to not use our API
  * at all. This file has all the functions related to registering the page, printing the form, and saving
- * the options. This includes the wizard settings. Additionally, we use the Exchange storage API to 
+ * the options. This includes the wizard settings. Additionally, we use the Exchange storage API to
  * save / retreive options. Add-ons are not required to do this.
 */
 
@@ -25,19 +25,19 @@ function it_exchange_stripe_addon_settings_callback() {
  * Exchange allows add-ons to add a small amount of settings to the wizard.
  * You can add these settings to the wizard by hooking into the following action:
  * - it_exchange_print_[addon-slug]_wizard_settings
- * Exchange exspects you to print your fields here. 
- * 
+ * Exchange exspects you to print your fields here.
+ *
  * @since 0.1.0
  * @todo make this better, probably
  * @param object $form Current IT Form object
  * @return void
 */
-function it_exchange_print_stripe_wizard_settings( $form ) { 
+function it_exchange_print_stripe_wizard_settings( $form ) {
     $IT_Exchange_Stripe_Add_On = new IT_Exchange_Stripe_Add_On();
     $settings = it_exchange_get_option( 'addon_stripe', true );
     $form_values = ITUtility::merge_defaults( ITForm::get_post_data(), $settings );
     $hide_if_js =  it_exchange_is_addon_enabled( 'stripe' ) ? '' : 'hide-if-js';
-    ?>  
+    ?>
     <div class="field stripe-wizard <?php echo $hide_if_js; ?>">
     <?php if ( empty( $hide_if_js ) ) { ?>
         <input class="enable-stripe" type="hidden" name="it-exchange-transaction-methods[]" value="stripe" />
@@ -93,7 +93,7 @@ add_filter( 'it_storage_get_defaults_exchange_addon_stripe', 'it_exchange_stripe
  *
  * @since 0.1.0
  *
- * @param array $default_currencies Array of default currencies supplied by iThemes Exchange
+ * @param array $default_currencies Array of default currencies supplied by ExchangeWP
  * @return array filtered list of currencies only supported by Stripe
  */
 function it_exchange_stripe_addon_get_currency_options( $default_currencies ) {
@@ -164,7 +164,11 @@ class IT_Exchange_Stripe_Add_On {
             add_action( 'it_exchange_remove_checkout_image_add_on_settings_stripe', array( $this, 'remove_checkout_image' ) );
             do_action( 'it_exchange_remove_checkout_image_add_on_settings_stripe' );
         }
-    }
+
+        // Creates our option in the database
+        add_action( 'admin_notices', array( $this, 'exchange_stripe_admin_notices' ) );
+        add_action( 'admin_init', array( $this, 'exchange_stripe_deactivate_license' ) );
+     }
 
     /**
      * Class deprecated constructor
@@ -174,7 +178,7 @@ class IT_Exchange_Stripe_Add_On {
      * @return void
     */
     function IT_Exchange_Stripe_Add_On() {
-		self::__construct();
+  		self::__construct();
     }
 
     /**
@@ -223,7 +227,7 @@ class IT_Exchange_Stripe_Add_On {
      * @todo verify video link
      */
     function get_stripe_payment_form_table( $form, $settings = array() ) {
-    
+
         $general_settings = it_exchange_get_option( 'settings_general' );
 
         if ( !empty( $settings ) )
@@ -243,6 +247,29 @@ class IT_Exchange_Stripe_Add_On {
                 <?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.
                 <span class="tip" title="<?php _e( 'Enabling Stripe limits your currency options to the currencies available to Stripe customers.', 'LION' ); ?>">i</span>
             </p>
+            <h4>License Key</h4>
+            <?php
+               $exchangewp_stripe_options = get_option( 'it-storage-exchange_addon_stripe' );
+               $license = $exchangewp_stripe_options['stripe_license'];
+               // var_dump($license);
+               $exstatus = trim( get_option( 'exchange_stripe_license_status' ) );
+               // var_dump($exstatus);
+            ?>
+            <p>
+             <label class="description" for="exchange_stripe_license_key"><?php _e('Enter your license key'); ?></label>
+             <!-- <input id="stripe_license" name="it-exchange-add-on-stripe-stripe_license" type="text" value="<?php #esc_attr_e( $license ); ?>" /> -->
+             <?php $form->add_text_box( 'stripe_license' ); ?>
+             <span>
+               <?php if( $exstatus !== false && $exstatus == 'valid' ) { ?>
+            			<span style="color:green;"><?php _e('active'); ?></span>
+            			<?php wp_nonce_field( 'exchange_stripe_nonce', 'exchange_stripe_nonce' ); ?>
+            			<input type="submit" class="button-secondary" name="exchange_stripe_license_deactivate" value="<?php _e('Deactivate License'); ?>"/>
+            		<?php } else {
+            			wp_nonce_field( 'exchange_stripe_nonce', 'exchange_stripe_nonce' ); ?>
+            			<input type="submit" class="button-secondary" name="exchange_stripe_license_activate" value="<?php _e('Activate License'); ?>"/>
+            		<?php } ?>
+             </span>
+            </p>
             <?php
                 if ( ! in_array( $general_settings['default-currency'], array_keys( $this->get_supported_currency_options() ) ) )
                     echo '<h4>' . sprintf( __( 'You are currently using a currency that is not supported by Stripe. <a href="%s">Please update your currency settings</a>.', 'LION' ), esc_url( add_query_arg( 'page', 'it-exchange-settings' ) ) ) . '</h4>';
@@ -259,7 +286,7 @@ class IT_Exchange_Stripe_Add_On {
 
             <h4><?php _e( 'Step 2. Setup Stripe Webhooks', 'LION' ); ?></h4>
             <p><?php printf( __( 'Webhooks can be configured in the %sWebhook Settings%s section of the Stripe dashboard. Click "Add URL" to reveal a form to add a new URL for receiving webhooks.', 'LION' ), '<a href="https://manage.stripe.com/account/webhooks">', '</a>' ); ?></p>
-            <p><?php _e( 'Please log in to your account and add this URL to your Webhooks so iThemes Exchange is notified of things like refunds, payments, etc.', 'LION' ); ?></p>
+            <p><?php _e( 'Please log in to your account and add this URL to your Webhooks so ExchangeWP is notified of things like refunds, payments, etc.', 'LION' ); ?></p>
             <code><?php echo get_site_url(); ?>/?<?php esc_attr_e( it_exchange_get_webhook( 'stripe' ) ); ?>=1</code>
 
             <h4><?php _e( 'Optional: Edit Purchase Button Label', 'LION' ); ?></h4>
@@ -267,7 +294,7 @@ class IT_Exchange_Stripe_Add_On {
                 <label for="stripe-purchase-button-label"><?php _e( 'Purchase Button Label', 'LION' ); ?> <span class="tip" title="<?php _e( 'This is the text inside the button your customers will press to purchase with Stripe', 'LION' ); ?>">i</span></label>
                 <?php $form->add_text_box( 'stripe-purchase-button-label' ); ?>
             </p>
-            
+
             <h4 class="hide-if-wizard"><?php _e( 'Optional: Checkout Image', 'LION' ); ?></h4>
             <p class="hide-if-wizard">
                 <label for="stripe-checkout-image"><?php _e( 'Checkout Image', 'LION' ); ?> <span class="tip" title="<?php _e( 'This should be a square image (128x128 pixels) and will appear in the Stripe checkout', 'LION' ); ?>">i</span></label>
@@ -320,7 +347,7 @@ class IT_Exchange_Stripe_Add_On {
     function save_settings() {
         $defaults = it_exchange_get_option( 'addon_stripe' );
         $new_values = wp_parse_args( ITForm::get_post_data(), $defaults );
-                
+
         if ( !empty( $_FILES['stripe-checkout-image']['name'] ) ) {
         	$id = media_handle_upload( 'stripe-checkout-image', 0 ); //post id of Client Files page
 			unset($_FILES);
@@ -330,13 +357,13 @@ class IT_Exchange_Stripe_Add_On {
 				$new_values['stripe-checkout-image'] = $id;
 			}
         }
-        
+
         // Check nonce
         if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'it-exchange-stripe-settings' ) ) {
             $this->error_message = __( 'Error. Please try again', 'LION' );
             return;
         }
-        
+
         if ( !empty( $new_values['stripe-live-secret-key'] ) )
             $new_values['stripe-live-secret-key'] = trim( $new_values['stripe-live-secret-key'] );
         if ( !empty( $new_values['stripe-live-publishable-key'] ) )
@@ -355,15 +382,195 @@ class IT_Exchange_Stripe_Add_On {
         } else {
             $this->status_message = __( 'Settings not saved.', 'LION' );
         }
+
+        if( isset( $_POST['exchange_stripe_license_activate'] ) ) {
+
+      		// run a quick security check
+      	 	if( ! check_admin_referer( 'exchange_stripe_nonce', 'exchange_stripe_nonce' ) )
+      			return; // get out if we didn't click the Activate button
+
+      		// retrieve the license from the database
+      		// $license = trim( get_option( 'exchange_stripe_license_key' ) );
+         $exchangewp_stripe_options = get_option( 'it-storage-exchange_addon_stripe' );
+         $license = trim( $exchangewp_stripe_options['stripe_license'] );
+
+      		// data to send in our API request
+      		$api_params = array(
+      			'edd_action' => 'activate_license',
+      			'license'    => $license,
+      			'item_name'  => urlencode( 'stripe' ), // the name of our product in EDD
+      			'url'        => home_url()
+      		);
+
+      		// Call the custom API.
+      		$response = wp_remote_post( 'https://exchangewp.com', array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
+
+      		// make sure the response came back okay
+      		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+
+      			if ( is_wp_error( $response ) ) {
+      				$message = $response->get_error_message();
+      			} else {
+      				$message = __( 'An error occurred, please try again.' );
+      			}
+
+      		} else {
+
+      			$license_data = json_decode( wp_remote_retrieve_body( $response ) );
+
+      			if ( false === $license_data->success ) {
+
+      				switch( $license_data->error ) {
+
+      					case 'expired' :
+
+      						$message = sprintf(
+      							__( 'Your license key expired on %s.' ),
+      							date_i18n( get_option( 'date_format' ), strtotime( $license_data->expires, current_time( 'timestamp' ) ) )
+      						);
+      						break;
+
+      					case 'revoked' :
+
+      						$message = __( 'Your license key has been disabled.' );
+      						break;
+
+      					case 'missing' :
+
+      						$message = __( 'Invalid license.' );
+      						break;
+
+      					case 'invalid' :
+      					case 'site_inactive' :
+
+      						$message = __( 'Your license is not active for this URL.' );
+      						break;
+
+      					case 'item_name_mismatch' :
+
+      						$message = sprintf( __( 'This appears to be an invalid license key for %s.' ), 'stripe' );
+      						break;
+
+      					case 'no_activations_left':
+
+      						$message = __( 'Your license key has reached its activation limit.' );
+      						break;
+
+      					default :
+
+      						$message = __( 'An error occurred, please try again.' );
+      						break;
+      				}
+
+      			}
+
+      		}
+
+      		// Check if anything passed on a message constituting a failure
+      		if ( ! empty( $message ) ) {
+      			$base_url = admin_url( 'admin.php?page=' . 'stripe-license' );
+      			$redirect = add_query_arg( array( 'sl_activation' => 'false', 'message' => urlencode( $message ) ), $base_url );
+
+      			wp_redirect( $redirect );
+      			exit();
+      		}
+
+      		//$license_data->license will be either "valid" or "invalid"
+      		update_option( 'exchange_stripe_license_status', $license_data->license );
+      		// wp_redirect( admin_url( 'admin.php?page=' . 'stripe-license' ) );
+      		exit();
+      	}
+
+       // deactivate here
+       // listen for our activate button to be clicked
+      	if( isset( $_POST['exchange_stripe_license_deactivate'] ) ) {
+
+      		// run a quick security check
+      	 	if( ! check_admin_referer( 'exchange_stripe_nonce', 'exchange_stripe_nonce' ) )
+      			return; // get out if we didn't click the Activate button
+
+      		// retrieve the license from the database
+      		// $license = trim( get_option( 'exchange_stripe_license_key' ) );
+
+         $exchangewp_stripe_options = get_option( 'it-storage-exchange_addon_stripe' );
+         $license = $exchangewp_stripe_options['stripe_license'];
+
+
+      		// data to send in our API request
+      		$api_params = array(
+      			'edd_action' => 'deactivate_license',
+      			'license'    => $license,
+      			'item_name'  => urlencode( 'stripe' ), // the name of our product in EDD
+      			'url'        => home_url()
+      		);
+      		// Call the custom API.
+      		$response = wp_remote_post( 'https://exchangewp.com', array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
+
+      		// make sure the response came back okay
+      		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+
+      			if ( is_wp_error( $response ) ) {
+      				$message = $response->get_error_message();
+      			} else {
+      				$message = __( 'An error occurred, please try again.' );
+      			}
+
+      			// $base_url = admin_url( 'admin.php?page=' . 'stripe-license' );
+      			// $redirect = add_query_arg( array( 'sl_activation' => 'false', 'message' => urlencode( $message ) ), $base_url );
+
+      			wp_redirect( 'admin.php?page=stripe-license' );
+      			exit();
+      		}
+
+      		// decode the license data
+      		$license_data = json_decode( wp_remote_retrieve_body( $response ) );
+      		// $license_data->license will be either "deactivated" or "failed"
+      		if( $license_data->license == 'deactivated' ) {
+      			delete_option( 'exchange_stripe_license_status' );
+      		}
+
+      		// wp_redirect( admin_url( 'admin.php?page=' . 'stripe-license' ) );
+      		exit();
+
+      	}
+
+      }
+
+    /**
+    * This is a means of catching errors from the activation method above and displaying it to the customer
+    *
+    * @since 1.2.2
+    */
+    function exchange_stripe_admin_notices() {
+      if ( isset( $_GET['sl_activation'] ) && ! empty( $_GET['message'] ) ) {
+
+      	switch( $_GET['sl_activation'] ) {
+
+      		case 'false':
+      			$message = urldecode( $_GET['message'] );
+      			?>
+      			<div class="error">
+      				<p><?php echo $message; ?></p>
+      			</div>
+      			<?php
+      			break;
+
+      		case 'true':
+      		default:
+      			// Developers can put a custom success message here for when activation is successful if they way.
+      			break;
+
+      	}
+      }
     }
-    
+
     function remove_checkout_image() {
         $settings = it_exchange_get_option( 'addon_stripe' );
         $attachment_id = absint( $_GET['remove-checkout-image'] );
         if ( $attachment_id == $_GET['remove-checkout-image'] ) {
 	        if ( $attachment_id == $settings['stripe-checkout-image'] ) {
 		        unset( $settings['stripe-checkout-image'] );
-		        
+
                 $errors = apply_filters( 'it_exchange_add_on_stripe_validate_settings', $this->get_form_errors( $settings ), $settings );
 		        if ( ! $errors && it_exchange_save_option( 'addon_stripe', $settings ) ) {
 		            ITUtility::show_status_message( __( 'Settings saved.', 'LION' ) );
@@ -439,12 +646,12 @@ class IT_Exchange_Stripe_Add_On {
             $errors[] = __( 'Please include your Stripe Live Secret Key', 'LION' );
         if ( empty( $values['stripe-live-publishable-key'] ) )
             $errors[] = __( 'Please include your Stripe Live Publishable Key', 'LION' );
-       
+
         try {
 			\Stripe\Stripe::setApiKey( $values['stripe-live-secret-key'] );
 			\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
 			$account = \Stripe\Account::retrieve();
-        } 
+        }
         catch( Exception $e ) {
 			$errors[] = $e->getMessage();
         }
@@ -454,7 +661,7 @@ class IT_Exchange_Stripe_Add_On {
                 $errors[] = __( 'Please include your Stripe Test Secret Key', 'LION' );
             if ( empty( $values['stripe-test-publishable-key'] ) )
                 $errors[] = __( 'Please include your Stripe Test Publishable Key', 'LION' );
-	        
+
 	        try {
 				\Stripe\Stripe::setApiKey( $values['stripe-test-secret-key'] );
 				\Stripe\Stripe::setApiVersion( ITE_STRIPE_API_VERSION );
@@ -483,9 +690,9 @@ class IT_Exchange_Stripe_Add_On {
 				\Stripe\Stripe::setApiKey( $settings['stripe-live-secret-key'] );
 
 				$country = \Stripe\CountrySpec::retrieve( $general_settings['company-base-country'] );
-		    
+
 				$currencies = array_change_key_case( array_flip( $country->supported_payment_currencies ), CASE_UPPER );
-			} 
+			}
 			catch( Exception $e ) {}
 	    }
         return $currencies;

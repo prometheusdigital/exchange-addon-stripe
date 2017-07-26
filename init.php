@@ -1,6 +1,6 @@
 <?php
 /**
- * iThemes Exchange Stripe Add-on
+ * ExchangeWP Stripe Add-on
  * @package IT_Exchange_Addon_Stripe
  * @since 0.1.0
 */
