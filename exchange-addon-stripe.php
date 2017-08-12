@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: ExchangeWP - Stripe Add-on
- * Version: 1.10.6
+ * Version: 1.10.7
  * Description: Adds the ability for users to checkout with Stripe.
  * Plugin URI: https://exchangewp.com/downloads/stripe/
  * Author: ExchangeWP
@@ -139,7 +139,7 @@ register_deactivation_hook( __FILE__, 'ithemes_exchange_stripe_deactivate' );
 
 		// setup the updater
 		$edd_updater = new EDD_SL_Plugin_Updater( 'https://exchangewp.com', __FILE__, array(
-				'version' 		=> '1.10.6', 				// current version number
+				'version' 		=> '1.10.7', 				// current version number
 				'license' 		=> $license_key, 		// license key (used get_option above to retrieve from DB)
 				'item_name' 	=> 'stripe', 	  // name of this plugin
 				'author' 	  	=> 'ExchangeWP',    // author of this plugin

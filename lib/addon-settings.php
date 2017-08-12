@@ -169,6 +169,7 @@ class IT_Exchange_Stripe_Add_On {
         // Creates our option in the database
         add_action( 'admin_notices', array( $this, 'exchange_stripe_admin_notices' ) );
         add_action( 'admin_init', array( $this, 'exchange_stripe_deactivate_license' ) );
+        add_action( 'admin_init', array( $this, 'exchange_stripe_activate_license' ) );
      }
 
     /**
@@ -189,7 +190,7 @@ class IT_Exchange_Stripe_Add_On {
      * @return void
     */
     function print_settings_page() {
-        $settings = it_exchange_get_option( 'addon_stripe', true );
+        $settings = it_exchange_get_option( 'addon_stripe' );
         $form_values  = empty( $this->error_message ) ? $settings : ITForm::get_post_data();
         $form_options = array(
             'id'      => apply_filters( 'it_exchange_add_on_stripe', 'it-exchange-add-on-stripe-settings' ),
@@ -258,7 +259,6 @@ class IT_Exchange_Stripe_Add_On {
             ?>
             <p>
              <label class="description" for="exchange_stripe_license_key"><?php _e('Enter your license key'); ?></label>
-             <!-- <input id="stripe_license" name="it-exchange-add-on-stripe-stripe_license" type="text" value="<?php #esc_attr_e( $license ); ?>" /> -->
              <?php $form->add_text_box( 'stripe_license' ); ?>
              <span>
                <?php if( $exstatus !== false && $exstatus == 'valid' ) { ?>
@@ -469,17 +469,12 @@ class IT_Exchange_Stripe_Add_On {
 
       		// Check if anything passed on a message constituting a failure
       		if ( ! empty( $message ) ) {
-      			$base_url = admin_url( 'admin.php?page=' . 'stripe-license' );
-      			$redirect = add_query_arg( array( 'sl_activation' => 'false', 'message' => urlencode( $message ) ), $base_url );
-
-      			wp_redirect( $redirect );
-      			exit();
+      			return;
       		}
 
       		//$license_data->license will be either "valid" or "invalid"
       		update_option( 'exchange_stripe_license_status', $license_data->license );
-      		// wp_redirect( admin_url( 'admin.php?page=' . 'stripe-license' ) );
-      		exit();
+      		return;
       	}
 
        // deactivate here
@@ -495,7 +490,6 @@ class IT_Exchange_Stripe_Add_On {
 
          $exchangewp_stripe_options = get_option( 'it-storage-exchange_addon_stripe' );
          $license = $exchangewp_stripe_options['stripe_license'];
-
 
       		// data to send in our API request
       		$api_params = array(
@@ -516,11 +510,8 @@ class IT_Exchange_Stripe_Add_On {
       				$message = __( 'An error occurred, please try again.' );
       			}
 
-      			// $base_url = admin_url( 'admin.php?page=' . 'stripe-license' );
-      			// $redirect = add_query_arg( array( 'sl_activation' => 'false', 'message' => urlencode( $message ) ), $base_url );
+      			return;
 
-      			wp_redirect( 'admin.php?page=stripe-license' );
-      			exit();
       		}
 
       		// decode the license data
@@ -530,8 +521,7 @@ class IT_Exchange_Stripe_Add_On {
       			delete_option( 'exchange_stripe_license_status' );
       		}
 
-      		// wp_redirect( admin_url( 'admin.php?page=' . 'stripe-license' ) );
-      		exit();
+      		return;
 
       	}
 
@@ -641,12 +631,15 @@ class IT_Exchange_Stripe_Add_On {
      * @return void
     */
     public function get_form_errors( $values ) {
-
+        //TODO Need to figure out how to make this better so that it will still
+        // save the license key even though there are other fields that don't get entered.
+        // For not I think it's ok since the likelihood that someone will not fill out other
+        // fields is less likely.
         $errors = array();
-        if ( empty( $values['stripe-live-secret-key'] ) )
-            $errors[] = __( 'Please include your Stripe Live Secret Key', 'LION' );
-        if ( empty( $values['stripe-live-publishable-key'] ) )
-            $errors[] = __( 'Please include your Stripe Live Publishable Key', 'LION' );
+        // if ( empty( $values['stripe-live-secret-key'] ) )
+        //     $errors[] = __( 'Please include your Stripe Live Secret Key', 'LION' );
+        // if ( empty( $values['stripe-live-publishable-key'] ) )
+        //     $errors[] = __( 'Please include your Stripe Live Publishable Key', 'LION' );
 
         try {
 			\Stripe\Stripe::setApiKey( $values['stripe-live-secret-key'] );
@@ -654,7 +647,9 @@ class IT_Exchange_Stripe_Add_On {
 			$account = \Stripe\Account::retrieve();
         }
         catch( Exception $e ) {
-			$errors[] = $e->getMessage();
+          //This needs to be uncommented when addressing the issues above for other
+          //error messages.
+			// $errors[] = $e->getMessage();
         }
 
         if ( !empty( $values['stripe-test-mode' ] ) ) {
