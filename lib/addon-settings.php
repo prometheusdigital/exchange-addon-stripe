@@ -81,6 +81,7 @@ function it_exchange_stripe_addon_default_settings( $values ) {
         'stripe-test-publishable-key'  => '',
         'stripe-purchase-button-label' => __( 'Purchase', 'LION' ),
         'stripe-checkout-image'        => '',
+        'stripe_license'               => '',
         'enable-bitcoin'               => false,
     );
     $values = ITUtility::merge_defaults( $values, $defaults );
