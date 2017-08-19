@@ -1,16 +1,16 @@
-# Copyright (C) 2015 iThemes Exchange - Stripe Add-on
-# This file is distributed under the same license as the iThemes Exchange - Stripe Add-on package.
+# Copyright (C) 2017 ExchangeWP - Stripe Add-on
+# This file is distributed under the same license as the ExchangeWP - Stripe Add-on package.
 msgid ""
 msgstr ""
-"Project-Id-Version: iThemes Exchange - Stripe Add-on 1.6.0\n"
-"Report-Msgid-Bugs-To: http://ithemes.com/support/\n"
+"Project-Id-Version: ExchangeWP - Stripe Add-on 1.6.0\n"
+"Report-Msgid-Bugs-To: http://exchangewp.com/\n"
 "POT-Creation-Date: 2015-08-17 17:49:48+00:00\n"
 "PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: AJ Morris <support@exchangewp.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
 #: exchange-addon-stripe.php:31 lib/addon-settings.php:222
@@ -24,7 +24,7 @@ msgstr ""
 #: exchange-addon-stripe.php:50
 msgid ""
 "You must have the mbstring PHP extension installed and activated on your web "
-"server to use the Stripe Add-on for iThemes Exchange. Please contact your "
+"server to use the Stripe Add-on for ExchangeWP. Please contact your "
 "web host provider to ensure this extension is enabled."
 msgstr ""
 
@@ -130,7 +130,7 @@ msgstr ""
 
 #: lib/addon-settings.php:250
 msgid ""
-"Please log in to your account and add this URL to your Webhooks so iThemes "
+"Please log in to your account and add this URL to your Webhooks so ExchangeWP "
 "Exchange is notified of things like refunds, payments, etc."
 msgstr ""
 
@@ -346,17 +346,17 @@ msgstr ""
 
 #: lib/updater/admin.php:140
 msgid ""
-"To receive automatic updates for %l, use the <a href=\"%s\">iThemes "
+"To receive automatic updates for %l, use the <a href=\"%s\">ExchangeWP "
 "Licensing</a> page found in the Settings menu."
 msgstr ""
 
 #: lib/updater/admin.php:147 lib/updater/admin.php:153
 #: lib/updater/settings-page.php:302
-msgid "iThemes Licensing"
+msgid "ExchangeWP Licensing"
 msgstr ""
 
 #: lib/updater/admin.php:181
-msgid "Manage iThemes product licenses to receive automatic upgrade support"
+msgid "Manage ExchangeWP product licenses to receive automatic upgrade support"
 msgstr ""
 
 #: lib/updater/admin.php:181
@@ -384,7 +384,7 @@ msgstr ""
 #: lib/updater/api.php:61
 msgid ""
 "<p>Unable to get changelog data at this time.</p><p>Error: Unrecognized "
-"response from iThemes API server.</p>"
+"response from ExchangeWP API server.</p>"
 msgstr ""
 
 #: lib/updater/server.php:78
@@ -403,18 +403,18 @@ msgstr ""
 
 #: lib/updater/server.php:165
 msgid ""
-"An error occurred when communicating with the iThemes update server: %s (%s)"
+"An error occurred when communicating with the ExchangeWP update server: %s (%s)"
 msgstr ""
 
 #: lib/updater/settings-page.php:77
 msgid ""
-"Incorrect password. Please make sure that you are supplying your iThemes "
+"Incorrect password. Please make sure that you are supplying your ExchangeWP "
 "membership username and password details."
 msgstr ""
 
 #: lib/updater/settings-page.php:81
 msgid ""
-"Invalid username. Please make sure that you are supplying your iThemes "
+"Invalid username. Please make sure that you are supplying your ExchangeWP "
 "membership username and password details."
 msgstr ""
 
@@ -435,19 +435,19 @@ msgstr ""
 #: lib/updater/settings-page.php:90
 msgid ""
 "%s could not be licensed due to an internal error. Please try to license %s "
-"again at a later time. If this problem continues, please contact iThemes "
+"again at a later time. If this problem continues, please contact ExchangeWP "
 "support."
 msgstr ""
 
 #: lib/updater/settings-page.php:96
 msgid ""
 "An unknown error relating to the %1$s product occurred. Please contact "
-"iThemes support. Error details: %2$s"
+"ExchangeWP support. Error details: %2$s"
 msgstr ""
 
 #: lib/updater/settings-page.php:98
 msgid ""
-"An unknown error occurred. Please contact iThemes support. Error details: %s"
+"An unknown error occurred. Please contact ExchangeWP support. Error details: %s"
 msgstr ""
 
 #: lib/updater/settings-page.php:129
@@ -456,18 +456,18 @@ msgstr ""
 
 #: lib/updater/settings-page.php:136
 msgid ""
-"You must supply an iThemes membership username and password in order to "
+"You must supply an ExchangeWP membership username and password in order to "
 "license products."
 msgstr ""
 
 #: lib/updater/settings-page.php:138
 msgid ""
-"You must supply an iThemes membership username in order to license products."
+"You must supply an ExchangeWP membership username in order to license products."
 msgstr ""
 
 #: lib/updater/settings-page.php:140
 msgid ""
-"You must supply an iThemes membership password in order to license products."
+"You must supply an ExchangeWP membership password in order to license products."
 msgstr ""
 
 #: lib/updater/settings-page.php:142
@@ -496,18 +496,18 @@ msgstr ""
 
 #: lib/updater/settings-page.php:201
 msgid ""
-"You must supply an iThemes membership username and password in order to "
+"You must supply an ExchangeWP membership username and password in order to "
 "remove licenses."
 msgstr ""
 
 #: lib/updater/settings-page.php:203
 msgid ""
-"You must supply an iThemes membership username in order to remove licenses."
+"You must supply an ExchangeWP membership username in order to remove licenses."
 msgstr ""
 
 #: lib/updater/settings-page.php:205
 msgid ""
-"You must supply an iThemes membership password in order to remove licenses."
+"You must supply an ExchangeWP membership password in order to remove licenses."
 msgstr ""
 
 #: lib/updater/settings-page.php:207
@@ -618,7 +618,7 @@ msgstr ""
 #: lib/updater/settings-page.php:508
 msgid ""
 "To license products, select the products you wish to license, enter your "
-"iThemes membership username and password, and press the License Products "
+"ExchangeWP membership username and password, and press the License Products "
 "button."
 msgstr ""
 
@@ -644,7 +644,7 @@ msgstr ""
 #: lib/updater/settings-page.php:584
 msgid ""
 "Please check this page again at a later time to see if the problem resolves "
-"itself. If the product remains, please contact <a href=\"%s\">iThemes "
+"itself. If the product remains, please contact <a href=\"%s\">ExchangeWP "
 "support</a> and provide them with the details given below."
 msgstr ""
 
@@ -697,11 +697,11 @@ msgid "%s ago"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
-msgid "iThemes Exchange - Stripe Add-on"
+msgid "ExchangeWP - Stripe Add-on"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "http://ithemes.com/exchange/stripe/"
+msgid "https://exchangewp.com/downloads/stripe/"
 msgstr ""
 
 #. Description of the plugin/theme
@@ -709,9 +709,9 @@ msgid "Adds the ability for users to checkout with Stripe."
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "iThemes"
+msgid "ExchangeWP"
 msgstr ""
 
 #. Author URI of the plugin/theme
-msgid "http://ithemes.com"
+msgid "http://exchangewp.com"
 msgstr ""

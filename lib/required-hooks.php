@@ -7,7 +7,7 @@
 */
 
 /**
- * Adds actions to the plugins page for the iThemes Exchange Stripe plugin
+ * Adds actions to the plugins page for the ExchangeWP Stripe plugin
  *
  * @since 1.0.0
  *
@@ -146,9 +146,9 @@ function it_exchange_stripe_addon_process_transaction( $status, $transaction_obj
 
 				it_exchange_stripe_addon_set_stripe_customer_id( $it_exchange_customer->id, $stripe_customer->id );
 			}
-						
+
 			if ( $subscription_id ) {
-					
+
 				$plan = \Stripe\Plan::retrieve( $subscription_id );
 
 				if ( ! empty( $plan->trial_period_days ) ) {
@@ -274,8 +274,8 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 					$auto_renew = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'auto-renew' ) );
 					$interval = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'interval' ) );
 					$interval_count = it_exchange_get_product_feature( $product['product_id'], 'recurring-payments', array( 'setting' => 'interval-count' ) );
-					
-					$trial_period_days = NULL;	
+
+					$trial_period_days = NULL;
 					if ( $trial_enabled ) {
 						$allow_trial = true;
 						//Should we all trials?
@@ -289,14 +289,14 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 										if ( $prod_id === $product['product_id'] || in_array( $prod_id, $children ) || in_array( $prod_id, $parents ) ) {
 											$allow_trial = false;
 											break;
-										}								
+										}
 									}
 								}
 							}
 						}
-				
+
 						$allow_trial = apply_filters( 'it_exchange_stripe_addon_make_payment_button_allow_trial', $allow_trial, $product['product_id'] );
-						
+
 						if ( $allow_trial && 0 < $trial_interval_count ) {
 							switch ( $trial_interval ) {
 								case 'year':
@@ -316,7 +316,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 							$trial_period_days = $trial_interval_count * $days;
 						}
 					}
-					
+
 					$subscription = true;
 					$product_id = $product['product_id'];
 				}
@@ -365,7 +365,7 @@ function it_exchange_stripe_addon_make_payment_button( $options ) {
 			$payment_image = '  image:       "' . esc_js( $relative_url ) . '",' . "\n";
 		}
 	}
-	
+
 	if ( !empty( $stripe_settings['enable-bitcoin'] ) ) {
 		$bitcoin_enabled = '  bitcoin:       "true",' . "\n";
 	}
@@ -639,7 +639,7 @@ add_action( 'init', 'it_exchange_stripe_unsubscribe_action_submit' );
  *
  * @since 1.3.1
  *
- * @param object $transaction iThemes Transaction object
+ * @param object $transaction ExchangeWP Transaction object
  * @return void
 */
 function it_exchange_stripe_after_payment_details_cancel_url( $transaction ) {
@@ -684,14 +684,14 @@ add_action( 'it_exchange_after_payment_details_cancel_url_for_stripe', 'it_excha
 /**
  * Mark this transaction method as okay to manually change transactions
  *
- * @since 1.1.36 
+ * @since 1.1.36
 */
 add_filter( 'it_exchange_stripe_transaction_status_can_be_manually_changed', '__return_true' );
 
 /**
  * Returns status options
  *
- * @since 1.1.36 
+ * @since 1.1.36
  * @return array
 */
 function it_exchange_stripe_get_default_status_options() {
@@ -707,4 +707,3 @@ function it_exchange_stripe_get_default_status_options() {
 	return $options;
 }
 add_filter( 'it_exchange_get_status_options_for_stripe_transaction', 'it_exchange_stripe_get_default_status_options' );
-

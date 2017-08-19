@@ -1,13 +1,13 @@
 <?php
 /*
- * Plugin Name: iThemes Exchange - Stripe Add-on
- * Version: 1.10.6
+ * Plugin Name: ExchangeWP - Stripe Add-on
+ * Version: 1.10.7
  * Description: Adds the ability for users to checkout with Stripe.
- * Plugin URI: http://ithemes.com/exchange/stripe/
- * Author: iThemes
- * Author URI: http://ithemes.com
- * iThemes Package: exchange-addon-stripe
- 
+ * Plugin URI: https://exchangewp.com/downloads/stripe/
+ * Author: ExchangeWP
+ * Author URI: https://exchangewp.com
+ * ExchangeWP Package: exchange-addon-stripe
+
  * Installation:
  * 1. Download and unzip the latest release zip file.
  * 2. If you use the WordPress plugin uploader to install this plugin skip to step 4.
@@ -19,7 +19,7 @@
 /**
  * This registers our plugin as a stripe addon
  *
- * To learn how to create your own-addon, visit http://ithemes.com/codex/page/Exchange_Custom_Add-ons:_Overview
+ * To learn how to create your own-addon, visit TODO: Add a link here about this.
  *
  * @since 0.1.0
  *
@@ -30,13 +30,13 @@ function it_exchange_register_stripe_addon() {
 		$options = array(
 			'name'              => __( 'Stripe', 'LION' ),
 			'description'       => __( 'Process transactions via Stripe, a simple and elegant payment gateway.', 'LION' ),
-			'author'            => 'iThemes',
-			'author_url'        => 'http://ithemes.com/exchange/stripe/',
+			'author'            => 'ExchangeWP',
+			'author_url'        => 'https://exchangewp.com/downloads/stripe/',
 			'icon'              => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/lib/images/stripe50px.png' ),
 			'wizard-icon'       => ITUtility::get_url_from_file( dirname( __FILE__ ) . '/lib/images/wizard-stripe.png' ),
 			'file'              => dirname( __FILE__ ) . '/init.php',
 			'category'          => 'transaction-methods',
-			'settings-callback' => 'it_exchange_stripe_addon_settings_callback',	
+			'settings-callback' => 'it_exchange_stripe_addon_settings_callback',
 		);
 		it_exchange_register_addon( 'stripe', $options );
 	}
@@ -47,7 +47,7 @@ function it_exchange_stripe_addon_show_mbstring_nag() {
 	if ( !extension_loaded( 'mbstring' ) ) {
 		?>
 		<div id="it-exchange-add-on-mbstring-nag" class="it-exchange-nag">
-			<?php _e( 'You must have the mbstring PHP extension installed and activated on your web server to use the Stripe Add-on for iThemes Exchange. Please contact your web host provider to ensure this extension is enabled.', 'LION' ); ?>
+			<?php _e( 'You must have the mbstring PHP extension installed and activated on your web server to use the Stripe Add-on for ExchangeWP. Please contact your web host provider to ensure this extension is enabled.', 'LION' ); ?>
 		</div>
 		<?php
 	}
@@ -64,7 +64,7 @@ function it_exchange_stripe_addon_show_php_version_nag() {
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {
 		?>
 		<div id="it-exchange-add-on-mbstring-nag" class="it-exchange-nag">
-			<?php _e( 'You must have PHP version 5.3 or greater to use the Stripe Add-on for iThemes Exchange. Please contact your web host provider to upgrade your PHP version.', 'LION' ); ?>
+			<?php _e( 'You must have PHP version 5.3 or greater to use the Stripe Add-on for ExchangeWP. Please contact your web host provider to upgrade your PHP version.', 'LION' ); ?>
 		</div>
 		<?php
 	}
@@ -92,11 +92,11 @@ add_action( 'plugins_loaded', 'it_exchange_stripe_set_textdomain' );
  * @param object $updater ithemes updater object
  * @return void
 */
-function ithemes_exchange_addon_stripe_updater_register( $updater ) { 
+function ithemes_exchange_addon_stripe_updater_register( $updater ) {
 	    $updater->register( 'exchange-addon-stripe', __FILE__ );
 }
 add_action( 'ithemes_updater_register', 'ithemes_exchange_addon_stripe_updater_register' );
-require( dirname( __FILE__ ) . '/lib/updater/load.php' );
+// require( dirname( __FILE__ ) . '/lib/updater/load.php' );
 
 function ithemes_exchange_stripe_deactivate() {
 	if ( empty( $_REQUEST['remove-gateway'] ) || __( 'Yes', 'LION' ) !== $_REQUEST['remove-gateway'] ) {
@@ -124,3 +124,33 @@ function ithemes_exchange_stripe_deactivate() {
 	}
 }
 register_deactivation_hook( __FILE__, 'ithemes_exchange_stripe_deactivate' );
+
+	if ( ! class_exists( 'EDD_SL_Plugin_Updater' ) )  {
+	 	require_once 'EDD_SL_Plugin_Updater.php';
+	 }
+
+	function exchange_stripe_plugin_updater() {
+
+		// retrieve our license key from the DB
+		// this is going to have to be pulled from a seralized array to get the actual key.
+		// $license_key = trim( get_option( 'exchange_stripe_license_key' ) );
+		$exchangewp_stripe_options = get_option( 'it-storage-exchange_addon_stripe' );
+		$license_key = $exchangewp_stripe_options['stripe_license'];
+
+		// setup the updater
+		$edd_updater = new EDD_SL_Plugin_Updater( 'https://exchangewp.com', __FILE__, array(
+				'version' 		=> '1.10.7', 				// current version number
+				'license' 		=> $license_key, 		// license key (used get_option above to retrieve from DB)
+				'item_name' 	=> 'stripe', 	  // name of this plugin
+				'author' 	  	=> 'ExchangeWP',    // author of this plugin
+				'url'       	=> home_url(),
+				'wp_override' => true,
+				'beta'		  	=> false
+			)
+		);
+		// var_dump($edd_updater);
+		// die();
+
+	}
+
+	add_action( 'admin_init', 'exchange_stripe_plugin_updater', 0 );
