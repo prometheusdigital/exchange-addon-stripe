@@ -249,27 +249,6 @@ class IT_Exchange_Stripe_Add_On {
                 <?php _e( 'Don\'t have a Stripe account yet?', 'LION' ); ?> <a href="http://stripe.com" target="_blank"><?php _e( 'Go set one up here', 'LION' ); ?></a>.
                 <span class="tip" title="<?php _e( 'Enabling Stripe limits your currency options to the currencies available to Stripe customers.', 'LION' ); ?>">i</span>
             </p>
-            <h4>License Key</h4>
-            <?php
-               $exchangewp_stripe_options = get_option( 'it-storage-exchange_addon_stripe' );
-               $license = $exchangewp_stripe_options['stripe_license'];
-               // var_dump($license);
-               $exstatus = trim( get_option( 'exchange_stripe_license_status' ) );
-               // var_dump($exstatus);
-            ?>
-            <p>
-             <label class="description" for="exchange_stripe_license_key"><?php _e('Enter your license key'); ?></label>
-             <?php $form->add_text_box( 'stripe_license' ); ?>
-             <span>
-               <?php if( $exstatus !== false && $exstatus == 'valid' ) { ?>
-            			<span style="color:green;"><?php _e('active'); ?></span>
-            			<?php wp_nonce_field( 'exchange_stripe_nonce', 'exchange_stripe_nonce' ); ?>
-            			<input type="submit" class="button-secondary" name="exchange_stripe_license_deactivate" value="<?php _e('Deactivate License'); ?>"/>
-            		<?php } else {
-            			wp_nonce_field( 'exchange_stripe_nonce', 'exchange_stripe_nonce' ); ?>
-            			<input type="submit" class="button-secondary" name="exchange_stripe_license_activate" value="<?php _e('Activate License'); ?>"/>
-            		<?php } ?>
-             </span>
             </p>
             <?php
                 if ( ! in_array( $general_settings['default-currency'], array_keys( $this->get_supported_currency_options() ) ) )
