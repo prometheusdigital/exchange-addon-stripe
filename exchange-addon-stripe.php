@@ -84,20 +84,6 @@ function it_exchange_stripe_set_textdomain() {
 }
 add_action( 'plugins_loaded', 'it_exchange_stripe_set_textdomain' );
 
-/**
- * Registers Plugin with iThemes updater class
- *
- * @since 1.0.0
- *
- * @param object $updater ithemes updater object
- * @return void
-*/
-function ithemes_exchange_addon_stripe_updater_register( $updater ) {
-	    $updater->register( 'exchange-addon-stripe', __FILE__ );
-}
-add_action( 'ithemes_updater_register', 'ithemes_exchange_addon_stripe_updater_register' );
-// require( dirname( __FILE__ ) . '/lib/updater/load.php' );
-
 function ithemes_exchange_stripe_deactivate() {
 	if ( empty( $_REQUEST['remove-gateway'] ) || __( 'Yes', 'LION' ) !== $_REQUEST['remove-gateway'] ) {
 		$title = __( 'Payment Gateway Warning', 'LION' );
