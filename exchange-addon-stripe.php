@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: ExchangeWP - Stripe Add-on
- * Version: 1.9.8
+ * Version: 1.10.8
  * Description: Adds the ability for users to checkout with Stripe.
  * Plugin URI: https://exchangewp.com/downloads/stripe/
  * Author: ExchangeWP
@@ -121,7 +121,7 @@ function exchange_stripe_plugin_updater() {
 		$license = $license_key['exchange_license'];
 
 		$edd_updater = new EDD_SL_Plugin_Updater( 'https://exchangewp.com', __FILE__, array(
-				'version' 		=> '1.9.8', 				// current version number
+				'version' 		=> '1.10.8', 				// current version number
 				'license' 		=> $license, 		// license key (used get_option above to retrieve from DB)
 				'item_id'		 	=> 331, 	  // name of this plugin
 				'author' 	  	=> 'ExchangeWP',    // author of this plugin
